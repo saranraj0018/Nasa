@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\Student;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+
+class StudentAuthController extends Controller
+{
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (!$validator->passes()) {
+            return redirect()->route('login')
+                ->withErrors($validator)
+                ->withInput($request->only('email'));
+        }
+
+        if (!Auth::guard('student')->attempt($credentials, $request->get('remember'))) {
+            return redirect()->route('login')
+                ->withErrors(['password' => 'Either Email/Password is incorrect'])
+                ->withInput($request->only('email'));
+        }
+        $studentId = Auth::guard('student')->id();
+        session()->put('student', $studentId);
+
+        return redirect()->route('student_dashboard');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::guard('student')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('student.login');
+    }
+}

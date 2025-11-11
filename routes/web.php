@@ -5,3 +5,5 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', 'student/login');
 
 require __DIR__ . '/student.php';
+require __DIR__ . '/admin.php';
+require __DIR__ . '/super_admin.php';

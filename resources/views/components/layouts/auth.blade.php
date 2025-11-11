@@ -5,13 +5,13 @@
     <x-partials.header />
 </head>
 
-<body class="min-h-screen bg-gradient-to-r from-[#FFE6CE] to-white flex flex-col">
+<body>
 
-    <div class="flex items-center justify-center py-10 flex-1">
+    <div>
         {{ $slot }}
     </div>
 
-    <footer class=" w-full text-center text-gray-500 text-sm">
+    <footer class="fixed bottom-0 w-full text-center text-gray-500 text-sm font-semibold p-2">
         &copy; {{ date('Y') }} NASA. All rights reserved.
     </footer>
     <x-partials.scripts />

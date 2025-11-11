@@ -1,71 +1,75 @@
 <x-layouts.auth>
-    <div class="min-h-screen flex items-center justify-center bg-cover bg-center relative"
-        style="background-image: url('{{ asset('login.png') }}'); background-size: cover;">
-
-        {{-- Optional Overlay --}}
-        <div class="absolute inset-0 bg-purple-900/40"></div>
-
-        {{-- Main Content --}}
-        <div
-            class="relative z-10 flex flex-col md:flex-row items-center justify-center bg-white/5 backdrop-blur-sm rounded-3xl shadow-lg overflow-hidden w-11/12 md:w-4/5 lg:w-3/4 p-4">
-
-            {{-- Left Section --}}
-            <div class="md:w-1/2 text-center md:text-left text-white p-4 md:p-6">
-                <h1 class="text-2xl font-bold mb-2 text-pink-400">NON ACADEMIC STUDENT ACTIVITY</h1>
-                <h2 class="text-xl font-semibold text-pink-400 mb-4">NASA Student Portal</h2>
-                <p class="text-sm leading-relaxed">
-                    Embark on your journey to explore the courses and expand your
-                    knowledge beyond boundaries
-                </p>
-            </div>
-
-            {{-- Right Section - Login Card (Reduced Height) --}}
-            <div class="bg-white rounded-2xl shadow-xl w-full md:w-2/5 p-6 md:p-8 relative z-20">
-
-                {{-- Logo --}}
-                <div class="flex items-center justify-center mb-3">
-                    <img src="{{ asset('login_header.png') }}" alt="Rathinam" class="h-8">
+    <div class="p-5 bg-cover no-repeat h-[100vh] flex flex-col justify-center "
+        style="background-image: url('{{ asset('/images/login.png') }}');">
+        <div class="px-[1em] lg:px-[5em] xl:px-[5em] 2xl:px-[10em]">
+            <div class="grid grid-cols-12 gap-3">
+                {{-- LEFT COLUMN --}}
+                <div class="col-span-12 md:col-span-7 text-center my-auto">
+                    <p class="text-3xl font-bold mb-2 text-[#FF00FD]">NON ACADEMIC STUDENT ACTIVITY</p>
+                    <p class="text-2xl font-semibold text-[#FF00FD] mb-4">NASA Student Portal</p>
+                    <p class="text-lg text-white  font-semibold">
+                        Embark on your journey to explore the courses and expand your
+                        knowledge beyond boundaries
+                    </p>
                 </div>
-
-                <h2 class="text-center text-lg font-bold text-purple-700 mb-1">LOGIN</h2>
-                <p class="text-center text-gray-600 text-xs mb-4">login to Stay Connected</p>
-
-                <form method="POST" action="{{ route('login') }}" class="space-y-3">
-                    @csrf
-
-                    {{-- Email --}}
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700">Email</label>
-                        <input type="email" name="email" required
-                            class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            placeholder="you@example.com">
+                {{-- RIGHT COLUMN --}}
+                <div class="col-span-12 md:col-span-5">
+                    <div class="bg-white p-10 rounded-3xl space-y-3">
+                        <img src="{{ asset('/images/rtc_logo.png') }}" alt="Logo" class="w-80 mx-auto">
+                        <p class="text-center text-2xl font-medium text-[#9F3895]">
+                            LOGIN
+                        </p>
+                        <p class="text-center text-sm font-medium text-[#3F003E]">
+                            Login to stay connnected
+                        </p>
+                        {{-- FORM SEGMENT --}}
+                        <form method="POST" action="{{ route('student.login') }}" class="space-y-3"
+                            x-data="{ show: false, loading: false }" @submit="loading = true">
+                            @csrf
+                            <label class="block text-md font-medium text-[#3F003E]">Email</label>
+                            <input type="email" name="email" required
+                                class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                placeholder="you@example.com">
+                            @error('email')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                            <div>
+                                <label class="block text-md font-medium text-[#3F003E]">Password</label>
+                                <div class="relative">
+                                    <input :type="show ? 'text' : 'password'" name="password"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 mt-1
+                              focus:outline-none focus:ring-2 focus:ring-[#ab5f00] pr-10"
+                                        placeholder="••••••••" />
+                                    <button type="button" @click="show = !show"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg">
+                                        <i x-show="!show" class="fa fa-eye-slash" aria-hidden="true"></i>
+                                        <i x-show="show" class="fa fa-eye" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                @error('password')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            {{-- Remember Me --}}
+                            <div class="flex items-center">
+                                <input type="checkbox" name="remember" id="remember"
+                                    class="w-3.5 h-3.5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                <label for="remember" class="ml-2 text-md text-[#3F003E]">Remember me</label>
+                            </div>
+                            <div class="flex flex-col justify-center align-center">
+                                {{-- Login Button --}}
+                                <button type="submit"
+                                    class="mx-auto w-90 py-2 bg-gradient-to-r from-primary to-pink-500 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition">
+                                    Login 
+                                </button>
+                                <div class="text-center mt-2">
+                                    <a href="#" class="text-xs text-purple-600 hover:underline">Forget
+                                        Password?</a>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-
-                    {{-- Password --}}
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700">Password</label>
-                        <input type="password" name="password" required
-                            class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            placeholder="••••••••">
-                    </div>
-
-                    {{-- Remember Me --}}
-                    <div class="flex items-center">
-                        <input type="checkbox" name="remember" id="remember"
-                            class="w-3.5 h-3.5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
-                        <label for="remember" class="ml-2 text-xs text-gray-700">Remember me</label>
-                    </div>
-
-                    {{-- Login Button --}}
-                    <button type="submit"
-                        class="w-full py-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition">
-                        Login
-                    </button>
-
-                    <div class="text-center mt-2">
-                        <a href="#" class="text-xs text-purple-600 hover:underline">Forget Password?</a>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
