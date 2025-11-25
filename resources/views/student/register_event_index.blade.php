@@ -6,7 +6,7 @@
             <div class="bg-[#BF9CFF] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class="text-[#230060] font-medium">Active Registration</p>
                 <div class="flex items-center justify-between">
-                    <h3 class="text-3xl font-bold text-[#230060]">24</h3>
+                    <h3 class="text-3xl font-bold text-[#230060]">{{  $activeCount ?? 0 }}</h3>
                     <img src="{{ asset('/images/active_registration.png') }}" alt=""
                         class="mx-auto mt-[-40px] mb-[-40px]">
                 </div>
@@ -18,7 +18,7 @@
             <div class="bg-[#FF8F6B] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class="text-[#992B07] font-medium">Attended Registration</p>
                 <div class="flex items-center justify-between mt-2">
-                    <h3 class="text-3xl font-bold text-[#992B07]">22</h3>
+                    <h3 class="text-3xl font-bold text-[#992B07]">{{  $attendedCount ?? 0 }}</h3>
                     <img src="{{ asset('/images/attended_events.png') }}" alt="" class="mx-auto">
                 </div>
                 <div class="relative">
@@ -29,7 +29,7 @@
             <div class="bg-[#B5DAFF] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class=" text-[#0756A6] font-medium">Pending Uploads</p>
                 <div class="flex items-center justify-between mt-2">
-                    <h3 class="text-3xl font-bold text-[#0756A5]">12</h3>
+                    <h3 class="text-3xl font-bold text-[#0756A5]">{{ $pending_uploads ?? 0 }}</h3>
                     <img src="{{ asset('/images/pending_uploads.png') }}" alt="" class="mx-auto">
                 </div>
                 <div class="relative">
@@ -45,10 +45,10 @@
     <!-- Right side -->
     <div class="flex space-x-4 text-gray-700 font-medium">
         <span id="upcoming-tab"
-            class="cursor-pointer bg-white px-3 text-primary rounded-full transition"
+            class="cursor-pointer bg-white px-3 text-primary py-1 rounded-full transition"
             onclick="showSection('upcoming')">Upcoming</span>
         <span id="ongoing-tab"
-            class="cursor-pointer px-3 rounded-full transition"
+            class="cursor-pointer px-3 py-1 rounded-full transition"
             onclick="showSection('ongoing')">Ongoing</span>
     </div>
 </div>
@@ -60,7 +60,7 @@
         @foreach ($upcomingEvents as $event)
             <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                 <div class="relative">
-                    <img src="{{ $event['banner_image'] }}" alt="Event" class="rounded-t-2xl w-full">
+                    <img src="{{ asset('storage/' . $event['banner_image']) }}" alt="Event" class="rounded-t-2xl w-full">
                    @if ($event['event_type'] == 'paid')
                             <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
                                 Premium
@@ -91,10 +91,13 @@
                             <p class="px-2">{{ $event['location'] }}</p>
                         </div>
                     </div>
+
+                    @if ($event->registrations->isEmpty())
                     <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
                         class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full" data-event_id={{ $event->id }}>
                         Register Now
                     </button>
+                    @endif
                 </div>
             </div>
         @endforeach
@@ -108,7 +111,7 @@
         @foreach ($ongoingEvents as $ongoing_event)
             <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                 <div class="relative">
-                    <img src="{{ $ongoing_event['banner_image'] }}" alt="Event" class="rounded-t-2xl w-full">
+                    <img src="{{ asset('storage/' . $ongoing_event['banner_image']) }}" alt="Event" class="rounded-t-2xl w-full">
                      @if ($ongoing_event['event_type'] == 'paid')
                             <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
                                 Premium
@@ -139,10 +142,12 @@
                             <p class="px-2">{{ $ongoing_event['location'] }}</p>
                         </div>
                     </div>
+                    @if ($ongoing_event->registrations->isEmpty())
                     <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
                         class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full" data-event_id={{ $ongoing_event->id }}>
                         Register Now
                     </button>
+                    @endif
                 </div>
             </div>
         @endforeach

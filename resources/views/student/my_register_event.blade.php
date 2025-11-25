@@ -1,12 +1,10 @@
 <x-layouts.app>
-    <!-- Dashboard Header -->
     <section class="p-2">
-        <!-- Top Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-[#BF9CFF] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class="text-[#230060] font-medium">Active Registration</p>
                 <div class="flex items-center justify-between">
-                    <h3 class="text-3xl font-bold text-[#230060]">24</h3>
+                    <h3 class="text-3xl font-bold text-[#230060]">{{ $activeCount ?? 0 }}</h3>
                     <img src="{{ asset('/images/active_registration.png') }}" alt=""
                         class="mx-auto mt-[-40px] mb-[-40px]">
                 </div>
@@ -14,11 +12,10 @@
                     <span class="bg-white text-xs px-4 py-1 rounded-full">Available this Semester</span>
                 </div>
             </div>
-
             <div class="bg-[#FF8F6B] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class="text-[#992B07] font-medium">Attended Registration</p>
                 <div class="flex items-center justify-between mt-2">
-                    <h3 class="text-3xl font-bold text-[#992B07]">22</h3>
+                    <h3 class="text-3xl font-bold text-[#992B07]">{{  $attendedCount ?? 0 }}</h3>
                     <img src="{{ asset('/images/attended_events.png') }}" alt="" class="mx-auto">
                 </div>
                 <div class="relative">
@@ -29,7 +26,7 @@
             <div class="bg-[#B5DAFF] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class=" text-[#0756A6] font-medium">Pending Uploads</p>
                 <div class="flex items-center justify-between mt-2">
-                    <h3 class="text-3xl font-bold text-[#0756A5]">12</h3>
+                    <h3 class="text-3xl font-bold text-[#0756A5]">{{ $pending_uploads ?? 0 }}</h3>
                     <img src="{{ asset('/images/pending_uploads.png') }}" alt="" class="mx-auto">
                 </div>
                 <div class="relative">
@@ -37,26 +34,22 @@
                 </div>
             </div>
         </div>
-
-        <!-- Header -->
         <div class="bg-[#F2E8F5] rounded-full px-5 py-3 mt-8 flex justify-between items-center">
             <h3 class="font-semibold text-primary">Events</h3>
             <div class="flex space-x-4 text-gray-700 font-medium">
-                <span id="registered-tab" class="cursor-pointer bg-white px-3 text-primary rounded-full transition"
+                <span id="registered-tab" class="cursor-pointer bg-white px-3 text-primary rounded-full transition py-1"
                     onclick="showMyregistration('registered')">Registered</span>
-                <span id="completed-tab" class="cursor-pointer px-3 rounded-full transition"
+                <span id="completed-tab" class="cursor-pointer px-3 rounded-full transition py-1"
                     onclick="showMyregistration('completed')">Completed</span>
             </div>
         </div>
-
-        <!-- Registered Events -->
         <div id="registered-section" class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Registered Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($registeredEvents as $event)
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ $event->event->banner_image }}" alt="Event" class="rounded-t-2xl w-full">
+                            <img src="{{ asset('storage/' . $event->event->banner_image) }}" alt="Event" class="rounded-t-2xl w-full">
                                @if ($event->event->event_type == 'paid')
                             <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
                                 Premium
@@ -105,7 +98,7 @@
                 @foreach ($completedEvents as $event)
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ $event->event->banner_image }}" alt="Event" class="rounded-t-2xl w-full">
+                            <img src="{{ asset('storage/' . $event->event->banner_image) }}" alt="Event" class="rounded-t-2xl w-full">
                             <span
                                 class="absolute top-3 right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
                                 <span class="text-2xl">25</span> Seats Available
@@ -140,7 +133,7 @@
                                     <p class="px-2 text-primary text-center cursor-pointer view-details-btn"
                                         data-event_id="{{ $event->event->id }}"
                                         data-title="{{ $event->event->title }}"
-                                        data-image="{{ $event->event->banner_image }}"
+                                        data-image="{{ asset('storage/' . $event->event->banner_image ) }}"
                                         data-description="{{ $event->event->description }}"
                                         data-date=" {{ \Carbon\Carbon::parse($event->event->event_date)->format('F j, Y') }}"
                                         data-start="{{ \Carbon\Carbon::parse($event->event->start_time)->format('h:i A') }}"

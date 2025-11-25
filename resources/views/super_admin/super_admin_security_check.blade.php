@@ -1,7 +1,7 @@
 <x-layouts.auth>
     <div class="p-5 bg-cover bg-no-repeat h-[100vh] flex items-center justify-center"
         style="background-image: url('{{ asset('/images/login.png') }}');">
-        <div class="px-[1em] lg:px-[5em] xl:px-[5em] 2xl:px-[10em] w-160">
+        <div class="px-[1em] lg:px-[5em] xl:px-[5em] 2xl:px-[10em] w-200">
             <div class="bg-white p-10 rounded-3xl shadow-lg flex flex-col items-center text-center space-y-3">
                 {{-- LOGO --}}
                 <img src="{{ asset('/images/rtc_logo.png') }}" alt="Logo" class="w-48 mx-auto">
@@ -15,7 +15,7 @@
                 <p class="text-md font-bold text-primary">Security Protocol Access</p>
                 <p class="text-sm font-medium">Enter your 6-digit authentication code</p>
                 {{-- FORM --}}
-                <form method="POST" action="{{ route('role_check.login') }}" class="w-full space-y-4"
+                <form method="POST" action="{{ route('security_check') }}" class="w-full space-y-4"
                     x-data="{ loading: false }" @submit="loading = true">
                     @csrf
                     <div class="text-left">
@@ -31,6 +31,9 @@
                         class="w-full py-2 bg-gradient-to-r from-primary to-pink-500 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition">
                         Complete Authentication
                     </button>
+                    <div class="text-center mt-2">
+                                    <a href="{{ route('login') }}" class="text-xs text-purple-600 hover:underline">Go to Login</a>
+                    </div>
                 </form>
             </div>
         </div>

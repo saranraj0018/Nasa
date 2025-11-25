@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\student;
 
 use App\Http\Controllers\Controller;
+use App\Models\Event;
 use App\Models\StudentEventRegistration;
 use App\Models\StudentUploadProof;
 use Exception;
@@ -13,11 +14,24 @@ class MyRegisterEventsController extends Controller
 {
     public function index(Request $request)
     {
-        $studentID = session()->get('student');
-        $this->data['registeredEvents'] = StudentEventRegistration::with('event')->where('student_id', $studentID)
+        $student = session()->get('student');
+        $this->data['registeredEvents'] = StudentEventRegistration::with('event')->where('student_id', $student->id)
             ->get();
-        $this->data['completedEvents'] = StudentEventRegistration::with('event')->where('student_id', $studentID)
+        $this->data['completedEvents'] = StudentEventRegistration::with('event')->where('student_id', $student->id)
             ->get();
+        $this->data['activeCount'] = StudentEventRegistration::where('student_id', $student->id)
+            ->where('status', 1)
+            ->count();
+
+        $this->data['attendedCount'] = StudentEventRegistration::where('student_id', $student->id)
+            ->where('status', 3)
+            ->count();
+        $events = Event::get();
+        $myuploads = StudentUploadProof::select('student_id', 'event_id')
+            ->where('student_id', $student->id)
+            ->groupBy('student_id', 'event_id')
+            ->get();
+        $this->data['pending_uploads'] = count($myuploads) -  count($events);
         return view('student.my_register_event')->with($this->data);
     }
 
@@ -30,7 +44,7 @@ class MyRegisterEventsController extends Controller
         ]);
         try {
             foreach ($request->file('proof') as $file) {
-                $fileName = $file->getClientOriginalExtension();
+                $fileName = $file->getClientOriginalName();
                 $filePath = $file->storeAs('student_upload_proof', $fileName, 'public');
                 $exists = StudentUploadProof::where(['student_id' => $validated['student_id'], 'event_id' => $validated['event_id'], 'file_name' =>  $fileName, 'file_path' => $filePath])->first();
                 if(!$exists){
@@ -41,17 +55,15 @@ class MyRegisterEventsController extends Controller
                 $upload->file_path  = $filePath;         // Public path
                 $upload->file_type  = $file->getClientOriginalExtension();
                 $upload->save();
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Proof uploaded successfully!',
-                    'data' => $upload
-                ]);
-                }else{
-                    return response()->json([
-                        'error' => true,
-                      ]);
                 }
             }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Proof uploaded successfully!',
+                'data' => $upload
+            ]);
+
         } catch (Exception $e) {
             return $e->getMessage();
         }

@@ -34,8 +34,11 @@ class StudentAuthController extends Controller
                 ->withErrors(['password' => 'Either Email/Password is incorrect'])
                 ->withInput($request->only('email'));
         }
-        $studentId = Auth::guard('student')->id();
-        session()->put('student', $studentId);
+        session()->forget('admin');
+        session()->forget('super_admin');
+        $student = Auth::guard('student')->id();
+        $studentdetail = Student::where('id', $student)->first();
+        session()->put('student', $studentdetail);
 
         return redirect()->route('student_dashboard');
     }
@@ -43,6 +46,8 @@ class StudentAuthController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('student')->logout();
+        Auth::guard('admin')->logout();
+        session()->flush();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('student.login');

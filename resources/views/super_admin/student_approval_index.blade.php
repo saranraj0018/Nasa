@@ -71,7 +71,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Student Applications -->
         <h1 class="text-primary mt-8 font-semibold">Student Applications</h1>
         <p class="text-gray-600 text-sm mb-3">Review and process student event applications</p>
@@ -101,12 +101,10 @@
 
                     <!-- Buttons -->
                     <div class="grid grid-cols-2 gap-3 mt-4">
-                        <button
-                            class="w-full bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-2 rounded-full">
+                        <button class="w-full bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
                             <i class="fa fa-check-circle mr-1"></i> Present
                         </button>
-                        <button
-                            class="w-full bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-2 rounded-full">
+                        <button class="w-full bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
                             <i class="fa fa-times-circle mr-1"></i> Absent
                         </button>
                     </div>
@@ -136,11 +134,11 @@
                     <!-- Buttons -->
                     <div class="grid grid-cols-2 gap-3 mt-4">
                         <button
-                            class="w-full bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-2 rounded-full">
+                            class="w-full bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
                             <i class="fa fa-check-circle mr-1"></i> Present
                         </button>
                         <button
-                            class="w-full bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-2 rounded-full">
+                            class="w-full bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
                             <i class="fa fa-times-circle mr-1"></i> Absent
                         </button>
                     </div>

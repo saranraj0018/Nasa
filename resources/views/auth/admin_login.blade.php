@@ -22,7 +22,7 @@
                             Login to stay connnected
                         </p>
                         {{-- FORM SEGMENT --}}
-                        <form method="POST" action="{{ route('role_check.login') }}" class="space-y-3"
+                        <form method="POST" action="{{ route('login') }}" class="space-y-3"
                             x-data="{ show: false, loading: false }" @submit="loading = true">
                             @csrf
                             <label class="block text-md font-medium text-[#3F003E]">Email</label>

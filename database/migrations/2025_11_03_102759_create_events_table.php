@@ -11,24 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admin', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->string('mobile_number')->nullable();
-            $table->string('role')->default('admin');
-            $table->string('code')->nullable();
-            $table->timestamps();
-        });
 
         Schema::create('faculties', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('department_id')->constrained('departments')->onDelete('no action');
+            $table->foreignId('designation_id')->constrained('designations')->onDelete('no action');
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('designation')->nullable();
-            $table->string('department')->nullable();
-            $table->string('contact_number')->nullable();
+            $table->string('mobile_number')->nullable();
+            $table->string('faculty_code');
+            $table->string('profile_pic')->nullable();
             $table->timestamps();
         });
 
@@ -49,12 +41,14 @@ return new class extends Migration
             $table->date('event_date');
             $table->time('start_time');
             $table->time('end_time');
+            $table->enum('event_type', ['paid','free']);
+            $table->integer('seat_count');
             $table->string('location');
             $table->enum('session', ['1', '2'])
-                ->comment('1 FN, 2 AN');  // e.g. FN, AN
+                ->comment('1 FN, 2 AN');
             $table->text('eligibility_criteria');
             $table->date('end_registration');
-            $table->foreignId('contact_person')->constrained('admin')->onDelete('no action');
+            $table->string('contact_person');
             $table->string('contact_email');
             $table->string('banner_image')->nullable(); // store image path
             $table->timestamps();
@@ -66,6 +60,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('events');
-    }
+
+     }
 };

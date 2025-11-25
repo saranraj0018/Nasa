@@ -121,33 +121,37 @@ $(function () {
     }
 
     // helper: render previews from filesArr
-    function showPreviewsFromArray() {
-        previewArea.empty();
+   function showPreviewsFromArray() {
+       previewArea.empty();
 
-        if (filesArr.length === 0) {
-            previewArea.addClass("hidden");
-            uploadText.removeClass("hidden");
-            return;
-        }
+       if (filesArr.length === 0) {
+           previewArea.addClass("hidden");
+           uploadText.removeClass("hidden");
+           return;
+       }
 
-        uploadText.addClass("hidden");
-        previewArea.removeClass("hidden");
+       uploadText.addClass("hidden");
+       previewArea.removeClass("hidden");
 
-        filesArr.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const wrapper = $(`
-                    <div class="img-wrapper relative inline-block m-1" data-idx="${index}">
-                        <img src="${e.target.result}" class="rounded-lg mx-auto mb-2" width="100" />
-                        <button type="button" class="remove-img absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">&times;</button>
-                        <p class="text-white text-xs truncate w-[100px]">${file.name}</p>
-                    </div>
-                `);
-                previewArea.append(wrapper);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
+       filesArr.forEach((file, index) => {
+           const reader = new FileReader();
+
+           reader.onload = function (e) {
+               const wrapper = $(`
+                <div class="img-wrapper relative inline-block m-1" data-idx="${index}">
+                    <img src="${e.target.result}" class="rounded-lg mx-auto mb-2" width="100" />
+                    <button type="button" class="remove-img absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">&times;</button>
+                    <p class="text-white text-xs truncate w-[100px]">${file.name}</p>
+                </div>
+            `);
+
+               previewArea.append(wrapper);
+           };
+
+           reader.readAsDataURL(file);
+       });
+   }
+
 
     // === Open/Close upload modal ===
     openModalBtn.on("click", function () {

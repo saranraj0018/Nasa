@@ -10,4 +10,9 @@ class Event extends Model
     {
         return $this->hasMany(StudentEventRegistration::class, 'event_id');
     }
+
+    public function get_faculty()
+    {
+        return $this->belongsTo(Faculty::class, 'faculty_id');
+    }
 }

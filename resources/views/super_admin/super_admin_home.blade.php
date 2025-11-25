@@ -16,8 +16,8 @@
                             class="p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#7D3CFF]">{{ isset($events) ? count($events) : 0 }}</h3>
-                <span class="text-[#7D3CFF] text-xs">+3 in this week</span>
+                <h3 class="text-3xl font-bold text-[#7D3CFF]">{{ $upcomingEvents ?? 0 }}</h3>
+                <span class="text-[#7D3CFF] text-xs">+{{ $upcomingEventsThisWeek }} in this week</span>
             </div>
 
             <div class="bg-[#FFEBE4] rounded-2xl shadow p-5 flex flex-col justify-between">
@@ -27,7 +27,7 @@
                         <img src="{{ asset('/images/ongoing_event.png') }}" alt="Super Admin" class="p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#FF6833]">{{ isset($events) ? count($events) : 0 }}</h3>
+                <h3 class="text-3xl font-bold text-[#FF6833]">{{ $ongoingEvents ?? 0 }}</h3>
                 <span class="text-[#FF6833] text-xs">Live Now</span>
             </div>
 
@@ -39,8 +39,8 @@
                             class="p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#02AC8B]">{{ isset($events) ? count($events) : 0 }}</h3>
-                <span class="text-[#02AC8B] text-xs">+2 in this month</span>
+                <h3 class="text-3xl font-bold text-[#02AC8B]">{{ $totalAdmins ?? 0 }}</h3>
+                <span class="text-[#02AC8B] text-xs">+{{ $adminsThisMonth  }}in this month</span>
             </div>
 
             <div class="bg-[#FFF6DE] rounded-2xl shadow p-5 flex flex-col justify-between">
@@ -51,8 +51,8 @@
                             class="p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#C79000]">{{ isset($events) ? count($events) : 0 }}</h3>
-                <span class="text-[#C79000] text-xs">+ 156 this month</span>
+                <h3 class="text-3xl font-bold text-[#C79000]">{{ $totalStudents ?? 0 }}</h3>
+                <span class="text-[#C79000] text-xs">+ {{ $studentsThisMonth }} this month</span>
             </div>
 
             <div class="bg-[#EDFFF2] rounded-2xl shadow p-5 flex flex-col justify-between">

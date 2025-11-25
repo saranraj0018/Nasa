@@ -18,7 +18,7 @@
             <div class="bg-[#FF8F6B] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class="text-[#992B07] font-medium">Register Events</p>
                 <div class="flex items-center justify-between mt-2">
-                    <h3 class="text-3xl font-bold text-[#992B07]">22</h3>
+                    <h3 class="text-3xl font-bold text-[#992B07]">{{ isset($registered_count) ? count($registered_count) : 0 }}</h3>
                     <img src="{{ asset('/images/register_event.png') }}" alt="" class="mx-auto">
                 </div>
                 <div class="relative">
@@ -29,7 +29,7 @@
             <div class="bg-[#B5DAFF] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class=" text-[#0756A6] font-medium">Completed Events</p>
                 <div class="flex items-center justify-between mt-2">
-                    <h3 class="text-3xl font-bold text-[#0756A5]">12</h3>
+                    <h3 class="text-3xl font-bold text-[#0756A5]">{{ isset($completed_events) ? count($completed_events) : 0 }}</h3>
                     <img src="{{ asset('/images/completed.png') }}" alt="" class="mx-auto">
                 </div>
                 <div class="relative">
@@ -40,7 +40,7 @@
             <div class="bg-[#FFCB4B] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class="text-[#D48C28] font-medium">Certificates Earned</p>
                 <div class="flex items-center justify-between mt-2">
-                    <h3 class="text-3xl font-bold text-[#D48C28]">10</h3>
+                    <h3 class="text-3xl font-bold text-[#D48C28]">{{ isset($completed_events) ? count($completed_events) : 0 }}</h3>
                     <img src="{{ asset('/images/certificates.png') }}" alt="" class="mx-auto">
                 </div>
                 <div class="relative">
@@ -61,7 +61,7 @@
                 @foreach ($upcomingEvents as $event)
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ $event['banner_image'] }}" alt="Event" class="rounded-t-2xl w-full">
+                            <img src="{{ asset('storage/' . $event['banner_image']) }}" alt="Event" class="rounded-t-2xl w-full">
                             @if ($event['event_type'] == 'paid')
                             <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
                                 Premium
@@ -92,9 +92,11 @@
                                     <p class="px-2">{{ $event['location'] }}</p>
                                 </div>
                             </div>
+                            @if ($event->registrations->isEmpty())
                             <button onclick="document.querySelector('.registerModal').classList.remove('hidden')" class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full" data-event_id={{ $event->id }}>
                                 Register Now
                             </button>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -106,7 +108,7 @@
                 @foreach ($ongoingEvents as $ongoing_event)
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ $ongoing_event['banner_image'] }}" alt="Event" class="rounded-t-2xl w-full">
+                            <img src="{{ asset('storage/' . $ongoing_event['banner_image']) }}"  alt="Event" class="rounded-t-2xl w-full">
                             @if ($ongoing_event['event_type'] == 'paid')
                             <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
                                 Premium
@@ -129,7 +131,7 @@
                                     <p class="px-2">{{ $ongoing_event->start_time ? \Carbon\Carbon::parse($ongoing_event->start_time)->format('h:i A') : '-' }} - {{ $ongoing_event->end_time ? \Carbon\Carbon::parse($ongoing_event->end_time)->format('h:i A') : '-' }}</p>
                                 </div>
                                 <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
-                                     <i class="fa fa-calendar text-primary" aria-hidden="true"></i>
+                                    <i class="fa fa-calendar text-primary" aria-hidden="true"></i>
                                     <p class="px-2">{{ \Carbon\Carbon::parse($ongoing_event['event_date'])->format('F j, Y') }}</p>
                                 </div>
                                 <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
@@ -137,9 +139,11 @@
                                     <p class="px-2">{{ $ongoing_event['location'] }}</p>
                                 </div>
                             </div>
+                            @if ($ongoing_event->registrations->isEmpty())
                             <button onclick="document.querySelector('.registerModal').classList.remove('hidden')" class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full" data-event_id={{ $ongoing_event->id }}>
                                 Register Now
                             </button>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -151,7 +155,7 @@
                   @foreach ($registeredEvents as $register_event)
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ $register_event->event->banner_image }}" alt="Event" class="rounded-t-2xl w-full">
+                            <img src="{{ asset('storage/' . $register_event->event->banner_image) }}"  alt="Event" class="rounded-t-2xl w-full">
                             @if ($register_event->event->event_type == 'paid')
                             <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
                                 Premium
@@ -182,9 +186,6 @@
                                     <p class="px-2">{{ $register_event->event->location }}</p>
                                 </div>
                             </div>
-                            {{-- <button onclick="document.querySelector('.registerModal').classList.remove('hidden')" class="mt-4 w-full bg-primary text-white font-medium py-2 rounded-full">
-                                Register Now
-                            </button> --}}
                         </div>
                     </div>
                 @endforeach

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Student;
 use App\Models\StudentEventRegistration;
+use App\Models\StudentUploadProof;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -18,17 +19,18 @@ class RegisterEventController extends Controller
         $now = Carbon::now();
         $this->data['events'] = Event::get();
         $student = session()->get('student');
-        $this->data['ongoingEvents'] = Event::whereDoesntHave('registrations', function ($query) use ($student) {
-            $query->where('student_id', $student);
-        })
+        $myuploads = StudentUploadProof::select('student_id', 'event_id')
+            ->where('student_id', $student->id)
+            ->groupBy('student_id', 'event_id')
+            ->get();
+       $this->data['pending_uploads'] = count($myuploads) -  count($this->data['events']);
+        $this->data['ongoingEvents'] = Event::with('registrations')
             ->whereDate('event_date', $now->toDateString())
             // ->whereTime('start_time', '<=', $now->toTimeString())
             // ->whereTime('end_time', '>=', $now->toTimeString())
             ->where('end_registration', '>=', $now) // not after registration deadline
             ->get();
-        $this->data['upcomingEvents'] = Event::whereDoesntHave('registrations', function ($query) use ($student) {
-            $query->where('student_id', $student);
-        })
+        $this->data['upcomingEvents'] = Event::with('registrations')
             ->where(function ($query) use ($now) {
                 $query->whereDate('event_date', '>', $now->toDateString())
                     ->orWhere(function ($q) use ($now) {
@@ -40,6 +42,13 @@ class RegisterEventController extends Controller
             ->orderBy('event_date', 'asc')
             ->orderBy('start_time', 'asc')
             ->get();
+        $this->data['activeCount'] = StudentEventRegistration::where('student_id', $student->id)
+            ->where('status', 1)
+            ->count();
+
+        $this->data['attendedCount'] = StudentEventRegistration::where('student_id', $student->id)
+            ->where('status', 3)
+            ->count();
         return view('student.register_event_index')->with($this->data);
     }
 
@@ -76,8 +85,7 @@ class RegisterEventController extends Controller
     public function getStudent(Request $request)
     {
         if($request->ajax() && $request->get_student){
-            $studentID = session()->get('student');
-            $student = Student::where('id', $studentID)->first();
+            $student = session()->get('student');
             $event = Event::where('id',$request->event_id)->first();
               return response()->json([
                 'success' => true,

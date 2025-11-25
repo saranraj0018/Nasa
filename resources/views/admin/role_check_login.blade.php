@@ -11,10 +11,10 @@
                                 class="w-16 h-16 rounded-full object-contain bg-white p-2">
                         </div>
                         <h1 class="text-2xl text-primary font-bold">ADMIN</h1>
-                        <button type="submit"
+                        <a href="{{ route("home") }}"
                             class="w-40 py-2 bg-gradient-to-r from-primary to-pink-500 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition">
                             Select Role <i class="fa-solid fa-arrow-right ml-1"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -26,10 +26,10 @@
                                 class="w-16 h-16 rounded-full object-contain bg-white p-2">
                         </div>
                         <h1 class="text-2xl text-primary font-bold">SUPER ADMIN</h1>
-                        <button type="submit"
+                        <a href="{{ route("security_check") }}"
                             class="w-40 py-2 bg-gradient-to-r from-primary to-pink-500 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition">
                             Select Role <i class="fa-solid fa-arrow-right ml-1"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

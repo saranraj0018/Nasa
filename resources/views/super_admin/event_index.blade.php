@@ -23,7 +23,7 @@
                 @foreach ($upcomingEvents as $event)
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ $event['banner_image'] }}" alt="Event" class="rounded-t-2xl w-full">
+                            <img src="{{ asset('storage/' . $event['banner_image']) }}" alt="Event" class="rounded-t-2xl w-full">
                             @if ($event['event_type'] == 'paid')
                                 <span
                                     class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
@@ -74,7 +74,7 @@
                 @foreach ($ongoingEvents as $ongoing_event)
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ $ongoing_event['banner_image'] }}" alt="Event"
+                            <img src="{{ asset('storage/' . $ongoing_event['banner_image']) }}"  alt="Event"
                                 class="rounded-t-2xl w-full">
                             @if ($ongoing_event['event_type'] == 'paid')
                                 <span
@@ -119,13 +119,13 @@
             </div>
         </div>
         <!-- Registered Events -->
-        <div id="registered-section" class="mt-6">
+        <div id="registered-section" class="mt-6 hidden">
             <h4 class="font-semibold text-gray-800 mb-4">Registered Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($registeredEvents as $event)
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ $event->event->banner_image }}" alt="Event" class="rounded-t-2xl w-full">
+                            <img src="{{ asset('storage/' . $event->event->banner_image) }}" alt="Event" class="rounded-t-2xl w-full">
                             @if ($event->event->event_type == 'paid')
                                 <span
                                     class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
@@ -176,7 +176,7 @@
                 @foreach ($completedEvents as $event)
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ $event->event->banner_image }}" alt="Event"
+                            <img src="{{ asset('storage/' . $event->event->banner_image) }}" alt="Event"
                                 class="rounded-t-2xl w-full">
                             <span
                                 class="absolute top-3 right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">

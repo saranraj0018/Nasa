@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('student_upload_proofs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
-            $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
+            $table->foreignId('student_id')->constrained('students')->onDelete('no action');
+            $table->foreignId('event_id')->constrained('events')->onDelete('no action');
             $table->string('file_name');
             $table->string('file_path');
             $table->string('file_type', 50)->nullable();
