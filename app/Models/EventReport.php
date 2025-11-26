@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class EventReport extends Model
+{
+    public function get_event_image()
+    {
+        return $this->hasMany(EventReportImage::class, 'report_id');
+    }
+
+    public function get_event()
+    {
+        return $this->belongsTo(Event::class, 'event_id');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(Admin::class, 'created_by');
+    }
+}

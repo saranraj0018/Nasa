@@ -15,4 +15,9 @@ class Event extends Model
     {
         return $this->belongsTo(Faculty::class, 'faculty_id');
     }
+
+    public function get_task()
+    {
+        return $this->belongsTo(Tasks::class, 'task_id');
+    }
 }

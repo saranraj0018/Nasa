@@ -23,6 +23,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/home', [AdminHomeController::class, 'index'])->name('home');
     Route::get('/reports', [AdminReportsController::class, 'index'])->name('reports');
     Route::get('/create_report', [AdminReportsController::class, 'crearteReport'])->name('create_report');
+    Route::post('/save_report', [AdminReportsController::class, 'saveReport'])->name('save_report');
+
     Route::post('/security_login', [SuperAdminAuthController::class, 'index'])->name('security_check.login');
     Route::get('/super_admin_home', [SuperAdminHomeController::class, 'index'])->name('super_admin_home');
     Route::get('/events', [EventsController::class, 'index'])->name('events');
@@ -68,4 +70,9 @@ Route::prefix('admin')->group(function () {
     Route::get('/student-list', [StudentController::class, 'index'])->name('student_list');
     Route::get('/create-student', [StudentController::class, 'createStudent'])->name('create_student');
     Route::post('/save-student', [StudentController::class, 'saveStudent'])->name('save_student');
+
+    Route::get('{id}/view-pdf', [AdminReportsController::class, 'viewPdf'])->name('reports_view_pdf');
+    Route::get('{id}/download-pdf', [AdminReportsController::class, 'downloadPdf'])->name('reports_download_pdf');
+
+    Route::post('/student-event-approval', [StudentApprovalController::class, 'studentEventApproval'])->name('student_event_approval');
 });

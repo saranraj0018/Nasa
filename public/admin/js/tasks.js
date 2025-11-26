@@ -1,5 +1,4 @@
 $(document).on("submit", "#taskForm", function (e) {
-    alert(1);
     e.preventDefault();
     // Fields to validate
     let fields = [
@@ -68,29 +67,23 @@ $(document).on("submit", "#taskForm", function (e) {
     );
 });
 
-
 document.addEventListener("DOMContentLoaded", function () {
-
     const dropArea = document.getElementById("dropArea");
     const fileInput = document.getElementById("fileInput");
     const previewArea = document.getElementById("previewArea");
-
     let filesArr = [];
-
     // -----------------------------
     // CLICK TO OPEN FILE SELECT
     // -----------------------------
     dropArea.addEventListener("click", () => {
         fileInput.click();
     });
-
     // -----------------------------
     // WHEN FILES SELECTED
     // -----------------------------
     fileInput.addEventListener("change", function () {
         handleFiles(this.files);
     });
-
     // -----------------------------
     // DRAG OVER
     // -----------------------------
@@ -98,11 +91,9 @@ document.addEventListener("DOMContentLoaded", function () {
         e.preventDefault();
         dropArea.classList.add("border-purple-500");
     });
-
     dropArea.addEventListener("dragleave", function () {
         dropArea.classList.remove("border-purple-500");
     });
-
     // -----------------------------
     // DROP FILES
     // -----------------------------
@@ -182,6 +173,56 @@ $(document).on("click", ".remove-img", function (e) {
 
     wrapper.remove();
 });
+
+
+   document.addEventListener("DOMContentLoaded", () => {
+       const adminSelect = document.querySelector('select[name="admin"]');
+       const statusSelect = document.querySelector('select[name="status"]');
+       const eventSelect = document.querySelector('select[name="event"]');
+       const tasks = document.querySelectorAll(".task-card");
+       const refreshBtn = document.getElementById("refreshBtn");
+
+       function filterTasks() {
+           const adminVal = adminSelect.value;
+           const statusVal = statusSelect.value;
+           const eventVal = eventSelect.value;
+
+           tasks.forEach((task) => {
+               const taskAdmin = task.dataset.admin;
+               const taskStatus = task.dataset.status;
+               const taskEvent = task.dataset.event;
+
+               const adminMatch = !adminVal || adminVal === taskAdmin;
+               const statusMatch = !statusVal || statusVal === taskStatus;
+               const eventMatch = !eventVal || eventVal === taskEvent;
+
+               task.style.display =
+                   adminMatch && statusMatch && eventMatch ? "block" : "none";
+           });
+       }
+
+       // Listen to filters
+       adminSelect.addEventListener("change", filterTasks);
+       statusSelect.addEventListener("change", filterTasks);
+       eventSelect.addEventListener("change", filterTasks);
+
+       // Refresh button
+       refreshBtn.addEventListener("click", () => {
+           // Reset all filters to default
+           adminSelect.value = "";
+           statusSelect.value = "";
+           eventSelect.value = "";
+
+           // Show all tasks
+           tasks.forEach((task) => {
+               task.style.display = "block";
+           });
+       });
+   });
+
+
+
+
 
 
 

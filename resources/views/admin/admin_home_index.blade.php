@@ -12,15 +12,15 @@
             <div class="rounded-2xl shadow p-5 flex flex-col justify-between bg-cover bg-center"
                 style="background-image: url('{{ asset('/images/admin_total_event.png') }}');">
                 <div class="flex items-center justify-between py-4">
-                    <p class="font-bold text-[#4E0E4D]">Total Events Created</p>
+                    <p class="font-bold text-[#4E0E4D] text-sm">Total Events Created</p>
                     <div class="w-10 h-10 rounded-full bg-[#F7E9F7] flex items-center justify-center shadow-md">
                         <img src="{{ asset('/images/tot_event.png') }}" alt="Admin"
                             class="w-10 h-10 rounded-full object-contain p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#4E0E4D]">42</h3>
+                <h3 class="text-3xl font-bold text-[#4E0E4D]">{{  isset($events) ? count($events) : 0 }}</h3>
                 <div class="flex items-center justify-between">
-                    <p class="text-[#4E0E4D] bg-[#F7E9F7] rounded-full px-2 text-xs py-1 mt-2">This Month</p>
+                    {{-- <p class="text-[#4E0E4D] bg-[#F7E9F7] rounded-full px-2 text-xs py-1 mt-2">This Month</p> --}}
                 </div>
             </div>
 
@@ -28,15 +28,15 @@
             <div class="rounded-2xl shadow p-5 flex flex-col justify-between bg-cover bg-center"
                 style="background-image: url('{{ asset('/images/admin_upcoming_event.png') }}');">
                 <div class="flex items-center justify-between py-4">
-                    <p class="font-bold text-[#4E0E4D]">Upcoming Events</p>
+                    <p class="font-bold text-[#4E0E4D] text-sm">Upcoming Events</p>
                     <div class="w-10 h-10 rounded-full bg-[#D3F4FF] flex items-center justify-center shadow-md">
                         <img src="{{ asset('/images/up_event.png') }}" alt="Admin"
                             class="w-10 h-10 rounded-full object-contain p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#4E0E4D]">42</h3>
+                <h3 class="text-3xl font-bold text-[#4E0E4D]">{{  isset($upcoming_events) ? count($upcoming_events) : 0 }}</h3>
                 <div class="flex items-center justify-between">
-                    <p class="text-[#4E0E4D] bg-[#94DAF4] rounded-full px-2 text-xs py-1 mt-2">This Month</p>
+                    {{-- <p class="text-[#4E0E4D] bg-[#94DAF4] rounded-full px-2 text-xs py-1 mt-2">This Month</p> --}}
                 </div>
             </div>
 
@@ -44,13 +44,13 @@
             <div class="rounded-2xl shadow p-5 flex flex-col justify-between bg-cover bg-center"
                 style="background-image: url('{{ asset('/images/admin_pending_approvals.png') }}');">
                 <div class="flex items-center justify-between py-4">
-                    <p class="font-bold text-[#4E0E4D]">Pending Approvals/p>
+                    <p class="font-bold text-[#4E0E4D] text-sm">Pending Approvals</p>
                     <div class="w-10 h-10 rounded-full bg-[#FFCDD1] flex items-center justify-center shadow-md">
                         <img src="{{ asset('/images/pending_approval.png') }}" alt="Admin"
                             class="w-10 h-10 rounded-full object-contain p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#4E0E4D]">42</h3>
+                <h3 class="text-3xl font-bold text-[#4E0E4D]">{{ isset($pending_approvals) ? count($pending_approvals) : 0   }}</h3>
                 <div class="flex items-center justify-between">
                     <p class="text-[#4E0E4D] bg-[#FFB8C0] rounded-full px-2 py-1 text-xs mt-2">Student Applications</p>
                 </div>
@@ -60,13 +60,13 @@
             <div class="rounded-2xl shadow p-5 flex flex-col justify-between bg-cover bg-center"
                 style="background-image: url('{{ asset('/images/admin_submitted_reports.png') }}');">
                 <div class="flex items-center justify-between py-4">
-                    <p class="font-bold text-[#4E0E4D]">Submitted Reports</p>
+                    <p class="font-bold text-[#4E0E4D] text-sm">Submitted Reports</p>
                     <div class="w-10 h-10 rounded-full bg-[#636363] flex items-center justify-center shadow-md">
                         <img src="{{ asset('/images/submitted_reports.png') }}" alt="Admin"
                             class="w-10 h-10 rounded-full object-contain p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#4E0E4D]">42</h3>
+                <h3 class="text-3xl font-bold text-[#4E0E4D]">{{ isset($submitted_reports) ? count($submitted_reports) : 0 }}</h3>
                 <div class="flex items-center justify-between">
                     <p class="text-[#4E0E4D] bg-[#DEE2E9] rounded-full px-2 text-xs mt-2 py-1">This Month</p>
                 </div>

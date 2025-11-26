@@ -15,4 +15,9 @@ class StudentEventRegistration extends Model
     {
         return $this->belongsTo(Student::class, 'student_id', 'id');
     }
+
+    public function get_student_proof()
+    {
+        return $this->hasMany(StudentUploadProof::class, 'student_id','student_id');
+    }
 }

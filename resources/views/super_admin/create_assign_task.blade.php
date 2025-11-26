@@ -8,8 +8,8 @@
         <h3 class="font-semibold text-primary mt-8">Assign Task to Admin</h3>
         <form id="taskForm" method="POST" enctype="multipart/form-data" class="space-y-4 mt-8">
             @csrf
-             @if (!empty($edit_task))
-             <input type="hidden" name="task_id" value="{{ $edit_task->id }}">
+            @if (!empty($edit_task))
+                <input type="hidden" name="task_id" value="{{ $edit_task->id }}">
             @endif
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <!-- Select Admin -->
@@ -62,8 +62,8 @@
                 <!-- Deadline -->
                 <div>
                     <label class="block text-sm font-medium">Deadline Date<span class="text-red-500">*</span></label>
-                    <input type="date" name="deadline_date" id="deadline_date"
-                        value="{{ !empty($edit_task) ? $edit_task->deadline_date : ''}}"
+                    <input type="datetime-local" name="deadline_date" id="deadline_date"
+                        value="{{ !empty($edit_task) ? \Carbon\Carbon::parse($edit_task->deadline_date)->format('Y-m-d\TH:i') : '' }}"
                         class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40">
                 </div>
 
@@ -73,13 +73,13 @@
 
                     <!-- Drop area -->
                     <div id="dropArea"
-                        class="border-2 border-dashed border-gray-400 rounded-2xl p-6 text-center cursor-pointer"
+                        class="border-2 border-dashed border-[#E54590] rounded-2xl p-6 text-center cursor-pointer"
                         style="min-height:120px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
                         <div id="dropHint">
-                            <p class="font-medium">Drag & drop images here</p>
-                            <p class="text-sm text-gray-500 mt-1">or click to select</p>
-                            <p class="text-sm text-red-600 mt-2 py-1 rounded-full bg-gray-100">
-                                JPG / PNG — Max 10MB — Max 4 images
+                             <img src="{{ asset('/images/upload.png') }}" class="mx-auto w-14 mb-3" />
+                            <p class="font-medium text-[#E54590]">Upload event banner Image</p>
+                            <p class="text-sm text-[#E54590] mt-2 py-1 rounded-full bg-gray-100">
+                                 PNG ,JPG up to 5MB
                             </p>
                         </div>
                     </div>
@@ -90,18 +90,18 @@
                         @if (!empty($edit_task) && !empty($edit_task->get_task_images))
                             @foreach ($edit_task->get_task_images as $img)
                                 <div class="img-wrapper relative inline-block" data-existing="{{ $img['id'] }}">
-                                    <img src="{{ asset('storage/' . $img['file_path']) }}" class="rounded-lg w-full h-32 object-cover" alt="heeee" />
+                                    <img src="{{ asset('storage/' . $img['file_path']) }}"
+                                        class="rounded-lg w-full h-32 object-cover" alt="heeee" />
                                     <button type="button"
                                         class="remove-img absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 text-sm">&times;</button>
                                     <p class="text-gray-800 text-xs truncate w-[120px]">{{ $img['filename'] }}</p>
                                 </div>
                             @endforeach
                         @endif
-                            <input type="hidden" id="removedImages" name="removed_images">
+                        <input type="hidden" id="removedImages" name="removed_images">
                     </div>
                     <!-- Hidden input -->
-                    <input id="fileInput" name="proof[]"
-                   type="file" accept="image/*" multiple class="hidden">
+                    <input id="fileInput" name="proof[]" type="file" accept="image/*" multiple class="hidden">
                 </div>
             </div>
 

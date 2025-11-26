@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('student_event_registrations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('students')->onDelete('no action');
-            $table->foreignId('event_id')->constrained('events')->onDelete('no action');
+            $table->unsignedBigInteger('student_id');
+            $table->unsignedBigInteger('event_id');
             $table->enum('status', ['1', '2','3','4'])->comment('1 - Registered, 2 - Approved, 3 - Completed, 4 - Cancelled');
             $table->timestamps();
+
+            $table->foreign('event_id')->references('id')->on('events')->onDelete('no action');
+            $table->foreign('student_id')->references('id')->on('students')->onDelete('no action');
         });
     }
 

@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('student_upload_proofs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('students')->onDelete('no action');
-            $table->foreignId('event_id')->constrained('events')->onDelete('no action');
+            $table->unsignedBigInteger('student_id');
+            $table->unsignedBigInteger('event_id');
             $table->string('file_name');
             $table->string('file_path');
             $table->string('file_type', 50)->nullable();
             $table->timestamps();
+
+            $table->foreign('student_id')->references('id')->on('students')->onDelete('no action');
+            $table->foreign('event_id')->references('id')->on('events')->onDelete('no action');
         });
     }
 
@@ -27,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('upload_proof');
+        // Schema::dropIfExists('upload_proof');
     }
 };

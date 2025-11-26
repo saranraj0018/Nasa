@@ -4,29 +4,43 @@ namespace App\Http\Controllers\super_admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Event;
 use App\Models\Faculty;
 use App\Models\TaskImage;
 use App\Models\TaskImages;
 use App\Models\Tasks;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class AssignTasksController extends Controller
 {
    public function index()
    {
-    $this->data['tasks'] = Tasks::with('get_admin', 'get_task_images')->get();
+    $adminId = Auth::guard('admin')->id();
+    $this->data['tasks'] = Tasks::where('created_by', $adminId)->with('get_admin', 'get_task_images')->get();
+    $this->data['pending_tasks'] = Tasks::where(['created_by' => $adminId, 'status' => 'pending'])->count();
+    $this->data['ongoing_tasks'] = Event::with('get_task')
+            ->whereHas('get_task', function ($query) use ($adminId) {
+                $query->where('created_by', $adminId)
+                    ->whereNotIn('status', ['pending', 'accepted']);
+            })
+            ->whereNotIn('status', ['completed']) // <-- wrap in array
+            ->count();
+    $this->data['completed_tasks'] = Tasks::where(['created_by' => $adminId, 'status' => 'completed'])->count();
+    $this->data['admins'] = Admin::where('role_id', 2)->get();
+    $this->data['event'] = Tasks::where('created_by', $adminId)->get();
     return view('super_admin.assign_task_index')->with($this->data);
    }
 
    public function createAssignTasks(Request $request)
    {
-     $this->data['admins'] = Admin::where('role_id',2)->get();
-        if ($request->task_id) {
-            $taskId = decrypt($request->task_id);
-            $this->data['edit_task'] = Tasks::with('get_task_images')->where('id', $taskId)->first();
+       if ($request->task_id) {
+           $taskId = decrypt($request->task_id);
+           $this->data['edit_task'] = Tasks::with('get_task_images')->where('id', $taskId)->first();
         }
+        $this->data['admins'] = Admin::where('role_id',2)->get();
     return view('super_admin.create_assign_task')->with($this->data);
    }
 
@@ -57,6 +71,7 @@ class AssignTasksController extends Controller
 
             // ---------- SAVE BASIC DETAILS ----------
             $tasks->admin_id      = $request->admin_id;
+            $tasks->created_by    = Auth::guard('admin')->id();
             $tasks->title         = $request->task_title;
             $tasks->description   = $request->description;
             $tasks->priority      = $request->priority;

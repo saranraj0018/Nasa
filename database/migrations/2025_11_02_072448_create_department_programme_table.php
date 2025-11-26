@@ -21,11 +21,13 @@ return new class extends Migration
 
         Schema::create('programmes', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('department_id');
             $table->string('name')->unique();
             $table->string('code')->nullable();
-            $table->foreignId('department_id')->constrained('departments')->onDelete('cascade');
             $table->enum('graduate_type',['ug','pg']);
             $table->timestamps();
+
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('no action');
         });
 
         Schema::create('designations', function (Blueprint $table) {

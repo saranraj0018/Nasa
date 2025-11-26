@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('department_id')->constrained('departments')->onDelete('no action');
-            $table->foreignId('programme_id')->constrained('programmes')->onDelete('no action');
+            $table->unsignedBigInteger('department_id');
+            $table->unsignedBigInteger('programme_id');
             $table->string('name');
             $table->string('email')->unique();
             $table->string('mobile_number')->unique();
@@ -22,6 +22,9 @@ return new class extends Migration
             $table->string('profile_pic')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->timestamps();
+
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('no action');
+            $table->foreign('programme_id')->references('id')->on('programmes')->onDelete('no action');
         });
 
     }

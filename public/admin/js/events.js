@@ -238,23 +238,18 @@ $(document).on("change", "#club_id", function () {
     }
 });
 
-document
-    .getElementById("fileInput")
-    .addEventListener("change", function (event) {
+document.getElementById("fileInput").addEventListener("change", function (event) {
         const file = event.target.files[0];
         const previewArea = document.getElementById("previewArea");
         const uploadText = document.getElementById("uploadText");
-
         if (file) {
             const reader = new FileReader();
-
             reader.onload = function (e) {
                 previewArea.innerHTML = `
                     <img src="${e.target.result}"
                          class="mx-auto rounded-2xl w-40 h-40 object-cover" />
                 `;
             };
-
             reader.readAsDataURL(file);
             uploadText.style.display = "none";
         }

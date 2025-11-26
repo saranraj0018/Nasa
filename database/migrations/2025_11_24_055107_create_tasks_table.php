@@ -11,25 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::create('tasks', function (Blueprint $table) {
-        //     $table->id();
-        //     $table->foreignId('admin_id')->constrained('admins')->onDelete('no action');
-        //     $table->string('title');
-        //     $table->string('description');
-        //     $table->enum('priority', ['low', 'medium', 'high']);
-        //     $table->date('deadline_date');
-        //     $table->string('banner_image');
-        //     $table->enum('status', ['pending', 'completed'])->default('pending');
-        //     $table->timestamps();
-        // });
+        Schema::create('tasks', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('admin_id');
+            $table->unsignedBigInteger('created_by');
+            $table->string('title');
+            $table->string('description');
+            $table->enum('priority', ['low', 'medium', 'high']);
+            $table->datetime('deadline_date');
+            $table->enum('status', ['pending', 'completed','accepted'])->default('pending');
+            $table->timestamps();
+
+            $table->foreign('admin_id')->references('id')->on('admins')->onDelete('no action');
+            $table->foreign('created_by')->references('id')->on('admins')->onDelete('no action');
+        });
 
         Schema::create('task_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('task_id')->constrained('tasks')->onDelete('no action');
+            $table->unsignedBigInteger('task_id');
             $table->string('file_name');
             $table->string('file_path');
             $table->string('file_type', 50)->nullable();
             $table->timestamps();
+
+            $table->foreign('task_id')->references('id')->on('tasks')->onDelete('no action');
         });
 
     }
@@ -39,6 +44,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tasks');
+        // Schema::dropIfExists('tasks');
     }
 };

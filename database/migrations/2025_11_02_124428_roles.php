@@ -20,7 +20,7 @@ return new class extends Migration
 
         Schema::create('admins', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('role_id')->constrained('roles')->onDelete('no action');
+            $table->unsignedBigInteger('role_id');
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
@@ -29,6 +29,8 @@ return new class extends Migration
             $table->string('security_code')->nullable();
             $table->string('emp_code')->nullable();
             $table->timestamps();
+
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('no action');
         });
     }
 

@@ -14,28 +14,35 @@ return new class extends Migration
 
         Schema::create('faculties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('department_id')->constrained('departments')->onDelete('no action');
-            $table->foreignId('designation_id')->constrained('designations')->onDelete('no action');
+            $table->unsignedBigInteger('department_id');
+            $table->unsignedBigInteger('designation_id');
             $table->string('name');
             $table->string('email')->unique();
             $table->string('mobile_number')->nullable();
             $table->string('faculty_code');
             $table->string('profile_pic')->nullable();
             $table->timestamps();
+
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('no action');
+            $table->foreign('designation_id')->references('id')->on('designations')->onDelete('no action');
         });
 
         Schema::create('clubs', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('faculty_id');
             $table->string('name')->unique();
             $table->string('description')->nullable();
-            $table->foreignId('faculty_id')->constrained('faculties')->onDelete('no action');
             $table->timestamps();
+
+            $table->foreign('faculty_id')->references('id')->on('faculties')->onDelete('no action');
         });
 
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('club_id')->constrained('clubs')->onDelete('no action');
-            $table->foreignId('faculty_id')->constrained('faculties')->onDelete('no action');
+            $table->unsignedBigInteger('club_id');
+            $table->unsignedBigInteger('task_id')->nullable();
+            $table->unsignedBigInteger('faculty_id');
+            $table->unsignedBigInteger('created_by');
             $table->string('title');
             $table->text('description');
             $table->date('event_date');
@@ -51,7 +58,13 @@ return new class extends Migration
             $table->string('contact_person');
             $table->string('contact_email');
             $table->string('banner_image')->nullable(); // store image path
+            $table->enum('status', ['pending', 'completed'])->default('pending');
             $table->timestamps();
+
+            $table->foreign('faculty_id')->references('id')->on('faculties')->onDelete('no action');
+            $table->foreign('club_id')->references('id')->on('clubs')->onDelete('no action');
+            $table->foreign('task_id')->references('id')->on('tasks')->onDelete('no action');
+            $table->foreign('created_by')->references('id')->on('admins')->onDelete('no action');
         });
     }
 
