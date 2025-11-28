@@ -15,9 +15,10 @@ class StudentDashboardController extends Controller
     {
         $now = Carbon::now();
         $student = session()->get('student');
+        $this->data['studentId'] = $student->id;
         $this->data['events'] = Event::get();
         $this->data['registered_count'] = StudentEventRegistration::where('student_id', $student->id)->get();
-        $this->data['completed_events'] = StudentEventRegistration::where('student_id', $student->id)->where('status', 3)->get();
+        $this->data['completed_events'] = StudentEventRegistration::where('student_id', $student->id)->where('status', 2)->get();
         $this->data['ongoingEvents'] = Event::with('registrations')
             ->whereDate('event_date', $now->toDateString())
             // ->whereTime('start_time', '<=', $now->toTimeString())

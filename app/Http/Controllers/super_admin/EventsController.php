@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\super_admin;
 
+use App\Helpers\ActivityLog;
 use App\Http\Controllers\Controller;
 use App\Models\Club;
 use App\Models\Event;
 use App\Models\Faculty;
 use App\Models\StudentEventRegistration;
+use App\Models\Tasks;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EventsController extends Controller
 {
@@ -62,7 +65,9 @@ class EventsController extends Controller
 
     public function eventlist(Request $request)
     {
+        $adminId = Auth::guard('admin')->id();
         $this->data['events'] = Event::with('get_faculty')->paginate(10);
+        $this->data['tasks'] = Tasks::with('get_admin', 'get_task_images', 'get_event')->where('admin_id', $adminId)->get();
         return view('super_admin.event_list')->with($this->data);
     }
 
@@ -87,6 +92,10 @@ class EventsController extends Controller
             'event_type'   => 'required'
         ];
 
+        if($request['event_type'] == 'paid'){
+            $rules['price'] = 'required';
+        }
+
         if (empty($request['event_id']) && !$request->has('old_banner')) {
             $rules['banner_image'] = 'required|image|mimes:jpeg,png,jpg';
         } else if ($request->hasFile('banner_image')) {
@@ -102,6 +111,12 @@ class EventsController extends Controller
                 $message = 'Event saved successfully';
             }
 
+            if(!empty($request['task_id'])){
+                $taskId = decrypt($request['task_id']);
+            }else{
+                $taskId = null;
+            }
+
             if ($request->hasFile('banner_image')) {
                 $file = $request->file('banner_image');
                 $img_name = time() . '_' . $file->getClientOriginalName();
@@ -110,8 +125,11 @@ class EventsController extends Controller
             } elseif ($request->has('old_banner')) {
                 $event->banner_image = $request->old_banner;
             }
-
+            $adminId = Auth::guard('admin')->id();
             $event->club_id  = $request['club_id'];
+            $event->task_id = $taskId;
+            $event->created_by =  $adminId ?? '';
+            $event->price = $request['price'] ?? 0;
             $event->faculty_id = $request['programme_officer'] ?? '';
             $event->title  = $request['event_title'] ?? '';
             $event->description = $request['description'] ?? '';
@@ -127,6 +145,22 @@ class EventsController extends Controller
             $event->contact_person = $request['contact_person']  ?? '';
             $event->contact_email = $request['contact_email']  ?? '';
             $event->save();
+
+            if ($event && !empty($taskId)) {
+                $get_task = Tasks::where('id', $taskId)->first();
+                if ($get_task) {
+                    ActivityLog::add($get_task->title . ' - Task Completed', auth('admin')->user());
+                    $get_task->update([
+                        'status' => 'completed'
+                    ]);
+                }
+            }
+            
+            if(!empty($request['event_id'])){
+                ActivityLog::add($event->title . ' - Event Updated', auth('admin')->user());
+            }else{
+                ActivityLog::add($event->title .' - New Event Created', auth('admin')->user());
+            }
 
             return response()->json([
                 'success' => true,

@@ -1,6 +1,5 @@
 <x-layouts.app>
     <div class="bg-[#F5E8F5] w-full  rounded-full shadow-sm px-8 py-3">
-        <!-- Left side -->
         <h3 class="font-semibold text-primary">Assign Tasks</h3>
     </div>
     <section class="p-3 mt-5">
@@ -14,7 +13,6 @@
                     <img src="{{ asset('/images/task_pending.png') }}" alt="Pending" class="w-14 h-14">
                 </div>
             </div>
-
             <!-- Ongoing -->
             <div class="bg-[#FFEBE4] rounded-xl shadow p-4 flex flex-col justify-between">
                 <p class="font-semibold">Ongoing</p>
@@ -23,7 +21,6 @@
                     <img src="{{ asset('/images/task_ongoing.png') }}" alt="Ongoing" class="w-14 h-14">
                 </div>
             </div>
-
             <!-- Completed -->
             <div class="bg-[#DAECFF] rounded-xl shadow p-4 flex flex-col justify-between">
                 <p class="font-semibold">Completed</p>
@@ -93,17 +90,20 @@
                     <!-- Status & Deadline -->
                     <div class="flex flex-wrap gap-2 mb-3 text-xs">
                         @if ($task->status == 'completed')
-                            <div
-                                class="flex items-center bg-gradient-to-r from-primary to-pink-600 rounded-full px-4 py-1 text-white">
+                            <button data-id="{{ $task->id }}"
+                                class="accept flex items-center bg-gradient-to-r from-primary to-pink-600 rounded-full px-4 py-1 text-white">
                                 Accept
-                            </div>
+                            </button>
                         @else
                             <div class="flex items-center bg-[#F2E8F5] rounded-full px-3 py-1">
                                 <span class="ml-1">
                                     @if ($task->status == 'pending')
                                         <i class="fa fa-hourglass-half text-primary"></i>Pending
                                     @elseif($task->status == 'accepted')
-                                        <i class="fa fa-check-circle text-primary"></i> Accepted
+                                        <div
+                                class="flex items-center bg-gradient-to-r from-primary to-pink-600 rounded-full px-4 py-1 text-white">
+                                Accepted
+                            </div>
                                     @else
                                         In progress
                                     @endif
@@ -133,7 +133,6 @@
                 </div>
             @endforeach
         </div>
-
     </section>
 </x-layouts.app>
 

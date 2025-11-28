@@ -23,7 +23,6 @@ class RegisterEventController extends Controller
             ->where('student_id', $student->id)
             ->groupBy('student_id', 'event_id')
             ->get();
-       $this->data['pending_uploads'] = count($myuploads) -  count($this->data['events']);
         $this->data['ongoingEvents'] = Event::with('registrations')
             ->whereDate('event_date', $now->toDateString())
             // ->whereTime('start_time', '<=', $now->toTimeString())
@@ -42,12 +41,14 @@ class RegisterEventController extends Controller
             ->orderBy('event_date', 'asc')
             ->orderBy('start_time', 'asc')
             ->get();
+
         $this->data['activeCount'] = StudentEventRegistration::where('student_id', $student->id)
             ->where('status', 1)
             ->count();
-
+        $activecount = StudentEventRegistration::where('student_id', $student->id)->count();
+        $this->data['pending_uploads'] =  $activecount - count($myuploads);
         $this->data['attendedCount'] = StudentEventRegistration::where('student_id', $student->id)
-            ->where('status', 3)
+            ->where('status',2)
             ->count();
         return view('student.register_event_index')->with($this->data);
     }

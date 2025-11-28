@@ -20,4 +20,9 @@ class Event extends Model
     {
         return $this->belongsTo(Tasks::class, 'task_id');
     }
+
+    public function get_report()
+    {
+            return $this->hasMany(EventReport::class, 'event_id', 'id');
+    }
 }

@@ -40,7 +40,7 @@
                     </div>
                 </div>
                 <h3 class="text-3xl font-bold text-[#02AC8B]">{{ $totalAdmins ?? 0 }}</h3>
-                <span class="text-[#02AC8B] text-xs">+{{ $adminsThisMonth  }}in this month</span>
+                <span class="text-[#02AC8B] text-xs">+{{ $adminsThisMonth  }} in this month</span>
             </div>
 
             <div class="bg-[#FFF6DE] rounded-2xl shadow p-5 flex flex-col justify-between">
@@ -52,7 +52,7 @@
                     </div>
                 </div>
                 <h3 class="text-3xl font-bold text-[#C79000]">{{ $totalStudents ?? 0 }}</h3>
-                <span class="text-[#C79000] text-xs">+ {{ $studentsThisMonth }} this month</span>
+                <span class="text-[#C79000] text-xs">+{{ $studentsThisMonth }} this month</span>
             </div>
 
             <div class="bg-[#EDFFF2] rounded-2xl shadow p-5 flex flex-col justify-between">
@@ -63,8 +63,8 @@
                             class="p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#02A830]">{{ isset($events) ? count($events) : 0 }}</h3>
-                <span class="text-[#02A830] text-xs">+3 in this week</span>
+                <h3 class="text-3xl font-bold text-[#02A830]">{{ $pendingReports }}</h3>
+                <span class="text-[#02A830] text-xs">+{{ $thisweeksubmittedReports }} in this week</span>
             </div>
 
             <div class="bg-[#FBEDFF] rounded-2xl shadow p-5 flex flex-col justify-between">
@@ -75,15 +75,15 @@
                             class="p-2">
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-[#72059C]">{{ isset($events) ? count($events) : 0 }}</h3>
-                <span class="text-[#72059C] text-xs">+3 in this week</span>
+                <h3 class="text-3xl font-bold text-[#72059C]">{{ $submittedReports }}</h3>
+                <span class="text-[#72059C] text-xs">+{{ $thisweeksubmittedReports }} in this week</span>
             </div>
         </div>
     </section>
 
     <h1 class="text-primary font-semibold mt-4">Recent Activity</h1>
 
-<div class="bg-[#F6F6F6] w-full h-[70px] rounded-2xl shadow-sm px-8 py-3 mt-3">
+{{-- <div class="bg-[#F6F6F6] w-full h-[70px] rounded-2xl shadow-sm px-8 py-3 mt-3">
     <h3 class="font-semibold">New Admin Registered</h3>
     <div class="flex items-center justify-between mt-1">
         <p class="text-gray-700">Dr. Sarah Chen</p>
@@ -121,8 +121,16 @@
         <p class="text-gray-700">Dr. Sarah Chen</p>
         <span class="text-gray-600 text-sm">2 minutes ago</span>
     </div>
-</div>
-
+</div> --}}
+    @foreach ($activities as $activity)
+        <div class="bg-[#F6F6F6] w-full h-[70px] rounded-2xl shadow-sm px-8 py-3 mt-3">
+            <h3 class="font-semibold">{{ $activity->title }}</h3>
+            <div class="flex items-center justify-between mt-1">
+                <p class="text-gray-700">{{ ucfirst($activity->user_name) }}</p>
+                <span class="text-gray-600 text-sm">{{ $activity->created_at->diffForHumans() }}</span>
+            </div>
+        </div>
+    @endforeach
 </x-layouts.app>
 
 

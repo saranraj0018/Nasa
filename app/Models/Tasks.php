@@ -20,4 +20,14 @@ class Tasks extends Model
     {
         return $this->hasMany(Tasks::class, 'task_id');
     }
+
+    public function get_creator()
+    {
+        return $this->belongsTo(Admin::class, 'created_by');
+    }
+
+    public function get_event()
+    {
+        return $this->belongsTo(Event::class, 'id','task_id');
+    }
 }

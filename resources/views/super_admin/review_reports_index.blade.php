@@ -4,7 +4,6 @@
         <h3 class="font-semibold text-primary">Review Report</h3>
         <p class="text-sm text-gray-700">Submit comprehensive reports for completed events</p>
     </div>
-
     <!-- Overview Cards -->
     <section class="p-3 mt-4">
         <!-- Filters Section -->
@@ -19,7 +18,20 @@
                 </div>
             </div>
         </div>
-
-
+        <div class="bg-white rounded-2xl shadow py-8 px-7 mt-3">
+            @foreach ($reports as $report)
+            <div class="shadow p-5 rounded-2xl mt-5">
+               <div class="flex items-center justify-between">
+                   <h1 class="font-bold">{{ $report->get_event->title ?? '' }}</h1>
+                    <a href="{{ route('reports_view_pdf', $report->id) }}" target="_blank"
+                        class="text-center bg-[#F5F7F9] font-medium py-1 rounded-full">
+                        <i class="fa fa-eye" aria-hidden="true"></i> View Pdf
+                    </a>
+               </div>
+                   <p>{{ $report->creator->name ?? '' }}</p>
+                   <p class="text-xs mt-2"><i class="fa fa-calendar text-primary "></i> Events : {{ \Carbon\Carbon::parse($report->get_event->event_date)->format('d/m/Y') }}    <i class="fa fa-calendar text-primary"></i> Submitted :  {{ \Carbon\Carbon::parse($report->created_at)->format('d/m/Y') }}</p>
+             </div>
+             @endforeach
+            </div>
     </section>
 </x-layouts.app>

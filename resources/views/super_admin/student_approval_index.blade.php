@@ -12,7 +12,7 @@
             <div class="bg-[#F3EDFF] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class="font-semibold text-gray-700 text-sm">Total Applied Event</p>
                 <div class="flex items-center justify-between py-4">
-                    <h3 class="text-3xl font-bold text-[#FF4757]">5</h3>
+                    <h3 class="text-3xl font-bold text-[#FF4757]">{{ $total_applied_event  }}</h3>
                     <img src="{{ asset('/images/total_applications.png') }}" alt="Total Applications" class="w-14 h-14">
                 </div>
             </div>

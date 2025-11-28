@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\super_admin;
 
+use App\Helpers\ActivityLog;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\Event;
@@ -16,8 +17,13 @@ use Illuminate\Support\Facades\Storage;
 
 class AssignTasksController extends Controller
 {
-   public function index()
+   public function index(Request $request)
    {
+
+    if($request->ajax() && $request->task_status_change){
+             $update = Tasks::where('id',$request->id)->update(['status','accepted']);
+    }
+
     $adminId = Auth::guard('admin')->id();
     $this->data['tasks'] = Tasks::where('created_by', $adminId)->with('get_admin', 'get_task_images')->get();
     $this->data['pending_tasks'] = Tasks::where(['created_by' => $adminId, 'status' => 'pending'])->count();
@@ -77,7 +83,11 @@ class AssignTasksController extends Controller
             $tasks->priority      = $request->priority;
             $tasks->deadline_date = $request->deadline_date;
             $tasks->save();
-
+            if(!empty($request->task_id)){
+                ActivityLog::add($tasks->title . ' - Task Updated', auth('admin')->user());
+            }else{
+                ActivityLog::add($tasks->title .' - New Task Created ', auth('admin')->user());
+            }
             // ---------- MULTIPLE IMAGE UPLOAD ----------
             if(isset($request->removed_images) && !empty($request->removed_images)){
                 $ids = json_decode($request->removed_images);

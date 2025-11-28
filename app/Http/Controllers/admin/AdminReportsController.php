@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Helpers\ActivityLog;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventReport;
@@ -150,6 +151,7 @@ class AdminReportsController extends Controller
         $report = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
         $pdf = Pdf::loadView('report.pdf.report_template', compact('report'))
             ->setPaper('a4', 'portrait');
+        ActivityLog::add($report->get_event->title .' - Report Viewed',auth('admin')->user());
         return $pdf->stream("event_report_{$report->id}.pdf");
     }
 
@@ -158,6 +160,7 @@ class AdminReportsController extends Controller
         $report = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
         $pdf = Pdf::loadView('report.pdf.report_template', compact('report'))
             ->setPaper('a4', 'portrait');
+        ActivityLog::add($report->get_event->title .'Report Downloaded', auth('admin')->user());
         return $pdf->download("event_report_{$report->id}.pdf");
     }
 }

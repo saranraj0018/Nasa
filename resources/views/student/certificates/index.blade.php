@@ -17,7 +17,7 @@
                         <p class="font-medium text-gray-700 mt-1 italic"></p>
                     </div>
                     <div class="absolute inset-0 rounded-2xl border border-[#9D55EC]/20 pointer-events-none"></div>
-                    <a href="{{ route('certificate_download', ['student_name' => $event->student->name, 'event_name' => $event->event->title , 'event_date' => $event->event->event_date]) }}"
+                    <a href="{{ route('certificate_download', ['student_name' => $event->student->name, 'event_name' => $event->event->title , 'event_date' => $event->event->event_date , 'student_id' => $event->student->id ]) }}"
                        class="bg-primary text-white px-5 py-2 mt-4 rounded-full text-sm inline-flex items-center justify-center gap-2">
                         Download Certificate
                       <i class="fa fa-download" aria-hidden="true"></i>

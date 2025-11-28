@@ -12,6 +12,7 @@
         @if (!empty($edit_event) && isset($edit_event))
             <input type="hidden" name="event_id" value={{ $edit_event->id }}>
         @endif
+        <input type="hidden" id="task_id" name="task_id" value="{{ request()->task_id }}">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
                 <label class="block text-sm font-medium">Event Title<span class="text-red-500">*</span></label>
@@ -21,7 +22,7 @@
             <div>
                 <label class="block text-sm font-medium">Select Club<span class="text-red-600">*</span></label>
                 <select name="club_id" id="club_id"
-                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 focus:outline-none focus:ring focus:ring-[#ab5f00]">
+                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 focus:outline-none focus:ring focus:ring-primary/40">
                     <option value="">Select Club</option>
                     @foreach ($club as $club_value)
                         <option value="{{ $club_value->id }}" @if (!empty($edit_event) && $edit_event->club_id == $club_value->id) selected @endif>
@@ -35,7 +36,7 @@
             <div>
                 <label class="block text-sm font-medium">Programme Officer<span class="text-red-600">*</span></label>
                 <select name="programme_officer" id="programme_officer"
-                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 focus:outline-none focus:ring-2 focus:ring-[#ab5f00]">
+                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 focus:outline-none focus:ring focus:ring-primary/40">
                     <option value="">Select Programme Officer</option>
                     @if (!empty($edit_faculty))
                         <option value="{{ $edit_faculty->id }}" selected>{{ $edit_faculty->name }}</option>
@@ -45,21 +46,32 @@
             <div>
                 <label class="block text-sm font-medium">Event Type<span class="text-red-600">*</span></label>
                 <select name="event_type" id="event_type"
-                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 focus:outline-none focus:ring-2 focus:ring-[#ab5f00]">
+                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 focus:outline-none focus:ring focus:ring-primary/40">
                     <option value="">Select Event Type</option>
                     <option value="paid" @if (!empty($edit_event) && $edit_event->event_type == 'paid') selected @endif>Paid</option>
                     <option value="free" @if (!empty($edit_event) && $edit_event->event_type == 'free') selected @endif>Free</option>
                 </select>
             </div>
+            <div id="priceFieldContainer">
+                @if (!empty($edit_event) && $edit_event->event_type == 'paid')
+                    <label class="block mt-3 font-medium">Price</label>
+                    <input type="number" name="price" id="price" value="{{ $edit_event->price }}"
+                        placeholder="Enter price"
+                        class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40"
+                        required>
+                @endif
+            </div>
+
             <div>
                 <label class="block text-sm font-medium">Seat Count<span class="text-red-500">*</span></label>
-                <input type="text" name="seat_count" id="seat_count" value={{ $edit_event->seat_count ?? '' }}
+                <input type="text" name="seat_count" id="seat_count" value="{{ $edit_event->seat_count ?? '' }}"
                     class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40">
             </div>
+
             <div class="col-span-2">
                 <label class="block text-sm font-medium">Event Description<span class="text-red-600">*</span></label>
                 <textarea name="description" id="description"
-                    class="bg-[#D9D9D9] w-full p-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="bg-[#D9D9D9] w-full p-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring focus:ring-primary/40"
                     rows="4"
                     placeholder="Provide a detailed description of the event objective, activities, and learning outcomes">
     {{ $edit_event->description ?? '' }}
@@ -75,19 +87,19 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
                 <label class="block text-sm font-medium">Event Date<span class="text-red-500">*</span></label>
-                <input type="date" name="event_date" id="event_date" value={{ $edit_event->event_date ?? '' }}
+                <input type="date" name="event_date" id="event_date" value="{{ $edit_event->event_date ?? '' }}"
                     class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40">
             </div>
 
             <div>
                 <label class="block text-sm font-medium">Start Time<span class="text-red-600">*</span></label>
-                <input type="time" name="start_time" id="start_time" value={{ $edit_event->start_time ?? '' }}
+                <input type="time" name="start_time" id="start_time" value="{{ $edit_event->start_time ?? '' }}"
                     class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40">
             </div>
 
             <div>
                 <label class="block text-sm font-medium">End Time<span class="text-red-600">*</span></label>
-                <input type="time" name="end_time" id="end_time" value={{ $edit_event->end_time ?? '' }}
+                <input type="time" name="end_time" id="end_time" value="{{ $edit_event->end_time ?? '' }}"
                     class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40">
             </div>
 
@@ -95,14 +107,14 @@
                 <label class="block text-sm font-medium">Location / Virtual Link<span
                         class="text-red-600">*</span></label>
                 <textarea name="location" id="location"
-                    class="bg-[#D9D9D9] w-full p-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="bg-[#D9D9D9] w-full p-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring focus:ring-primary/40"
                     rows="3" placeholder="Enter the event venue or virtual meeting link">{{ $edit_event->location ?? '' }}</textarea>
             </div>
 
             <div>
                 <label class="block text-sm font-medium">Session<span class="text-red-600">*</span></label>
                 <select name="session" id="session"
-                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 focus:outline-none focus:ring-2 focus:ring-[#ab5f00]">
+                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 focus:outline-none focus:ring focus:ring-primary/40">
                     <option value="">Select Session</option>
                     <option value="1" @if (!empty($edit_event) && $edit_event->session == 1) selected @endif>FN</option>
                     <option value="2" @if (!empty($edit_event) && $edit_event->session == 2) selected @endif>AN</option>
@@ -116,9 +128,10 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-                <label class="block text-sm font-medium">Eligibility Criteria<span class="text-red-600">*</span></label>
+                <label class="block text-sm font-medium">Eligibility Criteria<span
+                        class="text-red-600">*</span></label>
                 <textarea name="eligibility" id="eligibility"
-                    class="bg-[#D9D9D9] w-full p-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="bg-[#D9D9D9] w-full p-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring focus:ring-primary/40"
                     rows="4" placeholder="e.g., Engineering students, Grade 10-12, Previous workshop attendance required.">{{ $edit_event->eligibility_criteria ?? '' }}</textarea>
             </div>
 

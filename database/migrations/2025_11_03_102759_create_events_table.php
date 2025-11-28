@@ -43,6 +43,7 @@ return new class extends Migration
             $table->unsignedBigInteger('task_id')->nullable();
             $table->unsignedBigInteger('faculty_id');
             $table->unsignedBigInteger('created_by');
+            $table->decimal('price', 10, 2)->nullable();
             $table->string('title');
             $table->text('description');
             $table->date('event_date');

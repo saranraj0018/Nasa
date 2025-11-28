@@ -24,14 +24,15 @@ class MyRegisterEventsController extends Controller
             ->count();
 
         $this->data['attendedCount'] = StudentEventRegistration::where('student_id', $student->id)
-            ->where('status', 3)
+            ->where('status', 2)
             ->count();
         $events = Event::get();
         $myuploads = StudentUploadProof::select('student_id', 'event_id')
             ->where('student_id', $student->id)
             ->groupBy('student_id', 'event_id')
             ->get();
-        $this->data['pending_uploads'] = count($myuploads) -  count($events);
+        $activecount = StudentEventRegistration::where('student_id', $student->id)->count();
+        $this->data['pending_uploads'] =  $activecount - count($myuploads);
         return view('student.my_register_event')->with($this->data);
     }
 

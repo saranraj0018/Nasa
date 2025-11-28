@@ -215,14 +215,14 @@ $(function () {
         });
 
         if (filesArr.length > 4) {
-            alert("Maximum 4 images only allowed!");
+            showToast("Maximum 4 images only allowed!", "error", 2000);
             filesArr = filesArr.slice(0, 4);
         }
 
         // filter out files > 10MB
         filesArr = filesArr.filter((f) => {
             if (f.size > 10 * 1024 * 1024) {
-                alert(`${f.name} exceeds 10MB and was skipped.`);
+                 showToast(`${f.name} exceeds 10MB and was skipped.`, "error", 2000);
                 return false;
             }
             return true;
@@ -328,7 +328,7 @@ $(function () {
     // === Example toast fallback if undefined ===
     if (typeof showToast !== "function") {
         window.showToast = function (msg, type, ms) {
-            alert(`${type}: ${msg}`);
+            showToast(`${type}: ${msg}`, "error", 2000);
         };
     }
 });

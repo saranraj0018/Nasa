@@ -9,7 +9,7 @@
                         class="mx-auto mt-[-40px] mb-[-40px]">
                 </div>
                 <div class="relative">
-                    <span class="bg-white text-xs px-4 py-1 rounded-full">Available this Semester</span>
+                    {{-- <span class="bg-white text-xs px-4 py-1 rounded-full">Available this Semester</span> --}}
                 </div>
             </div>
             <div class="bg-[#FF8F6B] rounded-2xl shadow p-5 flex flex-col justify-between">
@@ -30,7 +30,7 @@
                     <img src="{{ asset('/images/pending_uploads.png') }}" alt="" class="mx-auto">
                 </div>
                 <div class="relative">
-                    <span class="bg-white text-xs px-4 py-1 rounded-full">This Academic Year</span>
+                    {{-- <span class="bg-white text-xs px-4 py-1 rounded-full">This Academic Year</span> --}}
                 </div>
             </div>
         </div>

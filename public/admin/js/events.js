@@ -163,13 +163,24 @@ $(document).on("submit", "#eventForm", function (e) {
             message: "Please select Event Type",
         },
     ];
+
     let isValid = true;
     for (const field of fields) {
         const result = validateField(field); // synchronous, so no async/await needed
         if (!result) isValid = false;
     }
+
+    let eventType = $("#event_type").val();
+    let price = $("#price").val();
+    if (eventType === "paid" && (price === "" || price <= 0)) {
+        showToast("Please enter valid price for Paid Event", "error", 2000);
+        isValid = false;
+    }
+
     if (!isValid) return;
     let formData = new FormData(this);
+    let taskId = "request()->task_id";
+    console.log(taskId);
     sendRequest(
         "/admin/save-event",
         formData,
@@ -257,4 +268,17 @@ document.getElementById("fileInput").addEventListener("change", function (event)
 
 document.getElementById("dropArea").addEventListener("click", function () {
     document.getElementById("fileInput").click();
+});
+
+document.getElementById('event_type').addEventListener('change', function () {
+    let type = this.value;
+    let container = document.getElementById('priceFieldContainer');
+
+    if (type === 'paid') {
+        container.innerHTML = `
+            <label class="block font-medium">Price</label>
+            <input type="number" name="price" id="price" placeholder="Enter price" class="bg-[#D9D9D9] w-full rounded-full py-2 px-4 focus:outline-none focus:ring focus:ring-primary/40">`;
+    } else {
+        container.innerHTML = '';
+    }
 });
