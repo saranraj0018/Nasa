@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Faculty;
 use App\Models\Student;
+use App\Models\Programme;
 use App\Models\Department;
 use App\Models\Designation;
-use App\Models\Programme;
-use Exception;
+use App\Helpers\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -113,13 +114,17 @@ class StudentController extends Controller
             $student->programme_id = $request['programme_id'] ?? '';
             $student->save();
 
+            if (!empty($request['student_id'])) {
+                ActivityLog::add($student->name . ' - Student Updated', auth('admin')->user());
+            } else {
+                ActivityLog::add($student->name . ' - New Student Created', auth('admin')->user());
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => $message
             ]);
         } catch (Exception $e) {
-            print_r($e->getMessage());
-            exit;
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),

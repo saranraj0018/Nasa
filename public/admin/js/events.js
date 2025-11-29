@@ -172,15 +172,24 @@ $(document).on("submit", "#eventForm", function (e) {
 
     let eventType = $("#event_type").val();
     let price = $("#price").val();
+    const errorEl = $("#price").siblings(".error-message");
     if (eventType === "paid" && (price === "" || price <= 0)) {
+         $("#price").addClass("border-red-500 ring-1 ring-red-500");
+         if (errorEl.length === 0) {
+             $("#price").after(
+                 `<div class="error-message text-red-500 text-sm mt-1">Please enter valid price for Paid Event</div>`
+             );
+         }
         showToast("Please enter valid price for Paid Event", "error", 2000);
         isValid = false;
+    }else{
+         $("#price").removeClass("border-red-500 ring-1 ring-red-500");
+         if (errorEl.length) errorEl.remove();
     }
 
     if (!isValid) return;
     let formData = new FormData(this);
     let taskId = "request()->task_id";
-    console.log(taskId);
     sendRequest(
         "/admin/save-event",
         formData,

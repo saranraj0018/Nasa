@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActivityLog;
 use App\Models\Department;
 use Exception;
 use Illuminate\Http\Request;
@@ -46,6 +47,12 @@ class DepartmentController extends Controller
             $department->code = $request['department_code'] ?? '';
             $department->save();
 
+            if (!empty($request['department_id'])) {
+                ActivityLog::add($department->name . ' - Department Updated', auth('admin')->user());
+            } else {
+                ActivityLog::add($department->name . ' - New Department Created', auth('admin')->user());
+            }
+            
             return response()->json([
                 'success' => true,
                 'message' => $message

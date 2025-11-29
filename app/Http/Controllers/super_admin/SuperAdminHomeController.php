@@ -54,7 +54,9 @@ class SuperAdminHomeController extends Controller
                     ->whereDoesntHave('get_report');
             })
             ->count();
-        $this->data['activities'] = Activity::get();
+        $this->data['activities'] = Activity::whereDate('created_at', Carbon::today())
+            ->orderBy('id', 'DESC')
+            ->get();
 
         return view('super_admin.super_admin_home')->with($this->data);
     }

@@ -50,6 +50,7 @@ async function sendRequest(
  * @returns {boolean}
  */
 function validateField(field) {
+
     const element = $(field.id);
     const value = element.val()?.trim() ?? "";
     const errorEl = element.siblings(".error-message");

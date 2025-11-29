@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Department;
-use App\Models\Programme;
 use Exception;
+use App\Models\Programme;
+use App\Models\Department;
+use App\Helpers\ActivityLog;
 use Illuminate\Http\Request;
 
 class ProgrammeController extends Controller
@@ -50,6 +51,12 @@ class ProgrammeController extends Controller
             $programme->department_id = $request['department_id'] ?? '';
             $programme->graduate_type = $request['graduate_type'] ?? '';
             $programme->save();
+
+            if (!empty($request['programme_id'])) {
+                ActivityLog::add($programme->name . ' - Programme Updated', auth('admin')->user());
+            } else {
+                ActivityLog::add($programme->name . ' - New Programme Created', auth('admin')->user());
+            }
 
             return response()->json([
                 'success' => true,

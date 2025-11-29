@@ -22,7 +22,7 @@
                             Login to stay connnected
                         </p>
                         {{-- FORM SEGMENT --}}
-                        <form method="POST" action="{{ route('login') }}" class="space-y-3"
+                        <form method="POST" action="{{ route('admin.login') }}" class="space-y-3"
                             x-data="{ show: false, loading: false }" @submit="loading = true">
                             @csrf
                             <label class="block text-md font-medium text-[#3F003E]">Email</label>
@@ -62,7 +62,7 @@
                                     Access mission controll
                                 </button>
                                 <div class="text-center mt-2">
-                                    <a href="#" class="text-xs text-purple-600 hover:underline">Forget
+                                    <a href="{{ route('admin.password.forgot') }}#" class="text-xs text-purple-600 hover:underline">Forget
                                         Password?</a>
                                 </div>
                             </div>

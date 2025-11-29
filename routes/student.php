@@ -1,20 +1,26 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\AdminAuthController;
+use App\Http\Controllers\Auth\StudentPasswordController;
 use App\Http\Controllers\Auth\StudentAuthController;
 use App\Http\Controllers\student\CertificatesController;
-use App\Http\Controllers\student\MyRegisterEventsController;
 use App\Http\Controllers\student\RegisterEventController;
+use App\Http\Controllers\student\MyRegisterEventsController;
 use App\Http\Controllers\student\StudentDashboardController;
-use Illuminate\Support\Facades\Route;
 
 
 
 Route::prefix('student')->group(function () {
-    Route::middleware(['guest'])->as('student.')->group(function () {
+
+    Route::middleware(['student.guest'])->as('student.')->group(function () {
         Route::view('/login', 'auth.login')->name('login');
         Route::post('/login', [StudentAuthController::class, 'login'])->name('student.login');
+        Route::get('forgot-password', [StudentPasswordController::class, 'showEmailForm'])->name('password.forgot');
+        Route::post('verify-email', [StudentPasswordController::class, 'verifyEmail'])->name('password.verify');
+        Route::post('update-password', [StudentPasswordController::class, 'updatePassword'])->name('password.update');
     });
+
     Route::middleware('auth:student')->group(function () {
         Route::get('/student-dashboard', [StudentDashboardController::class, 'index'])->name('student_dashboard');
         Route::get('/register-events', [RegisterEventController::class, 'index'])->name('register_events');

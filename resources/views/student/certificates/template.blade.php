@@ -143,10 +143,10 @@ body {
   </div>
   <div class="content">
     <p><strong>This is to certify that</strong></p>
-    <p><span class="recipient">{{ $student->name }}</span></p>
+    <p><span class="recipient">{{ $student->name ?? ''}}</span></p>
     <p>has successfully participated in</p>
-    <p class="event-name">{{ $event }}</p>
-    <p>organized by the Department of {{ $student->get_department->name ?? '' }} on {{ $event_date }}.</p>
+    <p class="event-name">{{ $event->title ?? '' }}</p>
+    <p>organized by the Department of {{ $student->get_department->name ?? '' }} on {{ $event->event_date ?? '' }}.</p>
   </div>
 
   <div class="footer">

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Helpers\ActivityLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AdminAuthController extends Controller
 {
@@ -30,13 +31,15 @@ class AdminAuthController extends Controller
         }
 
         if (!Auth::guard('admin')->attempt($credentials, $request->get('remember'))) {
-            return redirect()->route('login')
+            return redirect()->route('admin.login')
                 ->withErrors(['password' => 'Either Email/Password is incorrect'])
                 ->withInput($request->only('email'));
         }
 
         $admin = Auth::guard('admin')->id();
         $admin_details = Admin::where('id', $admin)->first();
+
+
         if($admin_details->role_id == 1){
             session()->put('super_admin', $admin_details);
             session()->forget('admin');
@@ -47,6 +50,18 @@ class AdminAuthController extends Controller
             session()->forget('super_admin');
         }
 
+        ActivityLog::add($admin_details->name . " - Login ", auth('admin')->user());
+
         return view('admin.role_check_login')->with($this->data);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::guard('student')->logout();
+        Auth::guard('admin')->logout();
+        session()->flush();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('admin.login');
     }
 }

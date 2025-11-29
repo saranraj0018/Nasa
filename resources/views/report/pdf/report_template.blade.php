@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Event Report #{{ $report->id }}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12.5px; color: #1A1A1A; margin: 30px; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 12.5px; color: #1A1A1A; }
         .header { text-align: center; margin-top: 0x; }
         .header img { width: 430px; margin-top: 0px; }
         .report-title { font-size: 18px; font-weight: 700; text-transform: uppercase; margin-top: 5px; color:#7A1C73; letter-spacing: 0.5px; }

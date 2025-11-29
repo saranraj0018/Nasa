@@ -61,7 +61,6 @@
                         required>
                 @endif
             </div>
-
             <div>
                 <label class="block text-sm font-medium">Seat Count<span class="text-red-500">*</span></label>
                 <input type="text" name="seat_count" id="seat_count" value="{{ $edit_event->seat_count ?? '' }}"
@@ -70,13 +69,10 @@
 
             <div class="col-span-2">
                 <label class="block text-sm font-medium">Event Description<span class="text-red-600">*</span></label>
-                <textarea name="description" id="description"
-                    class="bg-[#D9D9D9] w-full p-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring focus:ring-primary/40"
-                    rows="4"
+                <textarea name="description" id="description" class="bg-[#D9D9D9] w-full p-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring focus:ring-primary/40" rows="4"
                     placeholder="Provide a detailed description of the event objective, activities, and learning outcomes">
-    {{ $edit_event->description ?? '' }}
-</textarea>
-
+                        {{ $edit_event->description ?? '' }}
+                </textarea>
             </div>
         </div>
 
@@ -191,8 +187,8 @@
         <!-- Center-Aligned Button -->
         <div class="flex justify-center mt-10">
             <button type="submit"
-                class="px-10 bg-gradient-to-r from-primary to-pink-600 text-white font-semibold py-3 rounded-full hover:opacity-90 transition">
-                Create Event
+                class="px-3 w-43 bg-gradient-to-r from-primary to-pink-600 text-white font-semibold py-1 rounded-full hover:opacity-90 transition">
+                <i class="fas fa-save"></i> Create Event
             </button>
         </div>
     </form>

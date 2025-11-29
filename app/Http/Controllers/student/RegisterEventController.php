@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\student;
 
-use App\Http\Controllers\Controller;
+use Exception;
+use Carbon\Carbon;
 use App\Models\Event;
 use App\Models\Student;
-use App\Models\StudentEventRegistration;
-use App\Models\StudentUploadProof;
-use Carbon\Carbon;
-use Exception;
+use App\Helpers\ActivityLog;
 use Illuminate\Http\Request;
+use App\Models\StudentUploadProof;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Models\StudentEventRegistration;
 
 class RegisterEventController extends Controller
 {
@@ -68,6 +69,12 @@ class RegisterEventController extends Controller
                 $register->event_id      = $request->event_id ?? null;
                 $register->status        = 1;
                 $register->save();
+
+                if (!empty($request['report_id'])) {
+                    $user = auth('student')->user();
+                    $event = Event::where('id', $request->event_id)->first();
+                    ActivityLog::add($user->name .' - '. $event->title ." - Event Registered", $user);
+                }
             }
 
             return response()->json([

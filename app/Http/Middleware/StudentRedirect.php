@@ -14,9 +14,9 @@ class StudentRedirect
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, $guard = 'student'): Response
     {
-        if (!Auth::guard('student')->check()) {
+        if (!Auth::guard($guard)->check()) {
             return redirect()->route('login');
         }
         return $next($request);

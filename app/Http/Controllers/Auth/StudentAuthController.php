@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use App\Models\Student;
+use App\Helpers\ActivityLog;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -39,12 +40,14 @@ class StudentAuthController extends Controller
         $student = Auth::guard('student')->id();
         $studentdetail = Student::where('id', $student)->first();
         session()->put('student', $studentdetail);
-
+        ActivityLog::add($studentdetail->name . " - Login", auth('student')->user());
         return redirect()->route('student_dashboard');
     }
 
     public function logout(Request $request)
     {
+        echo 'test222';
+        exit;
         Auth::guard('student')->logout();
         Auth::guard('admin')->logout();
         session()->flush();

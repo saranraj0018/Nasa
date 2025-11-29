@@ -3,13 +3,25 @@
     <div class="p-5">
         <x-app-logo />
     </div>
-
     {{-- PROFILE SEGMENT IN SIDEBAR --}}
-
     <div class="space-y-2">
         @php
             $user = session()->get('student') ?? (session()->get('admin') ?? session()->get('super_admin'));
             $profile_pict = $user->profile_pic ?? null;
+             if (!empty(session()->get('student'))){
+              $name = session()->get('student')->name;
+              $id = session()->get('student')->id;
+              $route = route('student.logout');
+             }else if(!empty(session()->get('admin'))){
+              $name = session()->get('admin')->name;
+              $id = session()->get('admin')->emp_code;
+              $route = route('admin.logout');
+             }else if(!empty(session()->get('super_admin'))){
+              $name = session()->get('super_admin')->name;
+              $id = session()->get('super_admin')->emp_code;
+              $route = route('admin.logout');
+             }
+
         @endphp
 
         @if (!empty($profile_pict))
@@ -23,22 +35,10 @@
             Welcome Back
         </div>
         <div class="text-center font-medium text-md text-primary">
-            @if (!empty(session()->get('student')))
-                {{ session()->get('student')->name }}
-            @elseif (!empty(session()->get('admin')))
-                {{ session()->get('admin')->name }}
-            @elseif (!empty(session()->get('super_admin')))
-                {{ session()->get('super_admin')->name }}
-            @endif
+            {{ $name }}
         </div>
         <div class="text-center font-medium text-md text-primary">
-            ID - @if (!empty(session()->get('student')))
-                {{ session()->get('student')->id }}
-            @elseif (!empty(session()->get('admin')))
-                {{ session()->get('admin')->id }}
-            @elseif (!empty(session()->get('super_admin')))
-                {{ session()->get('super_admin')->id }}
-            @endif
+            ID -  {{ $id }}
         </div>
     </div>
 
@@ -81,6 +81,7 @@
                     <x-menu.item name="Home" icon="fa-home" route="super_admin_home" />
                     <x-menu.item name="Events" icon="fa-calendar-minus" route="events" />
                     <x-menu.item name="Create Event" icon="fa-pencil-square" route="event_list" />
+                    <x-menu.item name="Admin" icon="fas fa-chalkboard-teacher" route="admin_list" />
                     <x-menu.item name="Assign Tasks" icon="fa-check-circle" route="assign_tasks" />
                     <x-menu.item name="Review Reports" icon="fa-check-circle" route="review_reports" />
                     <x-menu.item name="Student Approval" icon="fa-graduation-cap" route="student_approval" />
@@ -98,22 +99,15 @@
         @else
             <img src="{{ asset('/images/user_dummy.png') }}" alt="Default Picture" class="w-1/5">
         @endif
-        {{-- <img src="{{ asset('/images/user_dummy.png') }}" alt="" class="w-1/5"> --}}
         <div class="my-auto space-y-1">
-            <form method="POST" action="{{ route('student.logout') }}">
+            <form method="POST" action="{{ $route }}">
                 @csrf
                 <button type="submit" class="text-sm font-medium hover:underline">
                     Logout
                 </button>
             </form>
             <p class="text-sm font-medium text-black">ID -
-                @if (!empty(session()->get('student')))
-                    {{ session()->get('student')->id }}
-                @elseif (!empty(session()->get('admin')))
-                    {{ session()->get('admin')->id }}
-                @elseif (!empty(session()->get('super_admin')))
-                    {{ session()->get('super_admin')->id }}
-                @endif
+              {{ $id }}
             </p>
         </div>
     </div>

@@ -25,6 +25,7 @@ class SuperAdminAuthController extends Controller
                     ->withErrors(['verification_code' => 'Invalid Security Code'])
                     ->withInput($request->only('verification_code'));
             }
+            session()->put('security_verified', true);
             return redirect()->route('super_admin_home');
         }
 

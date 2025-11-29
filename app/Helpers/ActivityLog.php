@@ -15,7 +15,7 @@ class ActivityLog
         }else if(!empty(session()->get('student'))){
            $user_type = 'student';
         }
-        
+
         Activity::create([
             'title' => $title,
             'user_name' => $user->name,

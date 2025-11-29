@@ -85,7 +85,9 @@ class AdminReportsController extends Controller
                     'public'
                 )
                 : $report->attendance_out;
-           $exist_report = EventReport::where('event_id', $request->event_id)->exists();
+           $user = auth('admin')->user();
+           $exist_report = EventReport::where(['event_id' => $request->event_id , 'created_by'=> $user->id ])->exists();
+
            if($exist_report){
                 return response()->json([
                     'success' => false,
@@ -94,7 +96,7 @@ class AdminReportsController extends Controller
            }
             // SAVE MAIN REPORT
             $report->event_id = $request->event_id;
-            $report->created_by = Auth::guard('admin')->id();
+            $report->created_by = $user->id;
             $report->male_count = $request->male_count;
             $report->female_count = $request->female_count;
             $report->outcomes = $request->outcome_results;
@@ -109,7 +111,7 @@ class AdminReportsController extends Controller
                 $ids = json_decode($request->removed_images);
                 foreach ($ids as $id) {
                     $img = EventReportImage::find($id);
-                    if ($img) {
+                    if ($img && Storage::disk('public')->exists($img->file_path)) {
                         Storage::disk('public')->delete($img->file_path);
                         $img->delete();
                     }
@@ -119,18 +121,26 @@ class AdminReportsController extends Controller
             // MULTIPLE PROOF IMAGES
             if ($request->hasFile('proof')) {
                 foreach ($request->proof as $file) {
-                    $imageName = time() . '_' . uniqid() . '.' . $file->extension();
+                    $imageName = \Illuminate\Support\Str::uuid() . '.' . $file->extension();
                     $path = $file->storeAs('report_images', $imageName, 'public');
-                    $exists = EventReportImage::where(['report_id' => $report->id, 'file_name' => $imageName, 'file_path' => $path])->first();
-                    if(!$exists){
-                        $reportimage = new EventReportImage();
-                        $reportimage->report_id = $report->id;
-                        $reportimage->file_name = $imageName;
-                        $reportimage->file_path = $path;
-                        $reportimage->file_type = $file->getClientOriginalExtension();
-                        $reportimage->save();
-                    }
+
+                    $reportimage = new EventReportImage();
+                    $reportimage->report_id = $report->id;
+                    $reportimage->file_name = $imageName;
+                    $reportimage->file_path = $path;
+                    $reportimage->file_type = $file->getClientOriginalExtension();
+                    $reportimage->save();
                 }
+            }
+
+            // Load event relation for logging
+            $report->load('get_event');
+            $eventTitle = $report->get_event->title ?? 'Unknown Event';
+
+            if (!empty($request['report_id'])) {
+                ActivityLog::add("{$user->name} - {$eventTitle} - Report Updated", auth('admin')->user());
+            } else {
+                ActivityLog::add("{$user->name} - {$eventTitle} - New Report Created", auth('admin')->user());
             }
 
             return response()->json([
@@ -151,7 +161,8 @@ class AdminReportsController extends Controller
         $report = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
         $pdf = Pdf::loadView('report.pdf.report_template', compact('report'))
             ->setPaper('a4', 'portrait');
-        ActivityLog::add($report->get_event->title .' - Report Viewed',auth('admin')->user());
+        $user = auth('admin')->user();
+        ActivityLog::add($user->name  .' - '. $report->get_event->title .' - Report Viewed', $user);
         return $pdf->stream("event_report_{$report->id}.pdf");
     }
 
@@ -159,8 +170,9 @@ class AdminReportsController extends Controller
     {
         $report = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
         $pdf = Pdf::loadView('report.pdf.report_template', compact('report'))
-            ->setPaper('a4', 'portrait');
-        ActivityLog::add($report->get_event->title .'Report Downloaded', auth('admin')->user());
+                ->setPaper('a4', 'portrait');
+        $user = auth('admin')->user();
+        ActivityLog::add($user->name .' - '. $report->get_event->title .'Report Downloaded', $user);
         return $pdf->download("event_report_{$report->id}.pdf");
     }
 }

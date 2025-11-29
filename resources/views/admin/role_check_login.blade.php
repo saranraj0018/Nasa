@@ -26,7 +26,7 @@
                                 class="w-16 h-16 rounded-full object-contain bg-white p-2">
                         </div>
                         <h1 class="text-2xl text-primary font-bold">SUPER ADMIN</h1>
-                        <a href="{{ route("security_check") }}"
+                        <a href="{{ route("admin.security_check") }}"
                             class="w-40 py-2 bg-gradient-to-r from-primary to-pink-500 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition">
                             Select Role <i class="fa-solid fa-arrow-right ml-1"></i>
                         </a>

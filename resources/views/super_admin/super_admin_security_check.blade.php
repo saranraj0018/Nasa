@@ -15,7 +15,7 @@
                 <p class="text-md font-bold text-primary">Security Protocol Access</p>
                 <p class="text-sm font-medium">Enter your 6-digit authentication code</p>
                 {{-- FORM --}}
-                <form method="POST" action="{{ route('security_check') }}" class="w-full space-y-4"
+                <form method="POST" action="{{ route('admin.security_check') }}" class="w-full space-y-4"
                     x-data="{ loading: false }" @submit="loading = true">
                     @csrf
                     <div class="text-left">
@@ -32,7 +32,7 @@
                         Complete Authentication
                     </button>
                     <div class="text-center mt-2">
-                                    <a href="{{ route('login') }}" class="text-xs text-purple-600 hover:underline">Go to Login</a>
+                                    <a href="{{ route('admin.login') }}" class="text-xs text-purple-600 hover:underline">Go to Login</a>
                     </div>
                 </form>
             </div>

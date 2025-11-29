@@ -60,10 +60,10 @@
                                 {{-- Login Button --}}
                                 <button type="submit"
                                     class="mx-auto w-90 py-2 bg-gradient-to-r from-primary to-pink-500 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition">
-                                    Login 
+                                    Login
                                 </button>
                                 <div class="text-center mt-2">
-                                    <a href="#" class="text-xs text-purple-600 hover:underline">Forget
+                                    <a href="{{ route('student.password.forgot') }}" class="text-xs text-purple-600 hover:underline">Forget
                                         Password?</a>
                                 </div>
                             </div>

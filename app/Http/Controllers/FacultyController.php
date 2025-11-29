@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActivityLog;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Faculty;
@@ -123,6 +124,12 @@ class FacultyController extends Controller
             $faculty->designation_id = $request['designation_id'] ?? '';
             $faculty->save();
 
+            if (!empty($request['faculty_id'])) {
+                ActivityLog::add($faculty->name . ' - Faculty Updated', auth('admin')->user());
+            } else {
+                ActivityLog::add($faculty->name . ' - New Faculty Created', auth('admin')->user());
+            }
+            
             return response()->json([
                 'success' => true,
                 'message' => $message

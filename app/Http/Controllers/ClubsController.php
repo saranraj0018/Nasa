@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Club;
 use App\Models\Faculty;
-use Exception;
+use App\Helpers\ActivityLog;
 use Illuminate\Http\Request;
 
 class ClubsController extends Controller
@@ -49,6 +50,11 @@ class ClubsController extends Controller
             $club->description = $request['description'] ?? '';
             $club->save();
 
+            if (!empty($request['club_id'])) {
+                ActivityLog::add($club->name . ' - Club Updated', auth('admin')->user());
+            } else {
+                ActivityLog::add($club->name . ' - New Club Created', auth('admin')->user());
+            }
             return response()->json([
                 'success' => true,
                 'message' => $message
