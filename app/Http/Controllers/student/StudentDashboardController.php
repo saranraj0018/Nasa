@@ -23,7 +23,7 @@ class StudentDashboardController extends Controller
             ->whereDate('event_date', $now->toDateString())
             // ->whereTime('start_time', '<=', $now->toTimeString())
             // ->whereTime('end_time', '>=', $now->toTimeString())
-            ->where('end_registration', '>=', $now) // not after registration deadline
+            ->where('end_registration', '<=', $now) // not after registration deadline
             ->get();
         $this->data['upcomingEvents'] = Event::with('registrations')
             ->where(function ($query) use ($now) {
@@ -33,7 +33,7 @@ class StudentDashboardController extends Controller
                         //    ->whereTime('start_time', '>', $now->toTimeString());
                     });
             })
-            ->where('end_registration', '>=', $now)
+            ->where('end_registration', '<=', $now)
             ->orderBy('event_date', 'asc')
             ->orderBy('start_time', 'asc')
             ->get();

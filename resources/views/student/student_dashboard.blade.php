@@ -62,19 +62,24 @@
             <h4 class="font-semibold text-gray-800 mb-4">Upcoming Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($upcomingEvents as $event)
+                @php
+                  $registered = \App\Models\StudentEventRegistration::where(['event_id' => $event['id']])->count();
+                  $available = $event['seat_count'] - $registered;
+                    $student = $studentId;
+            $registration_check = $event->registrations->where('student_id', $student)->first();
+                @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
                             <img src="{{ asset('storage/' . $event['banner_image']) }}" alt="Event"
-                                class="rounded-t-2xl w-full">
+                                class="rounded-t-2xl w-full h-48 object-cover">
                             @if ($event['event_type'] == 'paid')
-                                <span
-                                    class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
+                                <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
                                     Premium
                                 </span>
                             @endif
                             <span
                                 class="absolute @if ($event['event_type'] == 'paid') mt-2 top-10 @else top-3 @endif  right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
-                                <span class="text-2xl">25 </span><span>Seats
+                                <span class="text-2xl">{{ $available }} </span><span>Seats
                                     <pre> Available</span></pre>
                                 </span>
                             </span>
@@ -84,30 +89,26 @@
                             </span>
                         </div>
                         <div class="p-2 details">
-                            <div class="grid grid-cols-1 gap-1 md:grid-cols-2 text-xs">
-                                <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
+                            <div class="grid grid-cols-1 gap-1 md:grid-cols-4 text-xs">
+                                <div class="col-span-2 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
                                     <i class="fa fa-clock text-primary" aria-hidden="true"></i>
-                                    <p class="px-2">
-                                        {{ $event->start_time ? \Carbon\Carbon::parse($event->start_time)->format('h:i A') : '-' }}
+                                    <p class="px-1">
+                                        {{ $event->start_time ? \Carbon\Carbon::parse($event->start_time)->format('h:iA') : '-' }}
                                         -
-                                        {{ $event->end_time ? \Carbon\Carbon::parse($event->end_time)->format('h:i A') : '-' }}
+                                        {{ $event->end_time ? \Carbon\Carbon::parse($event->end_time)->format('h:iA') : '-' }}
                                     </p>
                                 </div>
-                                <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
+                                <div class="col-span-2 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
                                     <i class="fa fa-calendar text-primary" aria-hidden="true"></i>
-                                    <p class="px-2">
+                                    <p class="px-1">
                                         {{ \Carbon\Carbon::parse($event['event_date'])->format('F j, Y') }}</p>
                                 </div>
-                                <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
+                                <div class="col-span-4 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1 mt-2">
                                     <i class="fa fa-map-marker text-primary" aria-hidden="true"></i>
-                                    <p class="px-2">{{ $event['location'] }}</p>
+                                    <p class="px-1">{{ $event['location'] }}</p>
                                 </div>
                             </div>
-                            @php
-                                $student = $studentId;
-                                $registration_check = $event->registrations->where('student_id', $student)->first();
-                            @endphp
-                            @if (empty($registration_check))
+                            @if (empty($registration_check) && $available > 0)
                                 <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
                                     class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
                                     data-event_id={{ $event->id }}>
@@ -123,10 +124,16 @@
             <h4 class="font-semibold text-gray-800 mb-4">Ongoing Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($ongoingEvents as $ongoing_event)
+                @php
+                  $registered = \App\Models\StudentEventRegistration::where(['event_id' => $ongoing_event->id ])->count();
+                  $available = $ongoing_event->seat_count - $registered;
+                  $student = $studentId;
+                  $registration_check = $ongoing_event->registrations->where('student_id', $student)->first();
+                @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
                             <img src="{{ asset('storage/' . $ongoing_event['banner_image']) }}" alt="Event"
-                                class="rounded-t-2xl w-full">
+                                class="rounded-t-2xl w-full h-48 object-cover">
                             @if ($ongoing_event['event_type'] == 'paid')
                                 <span
                                     class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
@@ -135,7 +142,7 @@
                             @endif
                             <span
                                 class="absolute @if ($ongoing_event['event_type'] == 'paid') mt-2 top-10 @else top-3 @endif  right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
-                                <span class="text-2xl">25 </span><span>Seats
+                                <span class="text-2xl">{{ $available  }} </span><span>Seats
                                     <pre> Available</span></pre>
                                 </span>
                             </span>
@@ -145,26 +152,26 @@
                             </span>
                         </div>
                         <div class="p-2 details">
-                            <div class="grid grid-cols-1 gap-1 md:grid-cols-2 text-xs">
-                                <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
+                            <div class="grid grid-cols-1 gap-1 md:grid-cols-4 text-xs">
+                                <div class="col-span-2 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
                                     <i class="fa fa-clock text-primary" aria-hidden="true"></i>
-                                    <p class="px-2">
-                                        {{ $ongoing_event->start_time ? \Carbon\Carbon::parse($ongoing_event->start_time)->format('h:i A') : '-' }}
+                                    <p class="px-1">
+                                        {{ $ongoing_event->start_time ? \Carbon\Carbon::parse($ongoing_event->start_time)->format('h:iA') : '-' }}
                                         -
-                                        {{ $ongoing_event->end_time ? \Carbon\Carbon::parse($ongoing_event->end_time)->format('h:i A') : '-' }}
+                                        {{ $ongoing_event->end_time ? \Carbon\Carbon::parse($ongoing_event->end_time)->format('h:iA') : '-' }}
                                     </p>
                                 </div>
-                                <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
+                                <div class="col-span-2 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
                                     <i class="fa fa-calendar text-primary" aria-hidden="true"></i>
-                                    <p class="px-2">
+                                    <p class="px-1 m-0 p-0 text-xs">
                                         {{ \Carbon\Carbon::parse($ongoing_event['event_date'])->format('F j, Y') }}</p>
                                 </div>
-                                <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
+                                <div class="col-span-4 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1 mt-2">
                                     <i class="fa fa-map-marker text-primary" aria-hidden="true"></i>
-                                    <p class="px-2">{{ $ongoing_event['location'] }}</p>
+                                    <p class="px-1">{{ $ongoing_event['location'] }}</p>
                                 </div>
                             </div>
-                            @if ($ongoing_event->registrations->isEmpty())
+                            @if (empty($registration_check) && $available > 0)
                                 <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
                                     class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
                                     data-event_id={{ $ongoing_event->id }}>
@@ -180,6 +187,10 @@
             <h4 class="font-semibold text-gray-800 mb-4">Register Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($registeredEvents as $register_event)
+                  @php
+                  $registered = \App\Models\StudentEventRegistration::where(['event_id' => $register_event->event->id ])->count();
+                  $available = $register_event->event->seat_count - $registered;
+                @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
                             <img src="{{ asset('storage/' . $register_event->event->banner_image) }}" alt="Event"
@@ -192,7 +203,7 @@
                             @endif
                             <span
                                 class="absolute @if ($register_event->event->event_type) mt-2 top-10 @else top-3 @endif  right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
-                                <span class="text-2xl">25 </span><span>Seats
+                                <span class="text-2xl">{{  $available }} </span><span>Seats
                                     <pre> Available</span></pre>
                                 </span>
                             </span>
@@ -202,24 +213,24 @@
                             </span>
                         </div>
                         <div class="p-2 details">
-                            <div class="grid grid-cols-1 gap-1 md:grid-cols-2 text-xs">
-                                <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
+                            <div class="grid grid-cols-1 gap-1 md:grid-cols-4 text-xs">
+                                <div class="col-span-2 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
                                     <i class="fa fa-clock text-primary" aria-hidden="true"></i>
-                                    <p class="px-2">
-                                        {{ $register_event->event->start_time ? \Carbon\Carbon::parse($register_event->event->start_time)->format('h:i A') : '-' }}
+                                    <p class="px-1">
+                                        {{ $register_event->event->start_time ? \Carbon\Carbon::parse($register_event->event->start_time)->format('h:iA') : '-' }}
                                         -
-                                        {{ $register_event->event->end_time ? \Carbon\Carbon::parse($register_event->event->end_time)->format('h:i A') : '-' }}
+                                        {{ $register_event->event->end_time ? \Carbon\Carbon::parse($register_event->event->end_time)->format('h:iA') : '-' }}
                                     </p>
                                 </div>
-                                <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
+                                <div class="col-span-2 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
                                     <i class="fa fa-calendar text-primary" aria-hidden="true"></i>
-                                    <p class="px-2">
+                                    <p class="px-1">
                                         {{ \Carbon\Carbon::parse($register_event->event->event_date)->format('F j, Y') }}
                                     </p>
                                 </div>
-                                <div class="flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
+                                <div class="col-span-4 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1 mt-2">
                                     <i class="fa fa-map-marker text-primary" aria-hidden="true"></i>
-                                    <p class="px-2">{{ $register_event->event->location }}</p>
+                                    <p class="px-1">{{ $register_event->event->location }}</p>
                                 </div>
                             </div>
                         </div>

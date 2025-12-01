@@ -25,13 +25,13 @@ class StudentAuthController extends Controller
         ]);
 
         if (!$validator->passes()) {
-            return redirect()->route('login')
+            return redirect()->route('student.login')
                 ->withErrors($validator)
                 ->withInput($request->only('email'));
         }
 
         if (!Auth::guard('student')->attempt($credentials, $request->get('remember'))) {
-            return redirect()->route('login')
+            return redirect()->route('student.login')
                 ->withErrors(['password' => 'Either Email/Password is incorrect'])
                 ->withInput($request->only('email'));
         }
@@ -46,8 +46,6 @@ class StudentAuthController extends Controller
 
     public function logout(Request $request)
     {
-        echo 'test222';
-        exit;
         Auth::guard('student')->logout();
         Auth::guard('admin')->logout();
         session()->flush();

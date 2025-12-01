@@ -17,8 +17,16 @@ class MyRegisterEventsController extends Controller
         $student = session()->get('student');
         $this->data['registeredEvents'] = StudentEventRegistration::with('event')->where('student_id', $student->id)
             ->get();
-        $this->data['completedEvents'] = StudentEventRegistration::with('event')->where('student_id', $student->id)
+        $this->data['completedEvents'] = StudentEventRegistration::with('event')
+            ->whereHas('event', function ($query) {
+                $query->where('end_registration', '<=', now());
+            })
+            ->where([
+                'student_id' => $student->id,
+                'status' => 2
+            ])
             ->get();
+
         $this->data['activeCount'] = StudentEventRegistration::where('student_id', $student->id)
             ->where('status', 1)
             ->count();

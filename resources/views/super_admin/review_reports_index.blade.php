@@ -5,10 +5,10 @@
         <p class="text-sm text-gray-700">Submit comprehensive reports for completed events</p>
     </div>
     <!-- Overview Cards -->
-    <section class="p-3 mt-4">
+    <section class="p-3">
         <!-- Filters Section -->
-        <h1 class="text-primary mt-8 font-semibold">Filters & Actions</h1>
-        <div class="bg-white rounded-2xl shadow p-5 mt-3">
+        <h1 class="text-primary mt-3 font-semibold">Review Reports</h1>
+        {{-- <div class="bg-white rounded-2xl shadow p-5 mt-3">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Search -->
                 <div class="flex items-center bg-[#F2E8F5] rounded-full px-3">
@@ -17,7 +17,7 @@
                         class="w-full bg-transparent rounded-full px-4 py-2 focus:outline-none focus:ring-0">
                 </div>
             </div>
-        </div>
+        </div> --}}
         <div class="bg-white rounded-2xl shadow py-8 px-7 mt-3">
             @foreach ($reports as $report)
             <div class="shadow p-5 rounded-2xl mt-5">

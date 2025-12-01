@@ -20,6 +20,7 @@ class RegisterEventController extends Controller
         $now = Carbon::now();
         $this->data['events'] = Event::get();
         $student = session()->get('student');
+        $this->data['studentId'] = $student->id;
         $myuploads = StudentUploadProof::select('student_id', 'event_id')
             ->where('student_id', $student->id)
             ->groupBy('student_id', 'event_id')
@@ -28,7 +29,7 @@ class RegisterEventController extends Controller
             ->whereDate('event_date', $now->toDateString())
             // ->whereTime('start_time', '<=', $now->toTimeString())
             // ->whereTime('end_time', '>=', $now->toTimeString())
-            ->where('end_registration', '>=', $now) // not after registration deadline
+            ->where('end_registration', '<=', $now) // not after registration deadline
             ->get();
         $this->data['upcomingEvents'] = Event::with('registrations')
             ->where(function ($query) use ($now) {
@@ -38,7 +39,7 @@ class RegisterEventController extends Controller
                         //    ->whereTime('start_time', '>', $now->toTimeString());
                     });
             })
-            ->where('end_registration', '>=', $now)
+            ->where('end_registration', '<=', $now)
             ->orderBy('event_date', 'asc')
             ->orderBy('start_time', 'asc')
             ->get();
