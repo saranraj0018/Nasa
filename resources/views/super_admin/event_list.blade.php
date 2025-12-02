@@ -76,13 +76,13 @@
                                     <i class="fa fa-plus" aria-hidden="true"></i> Create Event
                                 </a>
                             @endif
+
                         </div>
                     </div>
                 @endif
             @endforeach
         </div>
     @endif
-
     <section class="p-2 mt-3">
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Event Lists</h4>

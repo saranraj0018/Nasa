@@ -43,6 +43,6 @@ class AdminPasswordController extends Controller
         $admin->password = Hash::make($request->password);
         $admin->save();
 
-        return redirect()->route('login')->with('status', 'Password updated successfully');
+        return redirect()->route('admin.login')->with('status', 'Password updated successfully');
     }
 }

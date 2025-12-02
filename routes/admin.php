@@ -45,7 +45,7 @@ Route::prefix('admin')->group(function () {
 
         //Assign Tasks
 
-        Route::get('/assign-tasks', [AssignTasksController::class, 'index'])->name('assign_tasks');
+        Route::any('/assign-tasks', [AssignTasksController::class, 'index'])->name('assign_tasks');
         Route::get('/create-assign-task', [AssignTasksController::class, 'createAssignTasks'])->name('create_assign_task');
         Route::post('/save-task', [AssignTasksController::class, 'saveTasks'])->name('save_task');
 

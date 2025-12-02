@@ -23,7 +23,6 @@ class MyRegisterEventsController extends Controller
             })
             ->where([
                 'student_id' => $student->id,
-                'status' => 2
             ])
             ->get();
 

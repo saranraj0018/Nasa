@@ -14,6 +14,12 @@ class AdminHomeController extends Controller
 {
     public function index(Request $request)
     {
+        if(!empty(session()->get('super_admin'))){
+            return redirect()->route('admin.login');
+                // ->withErrors(['password' => 'Either Email/Password is incorrect'])
+                // ->withInput($request->only('email'));
+        }
+
         $adminId = Auth::guard('admin')->id();
         $today = now();
         $this->data['events'] = Event::with('registrations')
