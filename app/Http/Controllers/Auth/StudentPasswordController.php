@@ -44,6 +44,6 @@ class StudentPasswordController extends Controller
         $student->password = Hash::make($request->password);
         $student->save();
 
-        return redirect()->route('login')->with('status', 'Password updated successfully');
+        return redirect()->route('student.login')->with('status', 'Password updated successfully');
     }
 }

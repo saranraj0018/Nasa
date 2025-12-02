@@ -10,6 +10,7 @@ class AdminGuest
 {
     public function handle($request, Closure $next, $guard = 'admin')
     {
+
         if (Auth::guard($guard)->check()) {
             $user = Auth::guard($guard)->user();
             // If verification is pending

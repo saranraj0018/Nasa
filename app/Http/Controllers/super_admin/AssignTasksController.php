@@ -10,6 +10,7 @@ use App\Models\Faculty;
 use App\Models\TaskImage;
 use App\Models\TaskImages;
 use App\Models\Tasks;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,20 +22,22 @@ class AssignTasksController extends Controller
    {
 
     if($request->ajax() && $request->task_status_change){
-             $update = Tasks::where('id',$request->id)->update(['status','accepted']);
+             $update = Tasks::where('id',$request->id)->update(['status' => 'accepted']);
     }
 
+    $now = Carbon::now();
     $adminId = Auth::guard('admin')->id();
     $this->data['tasks'] = Tasks::where('created_by', $adminId)->with('get_admin', 'get_task_images')->get();
     $this->data['pending_tasks'] = Tasks::where(['created_by' => $adminId, 'status' => 'pending'])->count();
     $this->data['ongoing_tasks'] = Event::with('get_task')
             ->whereHas('get_task', function ($query) use ($adminId) {
-                $query->where('created_by', $adminId)
-                    ->whereNotIn('status', ['pending', 'accepted']);
+                $query->where('created_by', $adminId);
+                    // ->whereNotIn('status', ['pending', 'accepted']);
             })
-            ->whereNotIn('status', ['completed']) // <-- wrap in array
+            ->whereDate('event_date', $now->toDateString())
+            // ->whereNotIn('status', ['completed'])
             ->count();
-    $this->data['completed_tasks'] = Tasks::where(['created_by' => $adminId, 'status' => 'completed'])->count();
+    $this->data['completed_tasks'] = Tasks::where(['created_by' => $adminId, 'status' => 'accepted'])->count();
     $this->data['admins'] = Admin::where('role_id', 2)->get();
     $this->data['event'] = Tasks::where('created_by', $adminId)->get();
     return view('super_admin.assign_task_index')->with($this->data);
