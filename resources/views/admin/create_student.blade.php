@@ -1,0 +1,122 @@
+<x-layouts.app>
+
+    <!-- Header -->
+    <div class="bg-[#F5E8F5] w-full h-[50px] rounded-full shadow-sm px-8 py-3">
+        <h3 class="font-semibold text-primary">Create New Student</h3>
+    </div>
+
+    <!-- Back Button -->
+    <a href="{{ route('student_list') }}">
+        <i class="fa-solid fa-arrow-left"></i>
+    </a>
+
+    <h1 class="text-primary font-semibold mt-10 px-3">Student Information</h1>
+    <p class="px-3">Basic Details about your Student</p>
+
+    <!-- Form Start -->
+    <form id="studentForm" method="POST" enctype="multipart/form-data" class="space-y-4 mt-8 px-3">
+        @csrf
+        @if (!empty($edit_student))
+            <input type="hidden" name="student_id" value="{{ $edit_student->id }}">
+        @endif
+
+        <!-- Student Name + Code -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium">Student Name<span class="text-red-500">*</span></label>
+                <input type="text" name="student_name" id="student_name" value="{{ $edit_student->name ?? '' }}"
+                    class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium">Date of Birth</label>
+                <input type="date" name="date_of_birth" id="date_of_birth" value="{{ $edit_student->date_of_birth ?? '' }}"
+                    class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1">
+            </div>
+        </div>
+
+        <!-- Email + Mobile -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium">Email<span class="text-red-500">*</span></label>
+                <input type="text" name="email" id="email"  value="{{ $edit_student->email ?? '' }}"
+                    class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium">Mobile Number<span class="text-red-500">*</span></label>
+                <input type="text" name="mobile_number" id="mobile_number"  value="{{ $edit_student->mobile_number ?? '' }}"
+                    class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1">
+            </div>
+        </div>
+
+        <!-- Department + Designation -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium">Department<span class="text-red-500">*</span></label>
+                <select name="department_id" id="department_id"
+                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 mt-1">
+                    <option value="">Select Department</option>
+                    @foreach ($department as $depart)
+                        <option value="{{ $depart->id }}"
+                            {{ (!empty($edit_student) && $edit_student->department_id == $depart->id) ? 'selected' : '' }}>
+                            {{ $depart->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium">Programme<span class="text-red-500">*</span></label>
+                <select name="programme_id" id="programme_id"
+                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-3 mt-1">
+                    <option value="">Select Programme</option>
+                    @foreach ($programme as $prog)
+                        <option value="{{ $prog->id }}"
+                            {{ (!empty($edit_student) && $edit_student->programme_id == $prog->id) ? 'selected' : '' }}>
+                            {{ $prog->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <!-- IMAGE UPLOAD START -->
+        <div class="grid grid-cols-1">
+            <div class="bg-[#F0F0F0] rounded-3xl p-10 text-center relative">
+                <div id="uploadBox" class="space-y-8">
+                    <div id="dropArea" class="border-2 border-dashed border-primary rounded-2xl p-8 relative cursor-pointer">
+                        <!-- Preview Area -->
+                        <div id="previewArea" class="flex justify-center">
+                            @if (!empty($edit_student) && $edit_student->profile_pic)
+                                <img src="{{ asset('storage/' . $edit_student->profile_pic) }}"
+                                    class="mx-auto rounded-2xl w-40 h-40 object-cover" />
+                                <input type="hidden" name="old_banner" value="{{ $edit_student->profile_pic }}">
+                            @endif
+                        </div>
+                        <!-- Upload Text -->
+                        <div id="uploadText"
+                            @if (!empty($edit_student) && $edit_student->profile_pic) style="display:none" @endif>
+                            <img src="{{ asset('/images/upload.png') }}" class="mx-auto w-14 mb-3" />
+                            <p class="text-primary font-semibold">Upload your profile image</p>
+                            <p class="text-primary text-sm mt-2">PNG, JPG up to 5MB</p>
+                        </div>
+                        <!-- File Input -->
+                        <input type="file" id="fileInput" name="banner_image" accept="image/*" class="hidden" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- IMAGE UPLOAD END -->
+
+        <!-- Submit -->
+        <div class="flex justify-center mt-10">
+            <button type="submit"
+                class="px-10 bg-gradient-to-r from-primary to-pink-600 text-white font-semibold py-3 rounded-full hover:opacity-90 transition">
+               <i class="fas fa-save"></i> Create Student
+            </button>
+        </div>
+
+    </form>
+</x-layouts.app>
+<script src="{{ asset('admin/js/student.js') }}"></script>

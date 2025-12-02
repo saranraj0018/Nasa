@@ -1,0 +1,179 @@
+<?php
+
+namespace App\Http\Controllers\super_admin;
+
+use App\Helpers\ActivityLog;
+use App\Http\Controllers\Controller;
+use App\Models\Club;
+use App\Models\Event;
+use App\Models\Faculty;
+use App\Models\StudentEventRegistration;
+use App\Models\Tasks;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class EventsController extends Controller
+{
+    public function index(Request $request)
+    {
+        $now = Carbon::now();
+        $this->data['ongoingEvents'] = Event::with('registrations')->whereDate('event_date', $now->toDateString())
+            // ->whereTime('start_time', '<=', $now->toTimeString())
+            // ->whereTime('end_time', '>=', $now->toTimeString())
+            ->where('end_registration', '<=', $now) // not after registration deadline
+            ->get();
+        $this->data['upcomingEvents'] = Event::with('registrations')->where(function ($query) use ($now) {
+                $query->whereDate('event_date', '>', $now->toDateString())
+                    ->orWhere(function ($q) use ($now) {
+                        $q->whereDate('event_date', '=', $now->toDateString());
+                        //    ->whereTime('start_time', '>', $now->toTimeString());
+                    });
+            })
+            ->where('end_registration', '<=', $now)
+            ->orderBy('event_date', 'asc')
+            ->orderBy('start_time', 'asc')
+            ->get();
+        $this->data['registeredEvents'] = StudentEventRegistration::with('event')
+            ->get();
+        $this->data['completedEvents'] = StudentEventRegistration::with('event')
+            ->where('status',2)
+            ->get();
+         return view('super_admin.event_index')->with($this->data);
+    }
+
+    public function createEvent(Request $request)
+    {
+        $this->data['faculty'] = Faculty::get();
+        $this->data['club'] = Club::get();
+        if($request->event_id){
+            $eventId = decrypt($request->event_id);
+            $this->data['edit_event'] = Event::where('id', $eventId)->first();
+            $this->data['edit_faculty'] = Faculty::where('id', $this->data['edit_event']->faculty_id)->first();
+        }
+         if($request->ajax()){
+            if($request->get_programme_officer){
+                $get_faculty = Club::with('get_faculty')->where('id',$request->clubId)->first();
+                return response()->json([
+                     'success' => true,
+                     'faculty' => $get_faculty
+                ]);
+            }
+        }
+        return view('super_admin.create_event')->with($this->data);
+    }
+
+    public function eventlist(Request $request)
+    {
+        $adminId = Auth::guard('admin')->id();
+        $this->data['events'] = Event::with('get_faculty')->paginate(10);
+        $this->data['tasks'] = Tasks::with('get_admin', 'get_task_images', 'get_event')->where('admin_id', $adminId)->get();
+        return view('super_admin.event_list')->with($this->data);
+    }
+
+    public function saveEvent(Request $request)
+    {
+
+        $rules = [
+            'event_title'   => 'required',
+            'club_id'   => 'required',
+            'programme_officer'   => 'required',
+            'description'   => 'required',
+            'event_date'   => 'required',
+            'start_time'   => 'required',
+            'end_time'   => 'required',
+            'location'   => 'required',
+            'session'   => 'required',
+            'eligibility'   => 'required',
+            'registration_deadline'   => 'required',
+            'contact_person'   => 'required',
+            'contact_email'   => 'required',
+            'seat_count'   => 'required',
+            'event_type'   => 'required'
+        ];
+
+        if($request['event_type'] == 'paid'){
+            $rules['price'] = 'required';
+        }
+
+        if (empty($request['event_id']) && !$request->has('old_banner')) {
+            $rules['banner_image'] = 'required|image|mimes:jpeg,png,jpg';
+        } else if ($request->hasFile('banner_image')) {
+            $rules['banner_image'] = 'image|mimes:jpeg,png,jpg';
+        }
+        $request->validate($rules);
+        try {
+            if (!empty($request['event_id'])) {
+                $message = 'Event Updated successfully';
+                $event = Event::find($request['event_id']);
+            } else {
+                $event = new Event();
+                $message = 'Event saved successfully';
+            }
+
+            if(!empty($request['task_id'])){
+                $taskId = decrypt($request['task_id']);
+            }else{
+                $taskId = null;
+            }
+
+            if ($request->hasFile('banner_image')) {
+                $file = $request->file('banner_image');
+                $img_name = time() . '_' . $file->getClientOriginalName();
+                $file->storeAs('event_banner', $img_name , 'public');
+                $event->banner_image = 'event_banner/' . $img_name;
+            } elseif ($request->has('old_banner')) {
+                $event->banner_image = $request->old_banner;
+            }
+            $adminId = Auth::guard('admin')->id();
+            $event->club_id  = $request['club_id'];
+            $event->task_id = $taskId;
+            $event->created_by =  $adminId ?? '';
+            $event->price = $request['price'] ?? 0;
+            $event->faculty_id = $request['programme_officer'] ?? '';
+            $event->title  = $request['event_title'] ?? '';
+            $event->description = $request['description'] ?? '';
+            $event->event_date = $request['event_date'] ?? '';
+            $event->start_time  = $request['start_time'] ?? '';
+            $event->end_time = $request['end_time']  ?? '';
+            $event->event_type = $request['event_type'] ?? '';
+            $event->seat_count = $request['seat_count'] ?? '';
+            $event->location  = $request['location'] ?? '';
+            $event->session = $request['session']  ?? '';
+            $event->eligibility_criteria = $request['eligibility']  ?? '';
+            $event->end_registration = $request['registration_deadline']  ?? '';
+            $event->contact_person = $request['contact_person']  ?? '';
+            $event->contact_email = $request['contact_email']  ?? '';
+            $event->save();
+
+            if ($event && !empty($taskId)) {
+                $get_task = Tasks::where('id', $taskId)->first();
+                if ($get_task) {
+                    ActivityLog::add($get_task->title . ' - Task Completed', auth('admin')->user());
+                    $get_task->update([
+                        'status' => 'completed'
+                    ]);
+                }
+            }
+
+            if(!empty($request['event_id'])){
+                ActivityLog::add($event->title . ' - Event Updated', auth('admin')->user());
+            }else{
+                ActivityLog::add($event->title .' - New Event Created', auth('admin')->user());
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'event' => $event,
+            ]);
+    } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save event',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+}
+}

@@ -1,0 +1,93 @@
+$(document).on("submit", "#studentForm", function (e) {
+    e.preventDefault();
+     let fields = [
+        {
+            id: "#student_name",
+            condition: (val) => val === "",
+            message: "Student Name is required",
+        },
+        {
+            id: "#email",
+            condition: (val) => val === "",
+            message: "Email is required",
+        },
+        {
+            id: "#mobile_number",
+            condition: (val) => val === "",
+            message: "Mobile Number is required",
+        },
+        {
+            id: "#department_id",
+            condition: (val) => val === "",
+            message: "Please Select Department",
+        },
+        {
+            id: "#programme_id",
+            condition: (val) => val === "",
+            message: "Please Select Programme",
+        },
+    ];
+    let isValid = true;
+    for (const field of fields) {
+        const result = validateField(field); // synchronous, so no async/await needed
+        if (!result) isValid = false;
+    }
+    if (!isValid) return;
+    let formData = new FormData(this);
+    sendRequest(
+        "/admin/save-student",
+        formData,
+        "POST",
+        function (res) {
+            if (res.success) {
+                showToast(res.message, "success", 2000);
+                setTimeout(function () {
+                    window.location.href = "/admin/student-list"; // Replace with your actual event list route
+                }, 2000);
+            } else {
+                showToast(res.message, "error", 2000);
+            }
+        },
+        function (err) {
+            if (err.errors) {
+                let msg = "";
+                $.each(err.errors, function (k, v) {
+                    msg += v[0] + "<br>";
+                });
+                showToast(msg, "error", 2000);
+            } else {
+                showToast(err.message || "Unexpected error", "error", 2000);
+            }
+        }
+    );
+});
+
+document.getElementById("fileInput").addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        const previewArea = document.getElementById("previewArea");
+        const uploadText = document.getElementById("uploadText");
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                previewArea.innerHTML = `
+                    <img src="${e.target.result}"
+                         class="mx-auto rounded-2xl w-40 h-40 object-cover" />
+                `;
+            };
+
+            reader.readAsDataURL(file);
+            uploadText.style.display = "none";
+        }
+    });
+
+document.getElementById("dropArea").addEventListener("click", function () {
+    document.getElementById("fileInput").click();
+});
+
+
+
+
+
+
