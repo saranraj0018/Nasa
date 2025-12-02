@@ -132,4 +132,89 @@ class StudentController extends Controller
             ], 500);
         }
     }
+
+    public function registerStudent(Request $request)
+    {
+        $this->data['department'] = Department::all();
+        $this->data['programme'] = Programme::all();
+        if ($request->student_id) {
+            $studentId = decrypt($request->student_id);
+            $this->data['edit_student'] = Student::where('id', $studentId)->first();
+        }
+        return view('student/register_student')->with($this->data);
+    }
+    public function registerSave(Request $request)
+    {
+        try {
+            $rules = [
+                'student_name'  => 'required',
+                'email'         => 'required|email',
+                'date_of_birth' => 'nullable',
+                'mobile_number' => 'required|digits:10',
+                'department_id' => 'required',
+                'programme_id'  => 'required',
+            ];
+
+                $exists = Student::where('email', $request['email'])->exists();
+                $mobile_exists = Student::where('mobile_number', $request['mobile_number'])->exists();
+                if ($exists) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Email ID is already exists!',
+                        'error' => 'Email ID is already exists!',
+                    ], 500);
+                }
+                if ($mobile_exists) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Mobile Number is already exists!',
+                        'error' => 'Mobile Number is already exists!',
+                    ], 500);
+                }
+
+
+           if ($request->hasFile('banner_image')) {
+                $rules['banner_image'] = 'image|mimes:jpeg,png,jpg';
+            }
+
+            $request->validate($rules);
+
+                $student = new Student();
+                $message = 'Student Registered Successfully';
+
+            if ($request->hasFile('banner_image')) {
+                $file = $request->file('banner_image');
+                $img_name = time() . '_' . $file->getClientOriginalName();
+                $file->storeAs('student', $img_name, 'public');
+                $student->profile_pic = 'student/' . $img_name;
+            }
+
+            $password = Hash::make($request['mobile_number']);
+            $student->name  = $request['student_name'];
+            $student->email  = $request['email'];
+            $student->password  = $password;
+            $student->mobile_number  = $request['mobile_number'];
+            $student->date_of_birth = $request['date_of_birth'] ?? '';
+            $student->department_id = $request['department_id'] ?? '';
+            $student->programme_id = $request['programme_id'] ?? '';
+            $student->save();
+
+            session()->put('register_student', $student);
+
+            ActivityLog::add($student->name . ' - New Student Created', $student);
+
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }
