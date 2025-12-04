@@ -8,8 +8,7 @@ use App\Http\Controllers\student\CertificatesController;
 use App\Http\Controllers\student\RegisterEventController;
 use App\Http\Controllers\student\MyRegisterEventsController;
 use App\Http\Controllers\student\StudentDashboardController;
-
-
+use App\Http\Controllers\StudentController;
 
 Route::prefix('student')->group(function () {
 
@@ -19,6 +18,8 @@ Route::prefix('student')->group(function () {
         Route::get('forgot-password', [StudentPasswordController::class, 'showEmailForm'])->name('password.forgot');
         Route::post('verify-email', [StudentPasswordController::class, 'verifyEmail'])->name('password.verify');
         Route::post('update-password', [StudentPasswordController::class, 'updatePassword'])->name('password.update');
+        Route::get('/register-student', [StudentController::class, 'registerStudent'])->name('register_student');
+        Route::post('/register-save', [StudentController::class, 'registerSave'])->name('register_save');
     });
 
     Route::middleware('auth:student')->group(function () {

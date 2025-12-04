@@ -86,7 +86,7 @@ function showToast(message, type = "success", duration = 3000) {
     };
 
     const icons = {
-        success: `<svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="#ab5f00" stroke-width="2" viewBox="0 0 24 24">
+        success: `<svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="#9F3895" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                   </svg>`,
         error: `<svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="red" stroke-width="2" viewBox="0 0 24 24">

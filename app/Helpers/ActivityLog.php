@@ -12,7 +12,7 @@ class ActivityLog
            $user_type = 'admin';
         }else if(!empty(session()->get('super_admin'))){
            $user_type = 'super_admin';
-        }else if(!empty(session()->get('student'))){
+        }else if(!empty(session()->get('student')) || !empty(session()->get('register_student'))){
            $user_type = 'student';
         }
 

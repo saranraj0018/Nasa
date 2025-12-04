@@ -37,7 +37,7 @@
                                 <div class="relative">
                                     <input :type="show ? 'text' : 'password'" name="password"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 mt-1
-                              focus:outline-none focus:ring-2 focus:ring-[#ab5f00] pr-10"
+                               focus:outline-none focus:ring focus:ring-primary/40 pr-10"
                                         placeholder="••••••••" />
                                     <button type="button" @click="show = !show"
                                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg">
@@ -49,20 +49,15 @@
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                            {{-- Remember Me --}}
-                            <div class="flex items-center">
-                                <input type="checkbox" name="remember" id="remember"
-                                    class="w-3.5 h-3.5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
-                                <label for="remember" class="ml-2 text-md text-[#3F003E]">Remember me</label>
-                            </div>
                             <div class="flex flex-col justify-center align-center">
                                 {{-- Login Button --}}
                                 <button type="submit"
-                                    class="mx-auto w-90 py-2 bg-gradient-to-r from-primary to-pink-500 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition">
+                                    class="w-full lg:w-auto py-2 bg-gradient-to-r from-primary to-pink-500 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition">
                                     Access mission controll
                                 </button>
                                 <div class="text-center mt-2">
-                                    <a href="{{ route('admin.password.forgot') }}#" class="text-xs text-purple-600 hover:underline">Forget
+                                    <a href="{{ route('admin.password.forgot') }}#"
+                                        class="text-xs text-purple-600 hover:underline">Forget
                                         Password?</a>
                                 </div>
                             </div>
