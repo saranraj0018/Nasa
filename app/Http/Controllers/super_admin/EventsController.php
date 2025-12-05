@@ -19,45 +19,48 @@ class EventsController extends Controller
     public function index(Request $request)
     {
         $now = Carbon::now();
-        $this->data['ongoingEvents'] = Event::with('registrations')->whereDate('event_date', $now->toDateString())
-            // ->whereTime('start_time', '<=', $now->toTimeString())
-            // ->whereTime('end_time', '>=', $now->toTimeString())
-            ->where('end_registration', '<=', $now) // not after registration deadline
+        $this->data['ongoingEvents'] = Event::with('registrations')
+            ->whereDate('event_date', $now->toDateString())
+            ->whereTime('start_time', '<=', $now->toTimeString())
+            ->whereTime('end_time', '>=', $now->toTimeString())
+            ->orderBy('start_time', 'asc')
             ->get();
-        $this->data['upcomingEvents'] = Event::with('registrations')->where(function ($query) use ($now) {
+
+        // Upcoming Events
+        $this->data['upcomingEvents'] = Event::with('registrations')
+            ->where(function ($query) use ($now) {
                 $query->whereDate('event_date', '>', $now->toDateString())
                     ->orWhere(function ($q) use ($now) {
-                        $q->whereDate('event_date', '=', $now->toDateString());
-                        //    ->whereTime('start_time', '>', $now->toTimeString());
+                        $q->whereDate('event_date', '=', $now->toDateString())
+                            ->whereTime('start_time', '>', $now->toTimeString());
                     });
             })
-            ->where('end_registration', '<=', $now)
             ->orderBy('event_date', 'asc')
             ->orderBy('start_time', 'asc')
             ->get();
         $this->data['registeredEvents'] = StudentEventRegistration::with('event')
             ->get();
         $this->data['completedEvents'] = StudentEventRegistration::with('event')
-            ->where('status',2)
+            ->where('status', 2)
             ->get();
-         return view('super_admin.event_index')->with($this->data);
+        return view('super_admin.event_index')->with($this->data);
     }
 
     public function createEvent(Request $request)
     {
         $this->data['faculty'] = Faculty::get();
         $this->data['club'] = Club::get();
-        if($request->event_id){
+        if ($request->event_id) {
             $eventId = decrypt($request->event_id);
             $this->data['edit_event'] = Event::where('id', $eventId)->first();
             $this->data['edit_faculty'] = Faculty::where('id', $this->data['edit_event']->faculty_id)->first();
         }
-         if($request->ajax()){
-            if($request->get_programme_officer){
-                $get_faculty = Club::with('get_faculty')->where('id',$request->clubId)->first();
+        if ($request->ajax()) {
+            if ($request->get_programme_officer) {
+                $get_faculty = Club::with('get_faculty')->where('id', $request->clubId)->first();
                 return response()->json([
-                     'success' => true,
-                     'faculty' => $get_faculty
+                    'success' => true,
+                    'faculty' => $get_faculty
                 ]);
             }
         }
@@ -93,7 +96,7 @@ class EventsController extends Controller
             'event_type'   => 'required'
         ];
 
-        if($request['event_type'] == 'paid'){
+        if ($request['event_type'] == 'paid') {
             $rules['price'] = 'required';
         }
 
@@ -112,16 +115,16 @@ class EventsController extends Controller
                 $message = 'Event saved successfully';
             }
 
-            if(!empty($request['task_id'])){
+            if (!empty($request['task_id'])) {
                 $taskId = decrypt($request['task_id']);
-            }else{
+            } else {
                 $taskId = null;
             }
 
             if ($request->hasFile('banner_image')) {
                 $file = $request->file('banner_image');
                 $img_name = time() . '_' . $file->getClientOriginalName();
-                $file->storeAs('event_banner', $img_name , 'public');
+                $file->storeAs('event_banner', $img_name, 'public');
                 $event->banner_image = 'event_banner/' . $img_name;
             } elseif ($request->has('old_banner')) {
                 $event->banner_image = $request->old_banner;
@@ -151,16 +154,16 @@ class EventsController extends Controller
                 $get_task = Tasks::where('id', $taskId)->first();
                 if ($get_task) {
                     ActivityLog::add($get_task->title . ' - Task Completed', auth('admin')->user());
-                    $get_task->update([
+                    $update = Tasks::where('id', $taskId)->update([
                         'status' => 'completed'
                     ]);
                 }
             }
 
-            if(!empty($request['event_id'])){
+            if (!empty($request['event_id'])) {
                 ActivityLog::add($event->title . ' - Event Updated', auth('admin')->user());
-            }else{
-                ActivityLog::add($event->title .' - New Event Created', auth('admin')->user());
+            } else {
+                ActivityLog::add($event->title . ' - New Event Created', auth('admin')->user());
             }
 
             return response()->json([
@@ -168,12 +171,12 @@ class EventsController extends Controller
                 'message' => $message,
                 'event' => $event,
             ]);
-    } catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to save event',
-                'error' => $e->getMessage(),
+                'error' => 'Failed to save event',
             ], 500);
         }
-}
+    }
 }
