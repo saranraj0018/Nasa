@@ -50,7 +50,11 @@ class AdminAuthController extends Controller
             session()->forget('super_admin');
         }
 
-        ActivityLog::add($admin_details->name . " - Login ", auth('admin')->user());
+        if (!empty(session()->get('super_admin'))) {
+            ActivityLog::add($admin_details->name . " - Super Admin Login ", auth('admin')->user());
+        } else if (!empty(session()->get('admin'))) {
+            ActivityLog::add($admin_details->name . " - Admin Login ", auth('admin')->user());
+        }
 
         return view('admin.role_check_login')->with($this->data);
     }

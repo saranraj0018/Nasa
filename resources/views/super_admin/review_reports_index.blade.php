@@ -19,6 +19,7 @@
             </div>
         </div> --}}
         <div class="bg-white rounded-2xl shadow py-8 px-7 mt-3">
+            @if($reports->isNotEmpty())
             @foreach ($reports as $report)
             <div class="shadow p-5 rounded-2xl mt-5">
                <div class="flex items-center justify-between">
@@ -32,6 +33,9 @@
                    <p class="text-xs mt-2"><i class="fa fa-calendar text-primary "></i> Events : {{ \Carbon\Carbon::parse($report->get_event->event_date)->format('d/m/Y') }}    <i class="fa fa-calendar text-primary"></i> Submitted :  {{ \Carbon\Carbon::parse($report->created_at)->format('d/m/Y') }}</p>
              </div>
              @endforeach
+             @else
+             <p class="text-center">No reports available</p>
+             @endif
             </div>
     </section>
 </x-layouts.app>

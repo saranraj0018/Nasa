@@ -21,19 +21,20 @@ class StudentDashboardController extends Controller
         $this->data['completed_events'] = StudentEventRegistration::where('student_id', $student->id)->where('status', 2)->get();
         $this->data['ongoingEvents'] = Event::with('registrations')
             ->whereDate('event_date', $now->toDateString())
-            // ->whereTime('start_time', '<=', $now->toTimeString())
-            // ->whereTime('end_time', '>=', $now->toTimeString())
-            ->where('end_registration', '<=', $now) // not after registration deadline
+            ->whereTime('start_time', '<=', $now->toTimeString())
+            ->whereTime('end_time', '>=', $now->toTimeString())
+            ->orderBy('start_time', 'asc')
             ->get();
+
+        // Upcoming Events
         $this->data['upcomingEvents'] = Event::with('registrations')
             ->where(function ($query) use ($now) {
                 $query->whereDate('event_date', '>', $now->toDateString())
                     ->orWhere(function ($q) use ($now) {
-                        $q->whereDate('event_date', '=', $now->toDateString());
-                        //    ->whereTime('start_time', '>', $now->toTimeString());
+                        $q->whereDate('event_date', '=', $now->toDateString())
+                            ->whereTime('start_time', '>', $now->toTimeString());
                     });
             })
-            ->where('end_registration', '<=', $now)
             ->orderBy('event_date', 'asc')
             ->orderBy('start_time', 'asc')
             ->get();

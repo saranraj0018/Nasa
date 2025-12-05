@@ -65,8 +65,10 @@
                 @php
                   $registered = \App\Models\StudentEventRegistration::where(['event_id' => $event['id']])->count();
                   $available = $event['seat_count'] - $registered;
-                    $student = $studentId;
-            $registration_check = $event->registrations->where('student_id', $student)->first();
+                  $student = $studentId;
+                  $registration_check = $event->registrations->where('student_id', $student)->first();
+                  $registrationDeadline = \Carbon\Carbon::parse($event->end_registration);
+                  $today = \Carbon\Carbon::now();
                 @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
@@ -108,13 +110,18 @@
                                     <p class="px-1">{{ $event['location'] }}</p>
                                 </div>
                             </div>
-                            @if (empty($registration_check) && $available > 0)
-                                <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
-                                    class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
-                                    data-event_id={{ $event->id }}>
-                                    Register Now
-                                </button>
-                            @endif
+                              @if (empty($registration_check) && $available > 0 && $registrationDeadline >= $today)
+    <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
+        class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
+        data-event_id={{ $event->id }}>
+        Register Now
+    </button>
+@else
+    <button disabled
+        class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
+        Registration Closed
+    </button>
+@endif
                         </div>
                     </div>
                 @endforeach
@@ -129,6 +136,8 @@
                   $available = $ongoing_event->seat_count - $registered;
                   $student = $studentId;
                   $registration_check = $ongoing_event->registrations->where('student_id', $student)->first();
+                   $registrationDeadline = \Carbon\Carbon::parse($ongoing_event->end_registration);
+                  $today = \Carbon\Carbon::now();
                 @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
@@ -171,13 +180,18 @@
                                     <p class="px-1">{{ $ongoing_event['location'] }}</p>
                                 </div>
                             </div>
-                            @if (empty($registration_check) && $available > 0)
-                                <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
-                                    class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
-                                    data-event_id={{ $ongoing_event->id }}>
-                                    Register Now
-                                </button>
-                            @endif
+                              @if (empty($registration_check) && $available > 0 && $registrationDeadline >= $today)
+    <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
+        class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
+        data-event_id={{ $ongoing_event->id }}>
+        Register Now
+    </button>
+@else
+    <button disabled
+        class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
+        Registration Closed
+    </button>
+@endif
                         </div>
                     </div>
                 @endforeach

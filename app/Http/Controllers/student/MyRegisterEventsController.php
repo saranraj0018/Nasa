@@ -9,21 +9,25 @@ use App\Models\StudentUploadProof;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class MyRegisterEventsController extends Controller
 {
     public function index(Request $request)
     {
         $student = session()->get('student');
+        $now = Carbon::now();
         $this->data['registeredEvents'] = StudentEventRegistration::with('event')->where('student_id', $student->id)
             ->get();
         $this->data['completedEvents'] = StudentEventRegistration::with('event')
-            ->whereHas('event', function ($query) {
-                $query->where('end_registration', '<=', now());
+            ->whereHas('event', function ($query) use ($now) {
+                $query->whereDate('event_date', '<', $now->toDateString())
+                    ->orWhere(function ($q) use ($now) {
+                        $q->whereDate('event_date', '=', $now->toDateString())
+                            ->whereTime('end_time', '<', $now->toTimeString());
+                    });
             })
-            ->where([
-                'student_id' => $student->id,
-            ])
+            ->where('student_id', $student->id)
             ->get();
 
         $this->data['activeCount'] = StudentEventRegistration::where('student_id', $student->id)
@@ -55,14 +59,14 @@ class MyRegisterEventsController extends Controller
                 $fileName = $file->getClientOriginalName();
                 $filePath = $file->storeAs('student_upload_proof', $fileName, 'public');
                 $exists = StudentUploadProof::where(['student_id' => $validated['student_id'], 'event_id' => $validated['event_id'], 'file_name' =>  $fileName, 'file_path' => $filePath])->first();
-                if(!$exists){
-                $upload = new StudentUploadProof();
-                $upload->student_id = $validated['student_id'];
-                $upload->event_id   = $validated['event_id'] ?? null;
-                $upload->file_name  = $fileName; // Original filename
-                $upload->file_path  = $filePath;         // Public path
-                $upload->file_type  = $file->getClientOriginalExtension();
-                $upload->save();
+                if (!$exists) {
+                    $upload = new StudentUploadProof();
+                    $upload->student_id = $validated['student_id'];
+                    $upload->event_id   = $validated['event_id'] ?? null;
+                    $upload->file_name  = $fileName; // Original filename
+                    $upload->file_path  = $filePath;         // Public path
+                    $upload->file_type  = $file->getClientOriginalExtension();
+                    $upload->save();
                 }
             }
 
@@ -71,7 +75,6 @@ class MyRegisterEventsController extends Controller
                 'message' => 'Proof uploaded successfully!',
                 'data' => $upload
             ]);
-
         } catch (Exception $e) {
             return $e->getMessage();
         }
