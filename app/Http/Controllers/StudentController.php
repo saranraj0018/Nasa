@@ -41,6 +41,7 @@ class StudentController extends Controller
                 'mobile_number' => 'required|digits:10',
                 'department_id' => 'required',
                 'programme_id'  => 'required',
+                'gender' => 'required'
             ];
 
             if (!empty($request['student_id'])) {
@@ -112,6 +113,7 @@ class StudentController extends Controller
             $student->date_of_birth = $request['date_of_birth'] ?? '';
             $student->department_id = $request['department_id'] ?? '';
             $student->programme_id = $request['programme_id'] ?? '';
+            $student->gender = $request['gender'] ?? '';
             $student->save();
 
             if (!empty($request['student_id'])) {
@@ -153,6 +155,7 @@ class StudentController extends Controller
                 'mobile_number' => 'required|digits:10',
                 'department_id' => 'required',
                 'programme_id'  => 'required',
+                'gender' => 'required'
             ];
 
                 $exists = Student::where('email', $request['email'])->exists();
@@ -197,6 +200,7 @@ class StudentController extends Controller
             $student->date_of_birth = $request['date_of_birth'] ?? '';
             $student->department_id = $request['department_id'] ?? '';
             $student->programme_id = $request['programme_id'] ?? '';
+            $student->gender = $request['gender'] ?? '';
             $student->save();
 
             session()->put('register_student', $student);

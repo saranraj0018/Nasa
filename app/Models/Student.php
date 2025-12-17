@@ -9,7 +9,7 @@ class Student extends Authenticatable
 {
     use Notifiable;
     protected $guard = 'student';
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = ['department_id', 'programme_id', 'mobile_number','name', 'email', 'password', 'date_of_birth', 'gender'];
     protected $hidden = ['password'];
 
     public function get_department()

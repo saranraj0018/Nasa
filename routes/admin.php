@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\SuperAdminAuthController;
 use App\Http\Controllers\super_admin\AssignTasksController;
 use App\Http\Controllers\super_admin\ReviewReportsController;
 use App\Http\Controllers\super_admin\SuperAdminHomeController;
+use App\Http\Controllers\student\StudentImportExportController;
 use App\Http\Controllers\super_admin\StudentApprovalController;
 
 Route::prefix('admin')->group(function () {
@@ -86,6 +87,14 @@ Route::prefix('admin')->group(function () {
         Route::get('{id}/download-pdf', [AdminReportsController::class, 'downloadPdf'])->name('reports_download_pdf');
 
         Route::post('/student-event-approval', [StudentApprovalController::class, 'studentEventApproval'])->name('student_event_approval');
+
+        //Student Upload
+        Route::get('/students/download-template', [StudentImportExportController::class, 'downloadTemplate'])
+            ->name('students.download.template');
+
+        Route::post('/students/upload', [StudentImportExportController::class, 'uploadStudents'])
+            ->name('students.upload');
+
 
         //create admins
         Route::get('/admin-list', [AdminController::class, 'index'])->name('admin_list');
