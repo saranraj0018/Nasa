@@ -6,6 +6,7 @@ use App\Models\Department;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class DepartmentsSheet implements FromCollection, WithHeadings, WithTitle
 {
@@ -23,4 +24,5 @@ class DepartmentsSheet implements FromCollection, WithHeadings, WithTitle
     {
         return 'Departments';
     }
+ 
 }

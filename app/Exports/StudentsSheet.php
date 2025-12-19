@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StudentsSheet implements WithHeadings,WithTitle
+class StudentsSheet implements WithHeadings, WithTitle
 {
     public function headings(): array
     {
@@ -24,4 +26,5 @@ class StudentsSheet implements WithHeadings,WithTitle
     {
         return 'Student Upload Sheet';
     }
+
 }

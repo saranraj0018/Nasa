@@ -70,6 +70,8 @@
                     <x-menu.item name="Student" icon="fas fa-user-graduate" route="student_list" />
                     <x-menu.item name="Club" icon="fas fa-users" route="club_list" />
                     <x-menu.item name="Create Event" icon="fas fa-pencil-alt" route="event_list" />
+                    <x-menu.item name="Student Attendance" icon="fa-graduation-cap" route="student_attendance" />
+                    <x-menu.item name="Assign Grades" icon="fa-star" route="student_attendance" />
                     <x-menu.item name="Student Approval" icon="fas fa-user-check" route="student_approval" />
                     <x-menu.item name="Reports" icon="fa-book" route="reports" />
                 </x-slot:menus>

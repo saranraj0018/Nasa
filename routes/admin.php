@@ -11,9 +11,11 @@ use App\Http\Controllers\AdminPasswordController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\admin\AdminHomeController;
 use App\Http\Controllers\Auth\StudentAuthController;
+use App\Http\Controllers\admin\AssignGradeController;
 use App\Http\Controllers\admin\AdminReportsController;
 use App\Http\Controllers\super_admin\EventsController;
 use App\Http\Controllers\Auth\SuperAdminAuthController;
+use App\Http\Controllers\admin\StudentAttendanceController;
 use App\Http\Controllers\super_admin\AssignTasksController;
 use App\Http\Controllers\super_admin\ReviewReportsController;
 use App\Http\Controllers\super_admin\SuperAdminHomeController;
@@ -51,6 +53,12 @@ Route::prefix('admin')->group(function () {
         Route::post('/save-task', [AssignTasksController::class, 'saveTasks'])->name('save_task');
 
         Route::get('/student-approval', [StudentApprovalController::class, 'index'])->name('student_approval');
+        Route::get('/student-attendance', [StudentAttendanceController::class, 'index'])->name('student_attendance');
+        Route::get('/student-attendance-entry', [StudentAttendanceController::class, 'attendanceEntry'])->name('student_attendance_entry');
+        Route::get('/attendance/download', [StudentAttendanceController::class, 'download'])->name('attendance.download');
+        Route::post('/attendance/mark', [StudentAttendanceController::class, 'markAttendance'])->name('attendance.mark');
+        Route::post('/assign-grade', [AssignGradeController::class, 'index'])->name('assign_grades');
+
         Route::get('/review-reports', [ReviewReportsController::class, 'index'])->name('review_reports');
         Route::get('/home', [AdminHomeController::class, 'index'])->name('home');
         Route::get('/reports', [AdminReportsController::class, 'index'])->name('reports');

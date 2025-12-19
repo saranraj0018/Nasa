@@ -44,47 +44,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Filters Section -->
-        <h1 class="text-primary mt-8 font-semibold">Filters & Actions</h1>
-        <div class="bg-white rounded-2xl shadow p-5 mt-3">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <!-- Search -->
-                <div class="flex items-center bg-[#F2E8F5] rounded-full px-3">
-                    <select name="status" class="bg-[#F2E8F5] w-full rounded-full px-4 py-2 focus:outline-none">
-                        <option value="">Search Status</option>
-                        <option value="2">verified</option>
-                        <option value="1">not verified</option>
-                    </select>
-                </div>
-                <!-- Status Filter -->
-                <div class="bg-[#F2E8F5] rounded-full">
-                    <select name="student" class="bg-[#F2E8F5] w-full rounded-full px-4 py-2 focus:outline-none">
-                        <option value="">Search Student</option>
-                        @foreach ($students as $student)
-                            <option value="{{ $student->id }}">{{ $student->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <!-- Event Filter -->
-                <div class="bg-[#F2E8F5] rounded-full">
-                    <select name="event" class="bg-[#F2E8F5] w-full rounded-full px-4 py-2 focus:outline-none">
-                        <option value="">Search Event</option>
-                        @foreach ($event as $eve)
-                            <option value="{{ $eve->title }}">{{ $eve->title }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <button id="refreshBtn" class="px-4 py-1 bg-[#F2E8F5] text-gray-700 rounded-full"> Refresh </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Student Applications -->
-        <h1 class="text-primary mt-8 font-semibold">Student Applications</h1>
-        <p class="text-gray-600 text-sm mb-3">Review and process student event applications</p>
-
         <!-- Verified Students -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
             @foreach ($registeredEvents as $event)

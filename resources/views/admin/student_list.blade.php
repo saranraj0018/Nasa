@@ -2,43 +2,33 @@
     <div class="bg-[#F5E8F5] w-full rounded-full shadow-sm px-8 py-3">
         <h3 class="font-semibold text-primary">Student</h3>
     </div>
-   <div class="flex justify-end items-center gap-3 mt-3">
+    <div class="flex justify-end items-center gap-3 mt-3">
 
-    <!-- Add Student -->
-    <a href="{{ route('create_student') }}"
-       class="flex items-center justify-center gap-1 w-[140px]
+        <!-- Add Student -->
+        <a href="{{ route('create_student') }}"
+            class="flex items-center justify-center gap-1 w-[140px]
               bg-gradient-to-r from-primary to-pink-600
               text-white font-medium py-1 rounded-full">
-        <i class="fa fa-plus"></i>
-        Add Student
-    </a>
+            <i class="fa fa-plus"></i>
+            Add Student
+        </a>
 
-    <!-- Download Template -->
-    <a href="{{ route('students.download.template') }}"
-       class="px-4 py-1 bg-green-600 text-white rounded-full">
-        Download Template
-    </a>
+        <!-- Download Template -->
+        <a href="{{ route('students.download.template') }}" class="px-4 py-1 bg-primary text-white rounded-full">
+            <i class="fa fa-download"></i> Download Template
+        </a>
 
-    <!-- Upload Students -->
-    <form action="{{ route('students.upload') }}"
-          method="POST"
-          enctype="multipart/form-data"
-          class="flex items-center gap-2">
-        @csrf
+        <!-- Upload Students -->
+        <form action="{{ route('students.upload') }}" method="POST" enctype="multipart/form-data"
+            class="flex items-center gap-2">
+            @csrf
+            <input type="file" name="file" required class="border border-gray-300 rounded px-2 py-1 text-sm">
+            <button type="submit" class="px-4 py-1 bg-gradient-to-r from-primary to-pink-600 text-white rounded-full">
+                <i class="fa fa-upload"></i> Upload
+            </button>
+        </form>
 
-        <input type="file"
-               name="file"
-               required
-               class="border border-gray-300 rounded px-2 py-1 text-sm">
-
-        <button type="submit"
-                class="px-4 py-1 bg-blue-600 text-white rounded-full">
-            Upload
-        </button>
-    </form>
-
-</div>
-
+    </div>
 
     <section class="p-2">
         <div class="mt-6">
