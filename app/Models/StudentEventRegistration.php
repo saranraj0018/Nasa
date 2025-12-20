@@ -20,4 +20,9 @@ class StudentEventRegistration extends Model
     {
         return $this->hasMany(StudentUploadProof::class, 'student_id','student_id');
     }
+
+    public function get_attendance()
+    {
+        return $this->hasMany(StudentAttendance::class, 'student_id', 'student_id');
+    }
 }

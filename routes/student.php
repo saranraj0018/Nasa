@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\StudentAuthController;
 use App\Http\Controllers\student\CertificatesController;
 use App\Http\Controllers\student\RegisterEventController;
 use App\Http\Controllers\student\MyRegisterEventsController;
+use App\Http\Controllers\student\RazorpayController;
 use App\Http\Controllers\student\StudentDashboardController;
 use App\Http\Controllers\StudentController;
 
@@ -37,6 +38,11 @@ Route::prefix('student')->group(function () {
         Route::post('/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
         Route::get('/certificates', [CertificatesController::class, 'index'])->name('certificates');
         Route::get('/certificate_download', [CertificatesController::class, 'downloadCertificate'])->name('certificate_download');
+
+        Route::post('/razorpay-order', [RazorpayController::class, 'createOrder'])
+            ->name('razorpay_order');
+
+        Route::post('/razorpay-success', [RazorpayController::class, 'paymentSuccess'])
+            ->name('razorpay_success');
     });
 });
-

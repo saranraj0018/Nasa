@@ -57,7 +57,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/student-attendance-entry', [StudentAttendanceController::class, 'attendanceEntry'])->name('student_attendance_entry');
         Route::get('/attendance/download', [StudentAttendanceController::class, 'download'])->name('attendance.download');
         Route::post('/attendance/mark', [StudentAttendanceController::class, 'markAttendance'])->name('attendance.mark');
-        Route::post('/assign-grade', [AssignGradeController::class, 'index'])->name('assign_grades');
+        Route::get('/assign-grade', [AssignGradeController::class, 'index'])->name('assign_grades');
+        Route::get('/assign-grade-entry', [AssignGradeController::class, 'gradeEntry'])->name('assign_grade_entry');
+        Route::post('/grade-save', [AssignGradeController::class, 'saveGrades'])->name('grade_save');
 
         Route::get('/review-reports', [ReviewReportsController::class, 'index'])->name('review_reports');
         Route::get('/home', [AdminHomeController::class, 'index'])->name('home');

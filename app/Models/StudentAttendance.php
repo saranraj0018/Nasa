@@ -11,4 +11,9 @@ class StudentAttendance extends Model
         return $this->belongsTo(Student::class, 'student_id');
     }
 
+    public function get_grade()
+    {
+        return $this->belongsTo(StudentEventRegistration::class, 'student_id', 'student_id');
+    }
+
 }

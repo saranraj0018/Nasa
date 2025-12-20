@@ -29,13 +29,13 @@
 
     <section class="p-3 mt-4">
         <!-- Title -->
-        <div class="flex justify-between items-center mt-5">
+        <div class="flex justify-between items-center">
             <h1 class="text-lg font-semibold text-gray-800">
-                {{ $event->title ?? '' }}
+               Event :  {{ $event->title ?? '' }}
             </h1>
             @if(!empty($attendance_entry) && $attendance_entry->count() > 0)
             <a href="{{ route('attendance.download', ['event_id' => $event->id]) }}"
-                class="bg-primary text-white px-4 py-2 rounded-full shadow hover:bg-pink-900 transition">
+                class="bg-primary text-white px-4 py-2 rounded-full shadow transition">
                 <i class="fa fa-download mr-1"></i> Download
             </a>
             @endif
@@ -45,7 +45,6 @@
         <form method="POST" action="{{ route('attendance.mark') }}">
             @csrf
             <input type="hidden" name="event_id" value="{{ $event->id }}">
-
             @php
                 $anyEntryExists = $attendance_entry->whereNotNull('entry_time')->count() > 0;
                 $anyExitExists = $attendance_entry->whereNotNull('exit_time')->count() > 0;
@@ -53,7 +52,6 @@
                     $attendance_entry->whereNotNull('entry_time')->count() > 0 ||
                     $attendance_entry->whereNotNull('exit_time')->count() > 0;
             @endphp
-
             <div class="mt-4 bg-white rounded-2xl shadow overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-primary text-white uppercase text-sm">
@@ -129,11 +127,10 @@
 
             <div class="mt-5 text-center">
                 <button type="submit"
-                    class="bg-primary text-white px-8 py-2 rounded-full shadow hover:bg-pink-900 transition"
+                    class="bg-primary text-white px-8 py-2 rounded-full shadow transition"
                     {{ $anyExitExists && $studentExitExists ? 'disabled' : '' }}>
                     Submit Attendance
                 </button>
-
             </div>
         </form>
 

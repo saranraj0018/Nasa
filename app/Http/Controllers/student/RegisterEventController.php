@@ -65,7 +65,9 @@ class RegisterEventController extends Controller
 
         try {
             $register_event = StudentEventRegistration::where(['student_id' => $request->stu_id, 'event_id' => $request->event_id])->first();
+            
             if (!$register_event) {
+
                 $register = new StudentEventRegistration();
                 $register->student_id    = $request->stu_id;
                 $register->event_id      = $request->event_id ?? null;

@@ -11,16 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('student_event_registrations', function (Blueprint $table) {
+        Schema::create('event_payments', function (Blueprint $table) {
+
             $table->id();
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('event_id');
-            $table->enum('status', ['1', '2','3','4'])->comment('1 - Registered, 2 - Approved, 3 - Completed, 4 - Cancelled');
-            $table->enum('grade', ['a', 'b', 'c', 'd'])->comment('A - Winner, B - Runner Up, C - Completed, D - Disqualified')->nullable();
+            $table->string('order_id')->nullable();
+            $table->string('payment_id')->nullable();
+            $table->string('signature')->nullable();
+            $table->enum('status', ['created', 'paid', 'failed'])->default('created');
+            $table->text('failure_reason')->nullable();
+            $table->decimal('amount', 10, 2);
             $table->timestamps();
 
-            $table->foreign('event_id')->references('id')->on('events')->onDelete('no action');
             $table->foreign('student_id')->references('id')->on('students')->onDelete('no action');
+            $table->foreign('event_id')->references('id')->on('events')->onDelete('no action');
         });
     }
 
@@ -29,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-
+        Schema::dropIfExists('event_payments');
     }
 };
