@@ -145,6 +145,7 @@ class StudentController extends Controller
         }
         return view('student/register_student')->with($this->data);
     }
+    
     public function registerSave(Request $request)
     {
         try {
