@@ -31,13 +31,13 @@
         <!-- Title -->
         <div class="flex justify-between items-center">
             <h1 class="text-lg font-semibold text-gray-800">
-               Event :  {{ $event->title ?? '' }}
+                Event : {{ $event->title ?? '' }}
             </h1>
-            @if(!empty($attendance_entry) && $attendance_entry->count() > 0)
-            <a href="{{ route('attendance.download', ['event_id' => $event->id]) }}"
-                class="bg-primary text-white px-4 py-2 rounded-full shadow transition">
-                <i class="fa fa-download mr-1"></i> Download
-            </a>
+            @if (!empty($attendance_entry) && $attendance_entry->count() > 0)
+                <a href="{{ route('attendance.download', ['event_id' => $event->id]) }}"
+                    class="bg-primary text-white px-4 py-2 rounded-full shadow transition">
+                    <i class="fa fa-download mr-1"></i> Download
+                </a>
             @endif
         </div>
 
@@ -61,8 +61,9 @@
                             <th class="px-4 py-3">Department</th>
                             <th class="px-4 py-3">Phone</th>
                             <th class="px-4 py-3">Email</th>
-                            <th class="px-4 py-3 text-center">Entry</th>
-                            <th class="px-4 py-3 text-center">Exit</th>
+                            <th class="px-4 py-3 text-center"> Entry <br> <input type="checkbox" id="selectAllEntry">
+                            </th>
+                            <th class="px-4 py-3 text-center">Exit <br> <input type="checkbox" id="selectAllExit"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -96,7 +97,7 @@
                                         <label class="inline-flex items-center">
                                             <input type="checkbox"
                                                 name="attendance[{{ $attendance->student_id }}][entry]"
-                                                class="form-checkbox h-5 w-5 text-green-500"
+                                                class="form-checkbox h-5 w-5 text-green-500 entry-checkbox"
                                                 {{ $studentEntryExists ? 'checked' : '' }}
                                                 {{ $anyEntryExists ? 'disabled' : '' }}>
                                         </label>
@@ -107,7 +108,7 @@
                                         <label class="inline-flex items-center">
                                             <input type="checkbox"
                                                 name="attendance[{{ $attendance->student_id }}][exit]"
-                                                class="form-checkbox h-5 w-5 text-red-500"
+                                                class="form-checkbox h-5 w-5 text-red-500 exit-checkbox"
                                                 {{ $studentExitExists ? 'checked' : '' }}
                                                 {{ $anyExitExists ? 'disabled' : '' }}>
                                         </label>
@@ -126,8 +127,7 @@
             </div>
 
             <div class="mt-5 text-center">
-                <button type="submit"
-                    class="bg-primary text-white px-8 py-2 rounded-full shadow transition"
+                <button type="submit" class="bg-primary text-white px-8 py-2 rounded-full shadow transition"
                     {{ $anyExitExists && $studentExitExists ? 'disabled' : '' }}>
                     Submit Attendance
                 </button>
@@ -138,3 +138,18 @@
     </section>
 
 </x-layouts.app>
+<script>
+    // Select All Entry
+    document.getElementById('selectAllEntry').addEventListener('change', function () {
+        document.querySelectorAll('.entry-checkbox:not(:disabled)').forEach(cb => {
+            cb.checked = this.checked;
+        });
+    });
+
+    // Select All Exit
+    document.getElementById('selectAllExit').addEventListener('change', function () {
+        document.querySelectorAll('.exit-checkbox:not(:disabled)').forEach(cb => {
+            cb.checked = this.checked;
+        });
+    });
+</script>

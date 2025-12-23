@@ -27,11 +27,10 @@ class RegisterEventController extends Controller
             ->get();
         $this->data['ongoingEvents'] = Event::with('registrations')
             ->whereDate('event_date', $now->toDateString())
-            ->whereTime('start_time', '<=', $now->toTimeString())
-            ->whereTime('end_time', '>=', $now->toTimeString())
+            // ->whereTime('start_time', '<=', $now->toTimeString())
+            // ->whereTime('end_time', '>=', $now->toTimeString())
             ->orderBy('start_time', 'asc')
             ->get();
-
         // Upcoming Events
         $this->data['upcomingEvents'] = Event::with('registrations')
             ->where(function ($query) use ($now) {
@@ -53,6 +52,9 @@ class RegisterEventController extends Controller
         $this->data['attendedCount'] = StudentEventRegistration::where('student_id', $student->id)
             ->where('status', 2)
             ->count();
+        $this->data['studentRegistrations'] = \App\Models\StudentEventRegistration::where('student_id', $student->id)
+            ->with('event') // eager load event for date and type
+            ->get();
         return view('student.register_event_index')->with($this->data);
     }
 
@@ -65,7 +67,7 @@ class RegisterEventController extends Controller
 
         try {
             $register_event = StudentEventRegistration::where(['student_id' => $request->stu_id, 'event_id' => $request->event_id])->first();
-            
+
             if (!$register_event) {
 
                 $register = new StudentEventRegistration();

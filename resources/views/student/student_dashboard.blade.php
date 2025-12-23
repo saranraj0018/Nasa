@@ -70,20 +70,34 @@
             <!-- Left side -->
             <h3 class="font-semibold text-primary">Events</h3>
         </div>
+
         <!-- Upcoming Event Section -->
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Upcoming Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($upcomingEvents as $event)
                     @php
-                        $registered = \App\Models\StudentEventRegistration::where([
-                            'event_id' => $event['id'],
-                        ])->count();
+                        $eventDate = \Carbon\Carbon::parse($event->event_date)->toDateString();
+                        $registered = \App\Models\StudentEventRegistration::where('event_id', $event['id'])->count();
                         $available = $event['seat_count'] - $registered;
-                        $student = $studentId;
-                        $registration_check = $event->registrations->where('student_id', $student)->first();
+
+                        // Check if student already registered for this event
+                        $registration_check = $event->registrations->where('student_id', $studentId)->first();
+
                         $registrationDeadline = \Carbon\Carbon::parse($event->end_registration);
                         $today = \Carbon\Carbon::now();
+
+                        // Check if student has any paid event registration on the same date
+                        $paidEventConflict = $studentRegistrations
+                            ->where('event.event_type', 'paid')
+                            ->where('event.event_date', $eventDate)
+                            ->first();
+
+                        $canRegister =
+                            empty($registration_check) &&
+                            $available > 0 &&
+                            $registrationDeadline >= $today &&
+                            !$paidEventConflict;
                     @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
@@ -126,16 +140,22 @@
                                     <p class="px-1">{{ $event['location'] }}</p>
                                 </div>
                             </div>
-
                             @if ($event->event_type === 'paid')
-                                <button type="button"
-                                    class="mt-4 w-full bg-primary text-white font-medium py-2 rounded-full pay-btn"
-                                    data-event-id="{{ $event->id }}" data-amount="{{ (int) $event->amount }}"
-                                    data-title="{{ e($event->title) }}">
-                                    Pay & Register
-                                </button>
+                                @if ($canRegister)
+                                    <button type="button"
+                                        class="mt-4 w-full bg-primary text-white font-medium py-2 rounded-full pay-btn"
+                                        data-event-id="{{ $event->id }}" data-amount="{{ (int) $event->amount }}"
+                                        data-title="{{ e($event->title) }}">
+                                        Pay & Register
+                                    </button>
+                                @else
+                                    <button disabled
+                                        class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
+                                        Registration Closed
+                                    </button>
+                                @endif
                             @else
-                                @if (empty($registration_check) && $available > 0 && $registrationDeadline >= $today)
+                                @if ($canRegister)
                                     <button
                                         onclick="document.querySelector('.registerModal').classList.remove('hidden')"
                                         class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
@@ -154,19 +174,33 @@
                 @endforeach
             </div>
         </div>
+        <!-- Ongoing Event Section -->
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Ongoing Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($ongoingEvents as $ongoing_event)
                     @php
-                        $registered = \App\Models\StudentEventRegistration::where([
-                            'event_id' => $ongoing_event->id,
-                        ])->count();
-                        $available = $ongoing_event->seat_count - $registered;
-                        $student = $studentId;
-                        $registration_check = $ongoing_event->registrations->where('student_id', $student)->first();
+                        $eventDate = \Carbon\Carbon::parse($ongoing_event->event_date)->toDateString();
+                        $registered = \App\Models\StudentEventRegistration::where('event_id', $ongoing_event['id'])->count();
+                        $available = $ongoing_event['seat_count'] - $registered;
+
+                        // Check if student already registered for this event
+                        $registration_check = $ongoing_event->registrations->where('student_id', $studentId)->first();
+
                         $registrationDeadline = \Carbon\Carbon::parse($ongoing_event->end_registration);
                         $today = \Carbon\Carbon::now();
+
+                        // Check if student has any paid event registration on the same date
+                        $paidEventConflict = $studentRegistrations
+                            ->where('event.event_type', 'paid')
+                            ->where('event.event_date', $eventDate)
+                            ->first();
+
+                        $canRegister =
+                            empty($registration_check) &&
+                            $available > 0 &&
+                            $registrationDeadline >= $today &&
+                            !$paidEventConflict;
                     @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
@@ -209,23 +243,41 @@
                                     <p class="px-1">{{ $ongoing_event['location'] }}</p>
                                 </div>
                             </div>
-                            @if (empty($registration_check) && $available > 0 && $registrationDeadline >= $today)
-                                <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
-                                    class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
-                                    data-event_id={{ $ongoing_event->id }}>
-                                    Register Now
-                                </button>
-                            @else
-                                <button disabled
-                                    class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
-                                    Registration Closed
-                                </button>
-                            @endif
+                             @if ($ongoing_event->event_type === 'paid')
+                                @if ($canRegister)
+                                    <button type="button"
+                                        class="mt-4 w-full bg-primary text-white font-medium py-2 rounded-full pay-btn"
+                                        data-event-id="{{ $ongoing_event->id }}" data-amount="{{ (int) $ongoing_event->amount }}"
+                                        data-title="{{ e($ongoing_event->title) }}">
+                                        Pay & Register
+                                    </button>
+                                @else
+                                    <button disabled
+                                        class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
+                                        Registration Closed
+                                    </button>
+                                @endif
+                             @else
+                                @if ($canRegister)
+                                    <button
+                                        onclick="document.querySelector('.registerModal').classList.remove('hidden')"
+                                        class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
+                                        data-event_id={{ $ongoing_event->id }}>
+                                        Register Now
+                                    </button>
+                                @else
+                                    <button disabled
+                                        class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
+                                        Registration Closed
+                                    </button>
+                                @endif
+                             @endif
                         </div>
                     </div>
                 @endforeach
             </div>
         </div>
+        <!-- Register Event Section -->
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Register Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

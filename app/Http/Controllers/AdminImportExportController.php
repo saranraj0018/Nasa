@@ -1,36 +1,33 @@
 <?php
 
-namespace App\Http\Controllers\student;
+namespace App\Http\Controllers;
 
-use App\Exports\StudentTemplateExport;
-use App\Http\Controllers\Controller;
-use App\Imports\StudentsImport;
+use App\Exports\AdminTemplateExport;
+use App\Imports\AdminImport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class StudentImportExportController extends Controller
+class AdminImportExportController extends Controller
 {
     public function downloadTemplate()
     {
-        return Excel::download(new StudentTemplateExport, 'student_upload_template.xlsx');
+        return Excel::download(new AdminTemplateExport, 'admin_upload_template.xlsx');
     }
 
-    public function uploadStudents(Request $request)
+    public function uploadAdmin(Request $request)
     {
         try {
             $request->validate([
                 'file' => 'required|mimes:xlsx'
             ]);
-            $import = new StudentsImport();
+            $import = new AdminImport();
             try {
                 Excel::import($import, $request->file('file'));
             } catch (ValidationException $e) {
                 $failures = $e->failures();
                 return back()->with('failures', $failures);
             }
-
             // // If you used SkipsOnFailure in your Import class and didn't catch the exception
             if ($import->failures()->isNotEmpty()) {
                 $failures = $import->failures();
@@ -38,8 +35,6 @@ class StudentImportExportController extends Controller
             }
             return back()->with('success', 'Students Uploaded Successfully');
         } catch (ValidationException $e) {
-
         }
     }
-
 }

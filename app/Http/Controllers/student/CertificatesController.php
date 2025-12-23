@@ -22,18 +22,23 @@ class CertificatesController extends Controller
                       ->whereNotNull('exit_time');
             })
             ->where(['student_id' => $student->id])
+            ->whereNotNull('grade')
             ->get();
-  
+
         return view('student.certificates.index')->with($this->data);
     }
 
     public function downloadCertificate(Request $request)
     {
         $event = Event::where('id', $request->event_id)->first();
+        $registration = StudentEventRegistration::where('event_id', $event->id)
+            ->where('student_id', $request->student_id)
+            ->first();
         $student = Student::with('get_department')->where('id',$request->student_id)->first();
         $pdf = Pdf::loadView('student.certificates.template', [
             'event' =>  $event,
             'student' => $student,
+            'registration' => $registration,
          ]);
         $filename = 'certificate-' . $event->title ?? '' . '-' . $student->name ?? '' . '.pdf';
         $user = auth('student')->user();

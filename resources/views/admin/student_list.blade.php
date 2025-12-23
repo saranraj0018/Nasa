@@ -2,8 +2,47 @@
     <div class="bg-[#F5E8F5] w-full rounded-full shadow-sm px-8 py-3">
         <h3 class="font-semibold text-primary">Student</h3>
     </div>
-    <div class="flex justify-end items-center gap-3 mt-3">
 
+    @if (session()->has('failures'))
+        <div class="text-red-700 alert alert-danger border border-danger shadow-sm mt-2">
+            <h5 class="mb-3 fw-bold">
+                <i class="fa fa-exclamation-triangle"></i> Import Errors
+            </h5>
+            <ul class="list-unstyled mb-0 mt-2">
+                @foreach (session('failures') as $failure)
+                    <li class="mb-3 p-3 bg-light border-start border-4 border-danger rounded">
+                        <div class="mb-1">
+                            <strong class="text-danger">
+                                Row #{{ $failure->row() }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span class="badge bg-dark me-2">
+                                {{ $failure->attribute() }}
+                            </span>
+
+                            @foreach ($failure->errors() as $error)
+                                <span class="badge bg-danger me-1">
+                                    {{ $error }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if (session('success'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                showToast("{{ session('success') }}", "success");
+            });
+        </script>
+    @endif
+
+    <div class="flex justify-end items-center gap-3 mt-3">
         <!-- Add Student -->
         <a href="{{ route('create_student') }}"
             class="flex items-center justify-center gap-1 w-[140px]
@@ -12,12 +51,10 @@
             <i class="fa fa-plus"></i>
             Add Student
         </a>
-
         <!-- Download Template -->
         <a href="{{ route('students.download.template') }}" class="px-4 py-1 bg-primary text-white rounded-full">
             <i class="fa fa-download"></i> Download Template
         </a>
-
         <!-- Upload Students -->
         <form action="{{ route('students.upload') }}" method="POST" enctype="multipart/form-data"
             class="flex items-center gap-2">
@@ -27,7 +64,6 @@
                 <i class="fa fa-upload"></i> Upload
             </button>
         </form>
-
     </div>
 
     <section class="p-2">

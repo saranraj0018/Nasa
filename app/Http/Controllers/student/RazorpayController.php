@@ -157,14 +157,15 @@ class RazorpayController extends Controller
 
     public function paymentSuccess(Request $request)
     {
+
         $request->validate([
-            'event_id' => 'required|exists:events,id',
+            'event_id' => 'required',
             'razorpay_order_id' => 'required',
             'razorpay_payment_id' => 'required',
             'razorpay_signature' => 'required',
         ]);
 
-        $payment = EventPayment::where('order_id', $request->razorpay_order_id)
+         $payment = EventPayment::where('order_id', $request->razorpay_order_id)
             ->where('status', 'created')
             ->first();
 
@@ -182,11 +183,13 @@ class RazorpayController extends Controller
             ]);
 
             DB::transaction(function () use ($payment, $request) {
-                $payment->update([
-                    'payment_id' => $request->razorpay_payment_id,
-                    'signature' => $request->razorpay_signature,
-                    'status' => 'paid',
-                ]);
+
+                $update = EventPayment::where('order_id', $request->razorpay_order_id)
+                    ->update([
+                        'payment_id' => $request->razorpay_payment_id,
+                        'signature' => $request->razorpay_signature,
+                        'status' => 'paid',
+                    ]);
 
                 $register = new StudentEventRegistration();
                 $register->student_id   = Auth::id();

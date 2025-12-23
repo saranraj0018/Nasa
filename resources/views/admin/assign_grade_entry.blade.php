@@ -96,7 +96,7 @@
                         @empty
                             <tr>
                                 <td colspan="3" class="px-4 py-6 text-center text-gray-500">
-                                    No students registered for this event.
+                                   No attendance records found for this event.
                                 </td>
                             </tr>
                         @endforelse

@@ -18,11 +18,13 @@ class StudentDashboardController extends Controller
         $this->data['studentId'] = $student->id;
         $this->data['events'] = Event::get();
         $this->data['registered_count'] = StudentEventRegistration::where('student_id', $student->id)->get();
-        $this->data['completed_events'] = StudentEventRegistration::where('student_id', $student->id)->where('status', 2)->get();
+        $this->data['completed_events'] = StudentEventRegistration::where('student_id', $student->id)
+                                          ->whereNotNull('grade')
+                                          ->where('status', 3)->get();
         $this->data['ongoingEvents'] = Event::with('registrations')
             ->whereDate('event_date', $now->toDateString())
-            ->whereTime('start_time', '<=', $now->toTimeString())
-            ->whereTime('end_time', '>=', $now->toTimeString())
+            // ->whereTime('start_time', '<=', $now->toTimeString())
+            // ->whereTime('end_time', '>=', $now->toTimeString())
             ->orderBy('start_time', 'asc')
             ->get();
 
@@ -39,6 +41,9 @@ class StudentDashboardController extends Controller
             ->orderBy('start_time', 'asc')
             ->get();
         $this->data['registeredEvents'] = StudentEventRegistration::with('event')->where('student_id', $student->id)
+            ->get();
+        $this->data['studentRegistrations'] = \App\Models\StudentEventRegistration::where('student_id', $student->id)
+            ->with('event') // eager load event for date and type
             ->get();
         return view('student.student_dashboard')->with($this->data);
     }

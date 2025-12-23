@@ -104,7 +104,6 @@ function showSection(type) {
 
 document.querySelectorAll(".pay-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
-        alert("Payment process started");
         payWithRazorpay(
             this.dataset.eventId,
             this.dataset.amount,
@@ -113,115 +112,34 @@ document.querySelectorAll(".pay-btn").forEach((btn) => {
     });
 });
 
-// function payWithRazorpay(eventId, amount, title) {
-//     $.ajax({
-//         url: "razorpay-order",
-//         type: "POST",
-//         dataType: "json",
-//         contentType: "application/json; charset=utf-8",
-//         data: JSON.stringify({
-//             event_id: eventId,
-//             _token: $("meta[name='csrf-token']").attr("content"),
-//         }),
-//         success: function (order) {
-//             var options = {
-//                 key: window.RAZORPAY_KEY,
-//                 amount: order.amount,
-//                 currency: "INR",
-//                 name: window.username,
-//                 description: title,
-//                 order_id: order.id,
-//                 handler: function (response) {
-//                     console.log(response);
-//                     $.ajax({
-//                         url: "razorpay_success",
-//                         type: "POST",
-//                         headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-//                         dataType: "json",
-//                         contentType: "application/json; charset=utf-8",
-//                         data: JSON.stringify({
-//                             event_id: eventId,
-//                             razorpay_payment_id: response.razorpay_payment_id,
-//                             razorpay_order_id: response.razorpay_order_id,
-//                             razorpay_signature: response.razorpay_signature,
-//                         }),
-//                         success: function (res) {
-//                             alert(res.message || "Payment successful");
-//                             location.reload();
-//                         },
-//                         error: function (err) {
-//                             console.error(err);
-//                             alert(err.responseJSON?.error || "Payment failed");
-//                         },
-//                     });
-//                 },
-//                 prefill: {
-//                     name: window.username,
-//                     email: window.email,
-//                 },
-//             };
-//             var rzp = new Razorpay(options);
-//             rzp.open();
-//         },
-//         error: function (err) {
-//             alert(err.responseJSON?.error || "Unable to create order!");
-//         },
-//     });
-// }
-console.log(window.RAZORPAY_KEY);
 function payWithRazorpay(eventId, title) {
     $.ajax({
         url: "razorpay-order",
         method: "POST",
-        headers: {
-            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-        },
         data: { event_id: eventId },
         success: function (order) {
-            if (order.free === true) {
-                alert(order.message);
-                location.reload();
-                return;
-            }
-
-            console.log("Razorpay order received:", order);
-
             var options = {
                 key: window.RAZORPAY_KEY,
-                amount: order.amount, // MUST be integer in paise
+                amount: order.amount.toString(),
                 currency: "INR",
                 name: window.username,
                 description: "Event Registration",
                 order_id: order.id,
                 image: "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/razorpay-icon.png",
                 handler: function (response) {
-                    console.log("Razorpay response:", response);
-
                     $.ajax({
-                        url: "/razorpay-success",
+                        url: "razorpay-success",
                         method: "POST",
-                        headers: {
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
-                                "content"
-                            ),
-                        },
                         data: {
                             event_id: eventId,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_signature: response.razorpay_signature,
-                            _token: "{{ csrf_token() }}",
                         },
                         success: function (res) {
-                            alert(res.message);
-                            location.reload();
+                        window.location.reload();
                         },
                         error: function (err) {
-                            console.error(err);
-                            alert(
-                                err.responseJSON?.error ||
-                                    "Payment verification failed"
-                            );
                         },
                     });
                 },
@@ -231,15 +149,11 @@ function payWithRazorpay(eventId, title) {
                 },
                 theme: { color: "#7A1C73" },
             };
-
-            console.log("Razorpay options:", options);
-
             var rzp = new Razorpay(options);
             rzp.open();
         },
         error: function (err) {
-            console.error(err);
-            alert(err.responseJSON?.error || "Unable to create order");
+
         },
     });
 }

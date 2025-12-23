@@ -9,10 +9,10 @@ class StudentTemplateExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            new StudentsSheet(),
-            new DepartmentsSheet(),
-            new ProgrammesSheet(),
-            new GenderSheet(),
+            'Student Upload Sheet'    => new StudentsSheet(),      // MAIN
+            'Departments' => new DepartmentsSheet(),   // REFERENCE
+            'Programmes'  => new ProgrammesSheet(),    // REFERENCE
+            'Gender'      => new GenderSheet(),
         ];
     }
 }

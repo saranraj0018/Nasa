@@ -45,22 +45,25 @@ class StudentAttendanceController extends Controller
         $eventId = $request->event_id;
 
         foreach ($request->attendance as $studentId => $data) {
-
             // Use firstOrNew to create or update attendance
-            $attendance = StudentAttendance::firstOrNew([
-                'event_id'   => $eventId,
-                'student_id' => $studentId,
-            ]);
+            $existingAttendance = StudentAttendance::where('event_id', $eventId)
+                ->where('student_id', $studentId)
+                ->first();
 
-            // Only save if not already set
+            if ($existingAttendance) {
+                $attendance = $existingAttendance;
+            } else {
+                $attendance = new StudentAttendance();
+                $attendance->event_id = $eventId;
+                $attendance->student_id = $studentId;
+            }
+
             if (!empty($data['entry']) && !$attendance->entry_time) {
                 $attendance->entry_time = now();
             }
-
             if (!empty($data['exit']) && !$attendance->exit_time) {
                 $attendance->exit_time = now();
             }
-
             $attendance->save();
         }
 

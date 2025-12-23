@@ -16,6 +16,7 @@ use App\Http\Controllers\admin\AdminReportsController;
 use App\Http\Controllers\super_admin\EventsController;
 use App\Http\Controllers\Auth\SuperAdminAuthController;
 use App\Http\Controllers\admin\StudentAttendanceController;
+use App\Http\Controllers\AdminImportExportController;
 use App\Http\Controllers\super_admin\AssignTasksController;
 use App\Http\Controllers\super_admin\ReviewReportsController;
 use App\Http\Controllers\super_admin\SuperAdminHomeController;
@@ -111,5 +112,12 @@ Route::prefix('admin')->group(function () {
         Route::get('/create-admin', [AdminController::class, 'createAdmin'])->name('create_admin');
         Route::post('/save-admin', [AdminController::class, 'saveAdmin'])->name('save_admin');
         Route::any('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+
+        //Admin Upload
+        Route::get('/admin/download-template', [AdminImportExportController::class, 'downloadTemplate'])
+            ->name('admin.download.template');
+
+        Route::post('/admin/upload', [AdminImportExportController::class, 'uploadAdmin'])
+            ->name('admin.upload');
     });
 });

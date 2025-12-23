@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Helpers\ActivityLog;
-use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\Student;
 use App\Models\EventReport;
-use App\Models\EventReportImage;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Helpers\ActivityLog;
 use Illuminate\Http\Request;
+use App\Models\StudentFeedback;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\EventReportImage;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -156,14 +158,95 @@ class AdminReportsController extends Controller
         }
     }
 
+    // public function viewPdf($id)
+    // {
+    //     $report = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
+    //     $pdf = Pdf::loadView('report.pdf.report_template', compact('report'))
+    //         ->setPaper('a4', 'portrait');
+    //     $user = auth('admin')->user();
+    //     ActivityLog::add($user->name  .' - '. $report->get_event->title .' - Report Viewed', $user);
+
+    //     return $pdf->stream("event_report_{$report->id}.pdf");
+    // }
+
     public function viewPdf($id)
     {
-        $report = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
-        $pdf = Pdf::loadView('report.pdf.report_template', compact('report'))
+
+        $event = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
+        // Get feedbacks
+        $feedbacks = StudentFeedback::with('student')
+            ->where('event_id', $id)
+            ->get();
+
+        // Calculate average ratings
+        $avgRatings = [
+            'overall_experience' => 0,
+            'engagement' => 0,
+            'organization' => 0,
+            'coordination' => 0,
+            'recommendation' => 0,
+        ];
+
+        $totalFeedbacks = $feedbacks->count();
+
+        if ($totalFeedbacks > 0) {
+            foreach ($feedbacks as $feedback) {
+                $ratings = json_decode($feedback->ratings, true);
+                foreach ($avgRatings as $key => $val) {
+                    $avgRatings[$key] += isset($ratings[$key]) ? (int)$ratings[$key] : 0;
+                }
+            }
+
+            // Calculate average
+            foreach ($avgRatings as $key => $val) {
+                $avgRatings[$key] = $val / $totalFeedbacks;
+            }
+        }
+
+        // Gender counts
+        $studentIds = $feedbacks->pluck('student_id')->toArray();
+        $maleCount = Student::whereIn('id', $studentIds)->where('gender', 'male')->count();
+        $femaleCount = Student::whereIn('id', $studentIds)->where('gender', 'female')->count();
+
+        // Prepare gender chart via QuickChart.io
+        $genderChartUrl = 'https://quickchart.io/chart?c=' . urlencode(json_encode([
+            'type' => 'pie',
+            'data' => [
+                'labels' => ['Male', 'Female'],
+                'datasets' => [[
+                    'data' => [$maleCount, $femaleCount],
+                    'backgroundColor' => ['#7A1C73', '#C36BCB']
+                ]]
+            ],
+            'options' => ['plugins' => ['legend' => ['position' => 'bottom']]]
+        ]));
+        // Counts
+        $registeredCount = $event->get_event->registrations()->count();
+        $attendedCount = $event->male_count + $event->female_count;
+
+        // Prepare PDF data
+        $data = [
+            'report' => (object)[
+                'get_event' => $event,
+                'feedbacks' => $feedbacks,
+                'avgRatings' => $avgRatings,
+                'male_count' => $maleCount,
+                'female_count' => $femaleCount,
+                'registered_count' => $registeredCount,
+                'attended_count' => $attendedCount,
+                'geo_images' => $event->geoImages,
+                'student_uploads' => $event->studentUploads,
+                'event_image' => $event->image, // optional main event image
+            ],
+            'genderChartUrl' => $genderChartUrl
+        ];
+
+        // Generate PDF
+        $pdf = Pdf::loadView('report.pdf.report_template', compact('data'))
             ->setPaper('a4', 'portrait');
         $user = auth('admin')->user();
-        ActivityLog::add($user->name  .' - '. $report->get_event->title .' - Report Viewed', $user);
-        return $pdf->stream("event_report_{$report->id}.pdf");
+        ActivityLog::add($user->name  . ' - ' . $event->title . ' - Report Viewed', $user);
+        return $pdf->stream("event_report_{$event->id}.pdf");
     }
 
     public function downloadPdf($id)

@@ -2,11 +2,11 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\FromCollection;
 
-class StudentsSheet implements WithHeadings, WithTitle
+class AdminSheet implements WithHeadings, WithTitle
 {
     public function headings(): array
     {
@@ -14,17 +14,16 @@ class StudentsSheet implements WithHeadings, WithTitle
             'S.No',
             'Name',
             'Email',
-            'Gender',
+            'Role',
             'Mobile Number',
-            'Date of Birth',
-            'Department',
-            'Programme',
+            'Employee Code',
+            'Security Code',
         ];
     }
 
     public function title(): string
     {
-        return 'Student Upload Sheet';
+        return 'Admin Upload Sheet';
     }
 
     public function array(): array

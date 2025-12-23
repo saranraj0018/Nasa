@@ -11,9 +11,9 @@
             <p class="px-3 mt-5 font-semibold text-primary">Basic Details about the Student</p>
             <form id="studentregisterForm" action="" method="POST" enctype="multipart/form-data" class="mt-5 px-3">
                 @csrf
-                <!-- Student Name + DOB -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
+                <!-- Email + Mobile -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                     <div>
                         <label class="block text-sm font-medium">Student Name <span class="text-red-500">*</span></label>
                         <input type="text" name="student_name" id="student_name"
                             value="{{ old('student_name', $edit_student->name ?? '') }}"
@@ -31,9 +31,6 @@
                             <small class="text-red-500">{{ $message }}</small>
                         @enderror
                     </div>
-                </div>
-                <!-- Email + Mobile -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium">Email <span class="text-red-500">*</span></label>
                         <input type="text" name="email" id="email"
@@ -53,10 +50,9 @@
                             <small class="text-red-500">{{ $message }}</small>
                         @enderror
                     </div>
-                </div>
-                 <div>
+                    <div>
                         <label class="block text-sm font-medium"> Gender <span class="text-red-500">*</span></label>
-                        <select name="gender" id="gender" class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40">
+                        <select name="gender" id="gender" class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 focus:outline-none focus:ring focus:ring-primary/40">
                             <option value="" selected disabled>Select Gender</option>
                             <option value="m">Male</option>
                             <option value="f">FeMale</option>
@@ -66,10 +62,7 @@
                             <small class="text-red-500">{{ $message }}</small>
                         @enderror
                     </div>
-                </div>
-                <!-- Department + Programme -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
+                        <div>
                         <label class="block text-sm font-medium">Department <span class="text-red-500">*</span></label>
                         <select name="department_id" id="department_id"
                             class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40">
@@ -101,9 +94,7 @@
                             <small class="text-red-500">{{ $message }}</small>
                         @enderror
                     </div>
-                </div>
-                <!-- Profile Image Upload -->
-                <div>
+                        <div>
                     <label class="block text-sm font-medium mb-1">Profile Image</label>
                     <div class="bg-[#F0F0F0] rounded-3xl p-10 text-center">
                         <div id="dropArea"
@@ -129,15 +120,15 @@
                         <small class="text-red-500">{{ $message }}</small>
                     @enderror
                 </div>
-
+                </div>
+                <!-- Profile Image Upload -->
                 <!-- Submit -->
-                <div class="flex justify-center pt-6">
+                <div class="flex justify-center p-6">
                     <button type="submit" class="w-full sm:w-auto px-10 md:px-14 bg-gradient-to-r from-primary to-pink-600 text-white font-semibold py-3 rounded-full hover:opacity-90 transition flex items-center justify-center gap-2">
                         <i class="fas fa-save"></i>
                         Register Student
                     </button>
                 </div>
-
             </form>
             <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
         </div>

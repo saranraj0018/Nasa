@@ -78,7 +78,7 @@ body {
 /* Badge */
 .badge {
   position: absolute;
-  top: 300px; /* Adjust for your layout */
+  top: 250px; /* Adjust for your layout */
   right: 50px;
   width: 100px;
   height: 100px;
@@ -123,6 +123,32 @@ body {
   font-size: 18px;
   color: #9F3895;
 }
+
+/* GRADE */
+.grade-box {
+    margin: 14px auto;
+    display: inline-block;
+    padding: 8px 35px;
+    border: 2px solid #7b1f7a;
+    border-radius: 4px;
+    background: #faf5fa;
+    font-size: 22px;
+    font-weight: bold;
+    color: #7b1f7a;
+}
+
+.grade-label {
+    display: block;
+    font-size: 14px;
+    font-weight: normal;
+    margin-bottom: 3px;
+    color: #444;
+}
+
+.grade-A { border-color: #1b5e20; color: #1b5e20; }
+.grade-B { border-color: #0d47a1; color: #0d47a1; }
+.grade-C { border-color: #e65100; color: #e65100; }
+.grade-D { border-color: #b71c1c; color: #b71c1c; }
 </style>
 </head>
 
@@ -144,9 +170,23 @@ body {
   <div class="content">
     <p><strong>This is to certify that</strong></p>
     <p><span class="recipient">{{ $student->name ?? ''}}</span></p>
-    <p>has successfully participated in</p>
+    <p>has demonstrated commendable performance and actively participated in</p>
     <p class="event-name">{{ $event->title ?? '' }}</p>
-    <p>organized by the Department of {{ $student->get_department->name ?? '' }} on {{ $event->event_date ?? '' }}.</p>
+     @if(!empty($registration->grade))
+            <div class="grade-box grade-{{ strtoupper($registration->grade) }}">
+                <span class="grade-label">Achievement Grade</span>
+                {{ strtoupper($registration->grade) }}
+            </div>
+        @endif
+
+        <p>
+            organized by the Department of
+            <strong>{{ $student->get_department->name ?? '' }}</strong>
+            on
+            <strong>
+                {{ \Carbon\Carbon::parse($event->event_date)->format('F d, Y') }}
+            </strong>.
+        </p>
   </div>
 
   <div class="footer">

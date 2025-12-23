@@ -5,6 +5,7 @@ namespace App\Http\Controllers\student;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\StudentEventRegistration;
+use App\Models\StudentFeedback;
 use App\Models\StudentUploadProof;
 use Exception;
 use Illuminate\Http\Request;
@@ -18,14 +19,14 @@ class MyRegisterEventsController extends Controller
         $student = session()->get('student');
         $now = Carbon::now();
         $this->data['registeredEvents'] = StudentEventRegistration::with('event')->where('student_id', $student->id)
-            ->get();
+        ->get();
         $this->data['completedEvents'] = StudentEventRegistration::with('event')
-            ->whereHas('event', function ($query) use ($now) {
-                $query->whereDate('event_date', '<', $now->toDateString())
-                    ->orWhere(function ($q) use ($now) {
-                        $q->whereDate('event_date', '=', $now->toDateString())
-                            ->whereTime('end_time', '<', $now->toTimeString());
-                    });
+        ->whereHas('event', function ($query) use ($now) {
+            $query->where('event_date', '<', $now->toDateString());
+            // ->orWhere(function ($q) use ($now) {
+                //     $q->whereDate('event_date', '=', $now->toDateString())
+                //         ->whereTime('end_time', '<', $now->toTimeString());
+                // });
             })
             ->where('student_id', $student->id)
             ->get();
@@ -53,7 +54,10 @@ class MyRegisterEventsController extends Controller
             'student_id' => 'required',
             'event_id'   => 'required',
             'proof'      => 'required',
+            'ratings.*' => 'required|integer|min:1|max:5',
+            'comments'  => 'nullable|string|max:500',
         ]);
+
         try {
             foreach ($request->file('proof') as $file) {
                 $fileName = $file->getClientOriginalName();
@@ -69,7 +73,17 @@ class MyRegisterEventsController extends Controller
                     $upload->save();
                 }
             }
+   
+            $exists_feedback  = StudentFeedback::where(['student_id' => $validated['student_id'], 'event_id' => $validated['event_id']])->first();
 
+            if (!$exists_feedback) {
+                $feedback = new StudentFeedback();
+                $feedback->student_id = $validated['student_id'];
+                $feedback->event_id   = $validated['event_id'] ?? null;
+                $feedback->ratings  = json_encode($request->ratings); // Original filename
+                $feedback->comments  = $request->comments;         // Public path
+                $feedback->save();
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'Proof uploaded successfully!',

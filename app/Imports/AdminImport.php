@@ -7,20 +7,20 @@ use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class StudentsImport implements WithMultipleSheets
+class AdminImport implements WithMultipleSheets
 {
 
-    public StudentsImportSheet $sheet;
+    public AdminsImportSheet $sheet;
 
     public function __construct()
     {
-        $this->sheet = new StudentsImportSheet();
+        $this->sheet = new AdminsImportSheet();
     }
 
     public function sheets(): array
     {
         return [
-            'Student Upload Sheet' => $this->sheet,
+            'Admin Upload Sheet' => $this->sheet,
         ];
     }
 
