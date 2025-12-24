@@ -72,26 +72,15 @@
         }
 
         /* GENDER CHART */
-       .gender-table {
+     .gender-wrapper {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.gender-left {
-    width: 360px;      /* FIXED – SAFE */
-    vertical-align: top;
-}
-
-.gender-right {
-    width: 180px;      /* FIXED – SAFE */
-    vertical-align: top;
-    text-align: center;
+    max-width: 480px;
+    margin: 0 auto;
 }
 
 /* BAR */
 .bar-item {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .bar-label {
@@ -102,32 +91,32 @@
 .bar-bg {
     width: 100%;
     background: #e0e0e0;
-    height: 14px;
+    height: 12px;
     border-radius: 6px;
 }
 
 .bar-fill {
-    height: 14px;
+    height: 12px;
     border-radius: 6px;
 }
 
 /* PIE */
 .pie-chart {
-    width: 120px;
-    height: 120px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
-    margin: 0 auto;
+    margin: 15px auto 0;
     position: relative;
 }
 
 .pie-center {
     position: absolute;
-    width: 50px;
-    height: 50px;
-    background: #ffffff;
+    width: 45px;
+    height: 45px;
+    background: #fff;
     border-radius: 50%;
-    top: 35px;
-    left: 35px;
+    top: 32px;
+    left: 32px;
 }
 
 /* LEGEND */
@@ -215,8 +204,14 @@ $avg = $data['report']->avgRatings ?? [];
                     </div>
                 </td>
                 <td class="event-meta">
-                    {{ optional($data['report']->get_event->event_date)->format('d M Y') }}<br>
-                    Session: {{ $data['report']->get_event->session ?? 'N/A' }}
+                   <b> Date: {{ $data['report']->get_event->event_date }}  &
+                    Session:
+                    @if ($data['report']->get_event->session == 1)
+                        FN
+                    @elseif ($data['report']->get_event->session == 2)
+                        AN
+                    @endif
+                   </b>
                 </td>
             </tr>
         </table>
@@ -238,55 +233,64 @@ $avg = $data['report']->avgRatings ?? [];
     </table>
 
     <!-- GENDER -->
-   <div class="section-title">Gender Participation</div>
+<div class="section-title">Gender Participation</div>
 
-<table class="gender-table">
-    <tr>
-        <!-- BAR -->
-        <td class="gender-left">
-            <div class="bar-item">
-                <div class="bar-label">Male ({{ $male }})</div>
-                <div class="bar-bg">
-                    <div class="bar-fill"
-                         style="width:{{ $malePct }}%; background:#7A1C73;">
-                    </div>
-                </div>
-            </div>
+@php
+$total = max(1, $male + $female);
+$maleAngle = ($male / $total) * 360;
+$femaleAngle = 360 - $maleAngle;
+@endphp
 
-            <div class="bar-item">
-                <div class="bar-label">Female ({{ $female }})</div>
-                <div class="bar-bg">
-                    <div class="bar-fill"
-                         style="width:{{ $femalePct }}%; background:#C36BCB;">
-                    </div>
-                </div>
-            </div>
-        </td>
+<!-- SVG CHART (NO CSS LAYOUT) -->
+<svg width="420" height="200" viewBox="0 0 420 200">
 
-        <!-- PIE -->
-        <td class="gender-right">
-            <div class="pie-chart"
-                 style="background: conic-gradient(
-                     #7A1C73 0 {{ $malePct }}%,
-                     #C36BCB {{ $malePct }}% 100%
-                 );">
-                <div class="pie-center"></div>
-            </div>
+    <!-- PIE -->
+    <g transform="translate(100,100)">
+        <!-- Male -->
+        <path d="
+            M 0 0
+            L 0 -70
+            A 70 70 0 {{ $maleAngle > 180 ? 1 : 0 }} 1
+              {{ 70 * sin(deg2rad($maleAngle)) }}
+              {{ -70 * cos(deg2rad($maleAngle)) }}
+            Z"
+            fill="#7A1C73"/>
 
-            <div class="legend">
-                <span>
-                    <span class="legend-box" style="background:#7A1C73"></span>
-                    Male
-                </span>
-                &nbsp;&nbsp;
-                <span>
-                    <span class="legend-box" style="background:#C36BCB"></span>
-                    Female
-                </span>
-            </div>
-        </td>
-    </tr>
-</table>
+        <!-- Female -->
+        <path d="
+            M 0 0
+            L {{ 70 * sin(deg2rad($maleAngle)) }}
+              {{ -70 * cos(deg2rad($maleAngle)) }}
+            A 70 70 0 {{ $femaleAngle > 180 ? 1 : 0 }} 1
+              0 -70
+            Z"
+            fill="#C36BCB"/>
+
+        <!-- Center hole -->
+        <circle cx="0" cy="0" r="35" fill="#ffffff"/>
+    </g>
+
+    <!-- LABELS -->
+    <text x="220" y="70" font-size="12" fill="#000">
+        ■ Male: {{ $male }}
+    </text>
+    <rect x="200" y="60" width="10" height="10" fill="#7A1C73"/>
+
+    <text x="220" y="95" font-size="12" fill="#000">
+        ■ Female: {{ $female }}
+    </text>
+    <rect x="200" y="85" width="10" height="10" fill="#C36BCB"/>
+
+    <!-- BARS -->
+    <text x="20" y="180" font-size="11">Male</text>
+    <rect x="60" y="170" width="{{ ($male/$total)*300 }}" height="10" fill="#7A1C73"/>
+
+    <text x="20" y="195" font-size="11">Female</text>
+    <rect x="60" y="185" width="{{ ($female/$total)*300 }}" height="10" fill="#C36BCB"/>
+
+</svg>
+
+
 
 
     <!-- AVERAGE FEEDBACK -->
@@ -354,3 +358,4 @@ $avg = $data['report']->avgRatings ?? [];
 </div>
 </body>
 </html>
+
