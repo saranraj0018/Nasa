@@ -19,14 +19,14 @@ class SuperAdminAuthController extends Controller
         $this->data['credential_value'] = $request->all();
 
         if($request->method() == 'POST'){
+            if (!empty(session()->get('admin'))) {
+                return redirect()->route('admin.security_check')
+                    ->withErrors(['verification_code' => 'You do not have access to the Super Admin portal.'])
+                    ->withInput($request->only('verification_code'));
+            }
             $superAdminId = session()->get('super_admin');
             $admin = Admin::where(['id' =>  $superAdminId->id,'security_code' => $request->verification_code,'role_id' => 1])->first();
             if(!$admin){
-                if(!empty(session()->get('admin'))){
-                    return redirect()->route('admin.security_check')
-                        ->withErrors(['verification_code' => 'You do not have access to the Super Admin portal.'])
-                        ->withInput($request->only('verification_code'));
-                }
                 return redirect()->route('admin.security_check')
                     ->withErrors(['verification_code' => 'Invalid Security Code'])
                     ->withInput($request->only('verification_code'));
