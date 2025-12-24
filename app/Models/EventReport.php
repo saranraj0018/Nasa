@@ -25,4 +25,9 @@ class EventReport extends Model
     {
         return $this->hasMany(StudentFeedback::class, 'event_id', 'id');
     }
+
+    public function student_uploads()
+    {
+        return $this->hasMany(StudentUploadProof::class, 'event_id', 'event_id');
+    }
 }

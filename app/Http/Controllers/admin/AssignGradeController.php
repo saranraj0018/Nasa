@@ -45,6 +45,7 @@ class AssignGradeController extends Controller
                 ->first();
             if ($registration) {
                 $registration->grade = $grade;
+                $registration->status = 3;
                 $registration->save();
             }
         }

@@ -40,8 +40,17 @@ class EventsController extends Controller
             ->get();
         $this->data['registeredEvents'] = StudentEventRegistration::with('event')
             ->get();
+        // $this->data['completedEvents'] = StudentEventRegistration::with('event')
+        //     ->where('status', 3)
+        //     ->get();
         $this->data['completedEvents'] = StudentEventRegistration::with('event')
-            ->where('status', 2)
+            ->whereHas('event', function ($query) use ($now) {
+                $query->where('event_date', '<', $now->toDateString());
+                // ->orWhere(function ($q) use ($now) {
+                //     $q->whereDate('event_date', '=', $now->toDateString())
+                //         ->whereTime('end_time', '<', $now->toTimeString());
+                // });
+            })
             ->get();
         return view('super_admin.event_index')->with($this->data);
     }

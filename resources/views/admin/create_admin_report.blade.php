@@ -52,7 +52,7 @@
                 class="bg-[#D9D9D9] w-full rounded-2xl p-3 mt-1 focus:outline-none focus:ring-2 focus:ring-primary/40"></textarea>
         </div>
         <!-- EVENT PROOF IMAGES -->
-        <h2 class="text-primary font-semibold mt-10 px-4">Event Proof Images</h2>
+        <h2 class="text-primary font-semibold mt-10 px-4">Geo Tag Images</h2>
         <div id="dropArea" class="border-2 border-dashed border-[#E54590] rounded-2xl p-6 text-center cursor-pointer"
             style="min-height:120px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
             <div id="dropHint">
