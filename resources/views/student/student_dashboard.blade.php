@@ -2,6 +2,20 @@
     <x-partials.navbar />
     <!-- Dashboard Header -->
     <section class="p-2 mt-3">
+        @if (session('success'))
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    showToast("{{ session('success') }}", "success");
+                });
+            </script>
+        @endif
+        @if (session('error'))
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    showToast("{{ session('error') }}", "error");
+                });
+            </script>
+        @endif
         <!-- Top Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-[#BF9CFF] rounded-2xl shadow p-5 flex flex-col justify-between">
@@ -51,29 +65,47 @@
                 </div>
             </div>
         </div>
-
         <!-- Section Header -->
         <div class="bg-[#F2E8F5] rounded-full px-5 py-3 mt-8 flex justify-between items-center">
             <!-- Left side -->
             <h3 class="font-semibold text-primary">Events</h3>
         </div>
+
         <!-- Upcoming Event Section -->
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Upcoming Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($upcomingEvents as $event)
-                @php
-                  $registered = \App\Models\StudentEventRegistration::where(['event_id' => $event['id']])->count();
-                  $available = $event['seat_count'] - $registered;
-                    $student = $studentId;
-            $registration_check = $event->registrations->where('student_id', $student)->first();
-                @endphp
+                    @php
+                        $eventDate = \Carbon\Carbon::parse($event->event_date)->toDateString();
+                        $registered = \App\Models\StudentEventRegistration::where('event_id', $event['id'])->count();
+                        $available = $event['seat_count'] - $registered;
+
+                        // Check if student already registered for this event
+                        $registration_check = $event->registrations->where('student_id', $studentId)->first();
+
+                        $registrationDeadline = \Carbon\Carbon::parse($event->end_registration);
+                        $today = \Carbon\Carbon::now();
+
+                        // Check if student has any paid event registration on the same date
+                        $paidEventConflict = $studentRegistrations
+                            ->where('event.event_type', 'paid')
+                            ->where('event.event_date', $eventDate)
+                            ->first();
+
+                        $canRegister =
+                            empty($registration_check) &&
+                            $available > 0 &&
+                            $registrationDeadline >= $today &&
+                            !$paidEventConflict;
+                    @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
                             <img src="{{ asset('storage/' . $event['banner_image']) }}" alt="Event"
                                 class="rounded-t-2xl w-full h-48 object-cover">
                             @if ($event['event_type'] == 'paid')
-                                <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
+                                <span
+                                    class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
                                     Premium
                                 </span>
                             @endif
@@ -108,28 +140,68 @@
                                     <p class="px-1">{{ $event['location'] }}</p>
                                 </div>
                             </div>
-                            @if (empty($registration_check) && $available > 0)
-                                <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
-                                    class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
-                                    data-event_id={{ $event->id }}>
-                                    Register Now
-                                </button>
+                            @if ($event->event_type === 'paid')
+                                @if ($canRegister)
+                                    <button type="button"
+                                        class="mt-4 w-full bg-primary text-white font-medium py-2 rounded-full pay-btn"
+                                        data-event-id="{{ $event->id }}" data-amount="{{ (int) $event->amount }}"
+                                        data-title="{{ e($event->title) }}">
+                                        Pay & Register
+                                    </button>
+                                @else
+                                    <button disabled
+                                        class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
+                                        Registration Closed
+                                    </button>
+                                @endif
+                            @else
+                                @if ($canRegister)
+                                    <button
+                                        onclick="document.querySelector('.registerModal').classList.remove('hidden')"
+                                        class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
+                                        data-event_id={{ $event->id }}>
+                                        Register Now
+                                    </button>
+                                @else
+                                    <button disabled
+                                        class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
+                                        Registration Closed
+                                    </button>
+                                @endif
                             @endif
                         </div>
                     </div>
                 @endforeach
             </div>
         </div>
+        <!-- Ongoing Event Section -->
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Ongoing Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($ongoingEvents as $ongoing_event)
-                @php
-                  $registered = \App\Models\StudentEventRegistration::where(['event_id' => $ongoing_event->id ])->count();
-                  $available = $ongoing_event->seat_count - $registered;
-                  $student = $studentId;
-                  $registration_check = $ongoing_event->registrations->where('student_id', $student)->first();
-                @endphp
+                    @php
+                        $eventDate = \Carbon\Carbon::parse($ongoing_event->event_date)->toDateString();
+                        $registered = \App\Models\StudentEventRegistration::where('event_id', $ongoing_event['id'])->count();
+                        $available = $ongoing_event['seat_count'] - $registered;
+
+                        // Check if student already registered for this event
+                        $registration_check = $ongoing_event->registrations->where('student_id', $studentId)->first();
+
+                        $registrationDeadline = \Carbon\Carbon::parse($ongoing_event->end_registration);
+                        $today = \Carbon\Carbon::now();
+
+                        // Check if student has any paid event registration on the same date
+                        $paidEventConflict = $studentRegistrations
+                            ->where('event.event_type', 'paid')
+                            ->where('event.event_date', $eventDate)
+                            ->first();
+
+                        $canRegister =
+                            empty($registration_check) &&
+                            $available > 0 &&
+                            $registrationDeadline >= $today &&
+                            !$paidEventConflict;
+                    @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
                             <img src="{{ asset('storage/' . $ongoing_event['banner_image']) }}" alt="Event"
@@ -142,7 +214,7 @@
                             @endif
                             <span
                                 class="absolute @if ($ongoing_event['event_type'] == 'paid') mt-2 top-10 @else top-3 @endif  right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
-                                <span class="text-2xl">{{ $available  }} </span><span>Seats
+                                <span class="text-2xl">{{ $available }} </span><span>Seats
                                     <pre> Available</span></pre>
                                 </span>
                             </span>
@@ -171,26 +243,51 @@
                                     <p class="px-1">{{ $ongoing_event['location'] }}</p>
                                 </div>
                             </div>
-                            @if (empty($registration_check) && $available > 0)
-                                <button onclick="document.querySelector('.registerModal').classList.remove('hidden')"
-                                    class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
-                                    data-event_id={{ $ongoing_event->id }}>
-                                    Register Now
-                                </button>
-                            @endif
+                             @if ($ongoing_event->event_type === 'paid')
+                                @if ($canRegister)
+                                    <button type="button"
+                                        class="mt-4 w-full bg-primary text-white font-medium py-2 rounded-full pay-btn"
+                                        data-event-id="{{ $ongoing_event->id }}" data-amount="{{ (int) $ongoing_event->amount }}"
+                                        data-title="{{ e($ongoing_event->title) }}">
+                                        Pay & Register
+                                    </button>
+                                @else
+                                    <button disabled
+                                        class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
+                                        Registration Closed
+                                    </button>
+                                @endif
+                             @else
+                                @if ($canRegister)
+                                    <button
+                                        onclick="document.querySelector('.registerModal').classList.remove('hidden')"
+                                        class="student_register mt-4 w-full bg-primary text-white font-medium py-2 rounded-full"
+                                        data-event_id={{ $ongoing_event->id }}>
+                                        Register Now
+                                    </button>
+                                @else
+                                    <button disabled
+                                        class="mt-4 w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 rounded-full">
+                                        Registration Closed
+                                    </button>
+                                @endif
+                             @endif
                         </div>
                     </div>
                 @endforeach
             </div>
         </div>
+        <!-- Register Event Section -->
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Register Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($registeredEvents as $register_event)
-                  @php
-                  $registered = \App\Models\StudentEventRegistration::where(['event_id' => $register_event->event->id ])->count();
-                  $available = $register_event->event->seat_count - $registered;
-                @endphp
+                    @php
+                        $registered = \App\Models\StudentEventRegistration::where([
+                            'event_id' => $register_event->event->id,
+                        ])->count();
+                        $available = $register_event->event->seat_count - $registered;
+                    @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
                             <img src="{{ asset('storage/' . $register_event->event->banner_image) }}" alt="Event"
@@ -203,7 +300,7 @@
                             @endif
                             <span
                                 class="absolute @if ($register_event->event->event_type) mt-2 top-10 @else top-3 @endif  right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
-                                <span class="text-2xl">{{  $available }} </span><span>Seats
+                                <span class="text-2xl">{{ $available }} </span><span>Seats
                                     <pre> Available</span></pre>
                                 </span>
                             </span>
@@ -239,7 +336,13 @@
             </div>
         </div>
     </section>
+
     @include('components.register.register-modal')
 </x-layouts.app>
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    window.RAZORPAY_KEY = "{{ config('services.razorpay.key') }}";
+    window.username = "{{ Auth::user()->name ?? 'Student' }}";
+    window.email = "{{ Auth::user()->email ?? '' }}";
+</script>
 <script src="{{ asset('admin/js/registration_form.js') }}"></script>

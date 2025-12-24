@@ -27,25 +27,25 @@ function showMyregistration(type) {
 
 $(function () {
     // === Upload Proof AJAX (Form submission) ===
-    $("#uploadProofForm").on("submit", function (e) {
-        e.preventDefault();
-        let formData = new FormData(this);
-        $.ajax({
-            url: "/upload-proof",
-            method: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (res) {
-                if (res.success) {
-                    showToast(res.message, "success", 2000);
-                }
-            },
-            error: function (err) {
-                showToast(err, "error", 2000);
-            },
-        });
-    });
+    // $("#uploadProofForm").on("submit", function (e) {
+    //     e.preventDefault();
+    //     let formData = new FormData(this);
+    //     $.ajax({
+    //         url: "/upload-proof",
+    //         method: "POST",
+    //         data: formData,
+    //         processData: false,
+    //         contentType: false,
+    //         success: function (res) {
+    //             if (res.success) {
+    //                 showToast(res.message, "success", 2000);
+    //             }
+    //         },
+    //         error: function (err) {
+    //             showToast(err, "error", 2000);
+    //         },
+    //     });
+    // });
 
     // === Assign event ID for upload ===
     $(document).on("click", ".upload", function () {
@@ -282,6 +282,10 @@ $(function () {
         filesArr.forEach((f) => formData.append("proof[]", f));
         formData.append("event_id", $("#event_id").val());
         formData.append("student_id", $("#student_id").val());
+         $("input[name^='ratings']:checked").each(function () {
+             formData.append($(this).attr("name"), $(this).val());
+         });
+        formData.append("comments", $("textarea[name='comments']").val());
         formData.append("_token", $('meta[name="csrf-token"]').attr("content"));
 
         fetch("/student/upload-proof", {

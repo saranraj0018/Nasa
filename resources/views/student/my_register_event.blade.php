@@ -15,7 +15,7 @@
             <div class="bg-[#FF8F6B] rounded-2xl shadow p-5 flex flex-col justify-between">
                 <p class="text-[#992B07] font-medium">Attended Registration</p>
                 <div class="flex items-center justify-between mt-2">
-                    <h3 class="text-3xl font-bold text-[#992B07]">{{  $attendedCount ?? 0 }}</h3>
+                    <h3 class="text-3xl font-bold text-[#992B07]">{{ $attendedCount ?? 0 }}</h3>
                     <img src="{{ asset('/images/attended_events.png') }}" alt="" class="mx-auto">
                 </div>
                 <div class="relative">
@@ -47,23 +47,28 @@
             <h4 class="font-semibold text-gray-800 mb-4">Registered Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($registeredEvents as $event)
-                @php
-                  $registered = \App\Models\StudentEventRegistration::where(['event_id' => $event->event->id])->count();
-                  $available = $event->event->seat_count - $registered;
-                @endphp
+                    @php
+                        $registered = \App\Models\StudentEventRegistration::where([
+                            'event_id' => $event->event->id,
+                        ])->count();
+                        $available = $event->event->seat_count - $registered;
+                    @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ asset('storage/' . $event->event->banner_image) }}" alt="Event" class="rounded-t-2xl w-full h-48 object-cover">
-                               @if ($event->event->event_type == 'paid')
-                            <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
-                                Premium
-                            </span>
+                            <img src="{{ asset('storage/' . $event->event->banner_image) }}" alt="Event"
+                                class="rounded-t-2xl w-full h-48 object-cover">
+                            @if ($event->event->event_type == 'paid')
+                                <span
+                                    class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
+                                    Premium
+                                </span>
                             @endif
-                     <span class="absolute @if($event->event->event_type == 'paid') mt-2 top-10 @else top-3 @endif  right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
+                            <span
+                                class="absolute @if ($event->event->event_type == 'paid') mt-2 top-10 @else top-3 @endif  right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
                                 <span class="text-2xl">{{ $available }} </span><span>Seats
                                     <pre> Available</span></pre>
                                 </span>
-                        </span>
+                            </span>
                             <span
                                 class="absolute bottom-3 left-3 bg-[rgba(128,128,128,0.4)] text-white text-xs px-3 py-1 rounded-full">
                                 {{ $event->event->title }}
@@ -72,7 +77,7 @@
                         <div class="p-2 details">
                             <div class="grid grid-cols-1 gap-1 md:grid-cols-4 text-xs">
                                 <div class="col-span-2 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1">
-                                     <i class="fa fa-clock text-primary" aria-hidden="true"></i>
+                                    <i class="fa fa-clock text-primary" aria-hidden="true"></i>
                                     <p class="px-1">
                                         {{ $event->event->start_time ? \Carbon\Carbon::parse($event->event->start_time)->format('h:i A') : '-' }}
                                         -
@@ -85,7 +90,7 @@
                                         {{ \Carbon\Carbon::parse($event->event->event_date)->format('F j, Y') }}</p>
                                 </div>
                                 <div class="col-span-4 flex items-center bg-[#F2E8F5] rounded-full px-1 py-1 mt-2">
-                                   <i class="fa fa-map-marker text-primary" aria-hidden="true"></i>
+                                    <i class="fa fa-map-marker text-primary" aria-hidden="true"></i>
                                     <p class="px-2">{{ $event->event->location }}</p>
                                 </div>
                             </div>
@@ -100,13 +105,16 @@
             <h4 class="font-semibold text-gray-800 mb-4">Completed Events</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($completedEvents as $event)
-                 @php
-                  $registered = \App\Models\StudentEventRegistration::where(['event_id' => $event->event->id])->count();
-                  $available = $event->event->seat_count - $registered;
-                @endphp
+                    @php
+                        $registered = \App\Models\StudentEventRegistration::where([
+                            'event_id' => $event->event->id,
+                        ])->count();
+                        $available = $event->event->seat_count - $registered;
+                    @endphp
                     <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="{{ asset('storage/' . $event->event->banner_image) }}" alt="Event" class="rounded-t-2xl w-full h-48 object-cover">
+                            <img src="{{ asset('storage/' . $event->event->banner_image) }}" alt="Event"
+                                class="rounded-t-2xl w-full h-48 object-cover">
                             <span
                                 class="absolute top-3 right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
                                 <span class="text-2xl">{{ $available }}</span> Seats Available
@@ -141,7 +149,7 @@
                                     <p class="px-2 text-primary text-center cursor-pointer view-details-btn"
                                         data-event_id="{{ $event->event->id }}"
                                         data-title="{{ $event->event->title }}"
-                                        data-image="{{ asset('storage/' . $event->event->banner_image ) }}"
+                                        data-image="{{ asset('storage/' . $event->event->banner_image) }}"
                                         data-description="{{ $event->event->description }}"
                                         data-date=" {{ \Carbon\Carbon::parse($event->event->event_date)->format('F j, Y') }}"
                                         data-start="{{ \Carbon\Carbon::parse($event->event->start_time)->format('h:i A') }}"
@@ -153,7 +161,8 @@
                                 <div
                                     class="flex border items-center border-primary  text-primary rounded-full px-5 py-1">
                                     <p id="openUploadModal" class="px-2 text-center upload"
-                                        data-event_id={{ $event->event->id }} data-student_id={{ $event->student_id }}>Upload Proof</p>
+                                        data-event_id={{ $event->event->id }}
+                                        data-student_id={{ $event->student_id }}>Upload Proof</p>
                                 </div>
                             </div>
                         </div>
@@ -175,7 +184,7 @@
                     <p id="modalDescription" class="text-sm mb-2"></p>
                     <div class="grid grid-cols-1 gap-1 md:grid-cols-3 text-xs py-3">
                         <div class="flex items-center bg-[#F2E8F5] rounded-full px-2 py-1">
-                           <i class="fa fa-clock text-primary" aria-hidden="true"></i>
+                            <i class="fa fa-clock text-primary" aria-hidden="true"></i>
                             <p class="px-2" id="modalTime">
                             </p>
                         </div>
@@ -193,48 +202,94 @@
         </div>
     </div>
 
-<div id="uploadModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
-    <div class="bg-gradient-to-r from-[#C068EE] to-[#9D55EC] rounded-3xl p-10 text-center w-[500px] relative">
-        <!-- Close Button -->
-        <button id="closeModal" class="closeModal absolute top-4 right-6 text-white text-xl font-bold">&times;</button>
-
-        <input id="event_id" type="hidden" />
-        <input id="student_id" type="hidden" />
-
-        <!-- Upload Box -->
-        <div id="uploadBox" class="space-y-6">
-            <div id="dropArea" class="border-2 border-dashed border-white rounded-2xl p-8 cursor-pointer relative">
-                <div id="previewArea" class="hidden grid grid-cols-2 gap-4"></div>
-                <div id="uploadText">
-                    <img src="{{ asset('/images/upload.png') }}" class="mx-auto w-14 mb-3" />
-                    <p class="text-white font-semibold">Drag & drop your images here</p>
-                    <p class="text-white text-sm mt-2">or click to select files</p>
-                    <p class="text-[#FD5063] text-md mt-2 py-2 rounded-full bg-white">
-                        JPG or PNG only, max 10MB each — Max 4 images allowed
-                    </p>
+    <div id="uploadModal"
+        class="fixed inset-0 bg-black/60 z-50 hidden overflow-y-auto flex items-start justify-center px-4 py-6">
+        <div class="bg-gradient-to-r from-[#C068EE] to-[#9D55EC] rounded-3xl p-10 text-center w-[500px] relative">
+            <!-- Close Button -->
+            <button id="closeModal"
+                class="closeModal absolute top-4 right-6 text-white text-xl font-bold">&times;</button>
+            <input id="event_id" type="hidden" />
+            <input id="student_id" type="hidden" />
+            <!-- Upload Box -->
+            <div id="uploadBox" class="space-y-6">
+                <div id="dropArea"
+                    class="border-2 border-dashed border-white rounded-2xl p-8 cursor-pointer relative">
+                    <div id="previewArea" class="hidden grid grid-cols-2 gap-4"></div>
+                    <div id="uploadText">
+                        <img src="{{ asset('/images/upload.png') }}" class="mx-auto w-14 mb-3" />
+                        <p class="text-white font-semibold">Drag & drop your images here</p>
+                        <p class="text-white text-sm mt-2">or click to select files</p>
+                        <p class="text-[#FD5063] text-md mt-2 py-2 rounded-full bg-white">
+                            JPG or PNG only, max 10MB each — Max 4 images allowed
+                        </p>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" multiple class="hidden" />
                 </div>
-                <input type="file" id="fileInput" accept="image/*" multiple class="hidden" />
-            </div>
 
-            <button id="submitUpload"
-                class="bg-gradient-to-r from-primary to-pink-600 text-white px-6 py-2 rounded-full">
-                Submit Here
-            </button>
-        </div>
+                <!-- Divider -->
+                <div class="my-6 border-t border-white/30"></div>
+                <!-- ================= Feedback Section ================= -->
+                <div class="bg-white/10 rounded-2xl p-5 text-left">
 
-        <!-- Success Box -->
-        <div id="successBox" class="hidden">
-            <div class="flex flex-col items-center space-y-4">
-                <img src="{{ asset('/images/upload_sucessfull.png') }}" width="70" />
-                <p class="text-white font-semibold">Proof uploaded successfully!</p>
-                <p class="text-white text-sm">Your attendance is marked as present</p>
-                <button id="uploadAnother" class="border border-white text-white px-6 py-2 rounded-full mt-3">
-                    Upload another proof
+                    <h4 class="text-white font-semibold mb-4">
+                        Event Feedback
+                    </h4>
+
+                    @php
+                        $questions = [
+                            'overall_experience' => 'How exciting was the overall event experience?',
+                            'engagement' => 'How engaging were the activities or sessions?',
+                            'organization' => 'How well was the event organized?',
+                            'coordination' => 'How interactive and friendly were the coordinators?',
+                            'recommendation' => 'How likely are you to attend similar events again?',
+                        ];
+                    @endphp
+
+                    @foreach ($questions as $key => $question)
+                        <div class="mb-4">
+                            <p class="text-white text-sm mb-2">
+                                {{ $question }}
+                            </p>
+
+                            <div class="flex gap-1">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <input type="radio" id="{{ $key }}_{{ $i }}"
+                                        name="ratings[{{ $key }}]" value="{{ $i }}"
+                                        class="hidden peer">
+                                    <label for="{{ $key }}_{{ $i }}"
+                                        class="cursor-pointer text-xl text-gray-300
+                                                  peer-checked:text-yellow-400
+                                                  hover:text-yellow-300 transition">
+                                        ★
+                                    </label>
+                                @endfor
+                            </div>
+                        </div>
+                    @endforeach
+                    <!-- Optional Comment -->
+                    <label class="text-white text-sm block mt-4 mb-2">
+                        Additional Comments (Optional)
+                    </label>
+
+                    <textarea name="comments" id="comments" rows="3" class="w-full rounded-xl p-3 text-sm"
+                        placeholder="Any memorable moment or suggestion?"></textarea>
+                </div>
+                <button id="submitUpload"
+                    class="bg-gradient-to-r from-primary to-pink-600 text-white px-6 py-2 rounded-full">
+                    Submit Here
                 </button>
+                <!-- Success Box -->
+                <div id="successBox" class="hidden">
+                    <div class="flex flex-col items-center space-y-4">
+                        <img src="{{ asset('/images/upload_sucessfull.png') }}" width="70" />
+                        <p class="text-white font-semibold">Proof uploaded successfully!</p>
+                        <p class="text-white text-sm">Your attendance is marked as present</p>
+                        <button id="uploadAnother" class="border border-white text-white px-6 py-2 rounded-full mt-3">
+                            Upload another proof
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 </x-layouts.app>
 <script src="{{ asset('admin/js/myregistration.js') }}"></script>
-

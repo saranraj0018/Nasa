@@ -20,4 +20,14 @@ class EventReport extends Model
     {
         return $this->belongsTo(Admin::class, 'created_by');
     }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(StudentFeedback::class, 'event_id', 'id');
+    }
+
+    public function student_uploads()
+    {
+        return $this->hasMany(StudentUploadProof::class, 'event_id', 'event_id');
+    }
 }

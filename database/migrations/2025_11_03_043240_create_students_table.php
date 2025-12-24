@@ -21,12 +21,12 @@ return new class extends Migration
             $table->string('password');
             $table->string('profile_pic')->nullable();
             $table->date('date_of_birth')->nullable();
+            $table->enum('gender', ['m','f','o'])->comment('m -> Male, f -> Female , o -> others ');
             $table->timestamps();
 
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('no action');
             $table->foreign('programme_id')->references('id')->on('programmes')->onDelete('no action');
         });
-
     }
 
     /**

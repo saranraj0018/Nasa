@@ -25,4 +25,12 @@ class Event extends Model
     {
             return $this->hasMany(EventReport::class, 'event_id', 'id');
     }
+
+    public function get_club()
+    {
+        return $this->belongsTo(Club::class, 'club_id');
+    }
+
+
+
 }

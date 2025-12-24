@@ -70,7 +70,9 @@
                     <x-menu.item name="Student" icon="fas fa-user-graduate" route="student_list" />
                     <x-menu.item name="Club" icon="fas fa-users" route="club_list" />
                     <x-menu.item name="Create Event" icon="fas fa-pencil-alt" route="event_list" />
-                    <x-menu.item name="Student Approval" icon="fas fa-user-check" route="student_approval" />
+                    <x-menu.item name="Student Attendance" icon="fa-graduation-cap" route="student_attendance" />
+                    <x-menu.item name="Assign Grades" icon="fa-star" route="assign_grades" />
+                    {{-- <x-menu.item name="Student Approval" icon="fas fa-user-check" route="student_approval" /> --}}
                     <x-menu.item name="Reports" icon="fa-book" route="reports" />
                 </x-slot:menus>
             @endif
@@ -83,8 +85,10 @@
                     <x-menu.item name="Create Event" icon="fa-pencil-square" route="event_list" />
                     <x-menu.item name="Admin" icon="fas fa-chalkboard-teacher" route="admin_list" />
                     <x-menu.item name="Assign Tasks" icon="fa-check-circle" route="assign_tasks" />
+                    <x-menu.item name="Student Attendance" icon="fa-graduation-cap" route="student_attendance" />
+                    <x-menu.item name="Assign Grades" icon="fa-star" route="assign_grades" />
                     <x-menu.item name="Review Reports" icon="fa-check-circle" route="review_reports" />
-                    <x-menu.item name="Student Approval" icon="fa-graduation-cap" route="student_approval" />
+                     {{-- <x-menu.item name="Student Approval" icon="fa-graduation-cap" route="student_approval" /> --}}
                 </x-slot:menus>
             @endif
         </x-menu.list>

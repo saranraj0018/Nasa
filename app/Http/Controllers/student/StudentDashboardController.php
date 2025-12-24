@@ -18,26 +18,32 @@ class StudentDashboardController extends Controller
         $this->data['studentId'] = $student->id;
         $this->data['events'] = Event::get();
         $this->data['registered_count'] = StudentEventRegistration::where('student_id', $student->id)->get();
-        $this->data['completed_events'] = StudentEventRegistration::where('student_id', $student->id)->where('status', 2)->get();
+        $this->data['completed_events'] = StudentEventRegistration::where('student_id', $student->id)
+                                          ->whereNotNull('grade')
+                                          ->where('status', 3)->get();
         $this->data['ongoingEvents'] = Event::with('registrations')
             ->whereDate('event_date', $now->toDateString())
             // ->whereTime('start_time', '<=', $now->toTimeString())
             // ->whereTime('end_time', '>=', $now->toTimeString())
-            ->where('end_registration', '<=', $now) // not after registration deadline
+            ->orderBy('start_time', 'asc')
             ->get();
+
+        // Upcoming Events
         $this->data['upcomingEvents'] = Event::with('registrations')
             ->where(function ($query) use ($now) {
                 $query->whereDate('event_date', '>', $now->toDateString())
                     ->orWhere(function ($q) use ($now) {
-                        $q->whereDate('event_date', '=', $now->toDateString());
-                        //    ->whereTime('start_time', '>', $now->toTimeString());
+                        $q->whereDate('event_date', '=', $now->toDateString())
+                            ->whereTime('start_time', '>', $now->toTimeString());
                     });
             })
-            ->where('end_registration', '<=', $now)
             ->orderBy('event_date', 'asc')
             ->orderBy('start_time', 'asc')
             ->get();
         $this->data['registeredEvents'] = StudentEventRegistration::with('event')->where('student_id', $student->id)
+            ->get();
+        $this->data['studentRegistrations'] = \App\Models\StudentEventRegistration::where('student_id', $student->id)
+            ->with('event') // eager load event for date and type
             ->get();
         return view('student.student_dashboard')->with($this->data);
     }

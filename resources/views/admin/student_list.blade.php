@@ -2,53 +2,110 @@
     <div class="bg-[#F5E8F5] w-full rounded-full shadow-sm px-8 py-3">
         <h3 class="font-semibold text-primary">Student</h3>
     </div>
-    <div class="flex justify-end">
+
+    @if (session()->has('failures'))
+        <div class="text-red-700 alert alert-danger border border-danger shadow-sm mt-2">
+            <h5 class="mb-3 fw-bold">
+                <i class="fa fa-exclamation-triangle"></i> Import Errors
+            </h5>
+            <ul class="list-unstyled mb-0 mt-2">
+                @foreach (session('failures') as $failure)
+                    <li class="mb-3 p-3 bg-light border-start border-4 border-danger rounded">
+                        <div class="mb-1">
+                            <strong class="text-danger">
+                                Row #{{ $failure->row() }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span class="badge bg-dark me-2">
+                                {{ $failure->attribute() }}
+                            </span>
+
+                            @foreach ($failure->errors() as $error)
+                                <span class="badge bg-danger me-1">
+                                    {{ $error }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if (session('success'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                showToast("{{ session('success') }}", "success");
+            });
+        </script>
+    @endif
+
+    <div class="flex justify-end items-center gap-3 mt-3">
+        <!-- Add Student -->
         <a href="{{ route('create_student') }}"
-                class="px-2 w-35 mt-3 bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
-                <i class="fa fa-plus" aria-hidden="true"></i>ADD Student</a>
+            class="flex items-center justify-center gap-1 w-[140px]
+              bg-gradient-to-r from-primary to-pink-600
+              text-white font-medium py-1 rounded-full">
+            <i class="fa fa-plus"></i>
+            Add Student
+        </a>
+        <!-- Download Template -->
+        <a href="{{ route('students.download.template') }}" class="px-4 py-1 bg-primary text-white rounded-full">
+            <i class="fa fa-download"></i> Download Template
+        </a>
+        <!-- Upload Students -->
+        <form action="{{ route('students.upload') }}" method="POST" enctype="multipart/form-data"
+            class="flex items-center gap-2">
+            @csrf
+            <input type="file" name="file" required class="border border-gray-300 rounded px-2 py-1 text-sm">
+            <button type="submit" class="px-4 py-1 bg-gradient-to-r from-primary to-pink-600 text-white rounded-full">
+                <i class="fa fa-upload"></i> Upload
+            </button>
+        </form>
     </div>
-     <section class="p-2 mt-3">
+
+    <section class="p-2">
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Student List</h4>
-             <div class="overflow-x-auto bg-white rounded-xl shadow-md">
-            <table class="w-full text-sm text-left text-gray-700 border-collapse">
-                <thead>
-                <tr class="bg-primary text-white text-sm uppercase tracking-wider">
-                    <th class="px-3 py-2">ID</th>
-                    <th class="px-3 py-2">Student Name</th>
-                    <th class="px-3 py-2">Email</th>
-                    <th class="px-3 py-2">Mobile Number</th>
-                    <th class="px-3 py-2">Date of Birth</th>
-                    <th class="px-3 py-2">Department</th>
-                    <th class="px-3 py-2">Designation</th>
-                    <th class="px-3 py-2">Action</th>
-                 </tr>
-                </thead>
-                <tbody id="studentTableBody" class="divide-y divide-gray-200">
-                @foreach($student as $stud)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $loop->iteration }}</td>
-                        <td class="px-4 py-3">{{ $stud->name ?? ''}}</td>
-                        <td class="px-4 py-3">{{ $stud->email ??''  }}</td>
-                        <td class="px-4 py-3">{{ $stud->mobile_number ?? ''}}</td>
-                         <td class="px-4 py-3">{{ $stud->date_of_birth ?? ''}}</td>
-                        <td class="px-4 py-3">{{ $stud->get_department->name }}</td>
-                        <td class="px-4 py-3">{{ $stud->get_programme->name }}</td>
-                        <td class="px-4 py-3 flex justify-center gap-4">
-                         <a href="{{ route('create_student', ['student_id' => encrypt($stud->id)]) }}">
-                             <i class="fa-solid fa-pen-to-square"></i>
-                        </a>
-                        </td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-         <div class="p-4">
-            {{ $student->links() }}
-        </div>
+            <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+                <table class="w-full text-sm text-left text-gray-700 border-collapse">
+                    <thead>
+                        <tr class="bg-primary text-white text-sm uppercase tracking-wider">
+                            <th class="px-3 py-2">ID</th>
+                            <th class="px-3 py-2">Student Name</th>
+                            <th class="px-3 py-2">Email</th>
+                            <th class="px-3 py-2">Mobile Number</th>
+                            <th class="px-3 py-2">Date of Birth</th>
+                            <th class="px-3 py-2">Department</th>
+                            <th class="px-3 py-2">Designation</th>
+                            <th class="px-3 py-2">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody" class="divide-y divide-gray-200">
+                        @foreach ($student as $stud)
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-3 font-medium text-gray-900">{{ $loop->iteration }}</td>
+                                <td class="px-4 py-3">{{ $stud->name ?? '' }}</td>
+                                <td class="px-4 py-3">{{ $stud->email ?? '' }}</td>
+                                <td class="px-4 py-3">{{ $stud->mobile_number ?? '' }}</td>
+                                <td class="px-4 py-3">{{ $stud->date_of_birth ?? '' }}</td>
+                                <td class="px-4 py-3">{{ $stud->get_department->name }}</td>
+                                <td class="px-4 py-3">{{ $stud->get_programme->name }}</td>
+                                <td class="px-4 py-3 flex justify-center gap-4">
+                                    <a href="{{ route('create_student', ['student_id' => encrypt($stud->id)]) }}">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4">
+                {{ $student->links() }}
+            </div>
         </div>
     </section>
 </x-layouts.app>
-
-

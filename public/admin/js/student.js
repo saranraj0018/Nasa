@@ -1,32 +1,37 @@
 $(document).on("submit", "#studentForm", function (e) {
     e.preventDefault();
      let fields = [
-        {
-            id: "#student_name",
-            condition: (val) => val === "",
-            message: "Student Name is required",
-        },
-        {
-            id: "#email",
-            condition: (val) => val === "",
-            message: "Email is required",
-        },
-        {
-            id: "#mobile_number",
-            condition: (val) => val === "",
-            message: "Mobile Number is required",
-        },
-        {
-            id: "#department_id",
-            condition: (val) => val === "",
-            message: "Please Select Department",
-        },
-        {
-            id: "#programme_id",
-            condition: (val) => val === "",
-            message: "Please Select Programme",
-        },
-    ];
+         {
+             id: "#student_name",
+             condition: (val) => val === "",
+             message: "Student Name is required",
+         },
+         {
+             id: "#email",
+             condition: (val) => val === "",
+             message: "Email is required",
+         },
+         {
+             id: "#mobile_number",
+             condition: (val) => val === "",
+             message: "Mobile Number is required",
+         },
+         {
+             id: "#department_id",
+             condition: (val) => val === "",
+             message: "Please Select Department",
+         },
+         {
+             id: "#programme_id",
+             condition: (val) => val === "",
+             message: "Please Select Programme",
+         },
+         {
+             id: "#gender",
+             condition: (val) => val === "",
+             message: "Please Select Gender",
+         },
+     ];
     let isValid = true;
     for (const field of fields) {
         const result = validateField(field); // synchronous, so no async/await needed
@@ -114,6 +119,11 @@ $(document).on("submit", "#studentregisterForm", function (e) {
             id: "#programme_id",
             condition: (val) => val === "",
             message: "Please Select Programme",
+        },
+        {
+            id: "#gender",
+            condition: (val) => val === "",
+            message: "Please Select Gender",
         },
     ];
     let isValid = true;

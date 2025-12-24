@@ -2,118 +2,360 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Event Report #{{ $report->id }}</title>
+    <title>Event Report</title>
+
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12.5px; color: #1A1A1A; }
-        .header { text-align: center; margin-top: 0x; }
-        .header img { width: 430px; margin-top: 0px; }
-        .report-title { font-size: 18px; font-weight: 700; text-transform: uppercase; margin-top: 5px; color:#7A1C73; letter-spacing: 0.5px; }
-        .report-meta { font-size: 12px; color: #444; margin-top: 2px; }
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 13px;
+            color: #1A1A1A;
+            margin: 0;
+            padding: 0;
+        }
 
-        .section-title { font-size: 14px; font-weight: 700; background: #F1E5F7; padding: 6px 8px; border-left: 4px solid #7A1C73; margin: 18px 0 8px; }
+        .container {
+            padding: 20px;
+        }
 
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #bbb; padding: 8px 9px; font-size: 12.5px; }
-        th { background: #fafafa; width: 34%; }
+        /* HEADER */
+        .header {
+            border-bottom: 3px solid #7A1C73;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
 
-        .file-badge { background: #EEF5FF; border: 1px solid #CDE0FF; padding: 4px 6px; border-radius: 4px; font-size: 11.5px; display:inline-block; }
+        .event-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #7A1C73;
+        }
 
-        .image-grid { margin-top: 8px; }
-        .image-block { display:inline-block; margin: 5px 10px 10px 0; text-align:center; }
-        .image-block img { max-width: 240px; max-height: 160px; border:1px solid #bbb; padding:4px; }
+        .event-meta {
+            font-size: 12px;
+            text-align: right;
+        }
 
-        .footer { margin-top: 24px; text-align: right; font-size: 11.5px; color: black; }
-        hr { border: none; border-top: 1px solid #CCC; margin: 20px 0; }
+        table.header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* SUMMARY */
+        .summary-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        .summary-box {
+            background: #F9F3FB;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            text-align: center;
+            padding: 12px;
+        }
+
+        .summary-box h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #7A1C73;
+        }
+
+        /* SECTION */
+        .section-title {
+            margin-top: 25px;
+            margin-bottom: 10px;
+            padding: 6px;
+            font-weight: bold;
+            background: #F1E5F7;
+            border-left: 5px solid #7A1C73;
+        }
+
+        /* GENDER CHART */
+     .gender-wrapper {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* BAR */
+.bar-item {
+    margin-bottom: 12px;
+}
+
+.bar-label {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.bar-bg {
+    width: 100%;
+    background: #e0e0e0;
+    height: 12px;
+    border-radius: 6px;
+}
+
+.bar-fill {
+    height: 12px;
+    border-radius: 6px;
+}
+
+/* PIE */
+.pie-chart {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    margin: 15px auto 0;
+    position: relative;
+}
+
+.pie-center {
+    position: absolute;
+    width: 45px;
+    height: 45px;
+    background: #fff;
+    border-radius: 50%;
+    top: 32px;
+    left: 32px;
+}
+
+/* LEGEND */
+.legend {
+    margin-top: 8px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.legend-box {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+        /* FEEDBACK BARS */
+        .feedback-bars {
+            width: 100%;
+        }
+
+        /* STUDENT FEEDBACK */
+        .feedback-item {
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+        }
+
+        .stars {
+            color: #F1C40F;
+        }
+
+        /* IMAGES */
+        .image-grid {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .image-grid img {
+            width: 32%;
+            height: 140px;
+            object-fit: cover;
+            border: 1px solid #bbb;
+            margin-right: 1%;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 11px;
+        }
     </style>
 </head>
-
 <body>
 
-    <!-- INSTITUTION HEADER -->
+@php
+function stars($rating) {
+    $full = floor($rating);
+    return str_repeat('★',$full).str_repeat('☆',5-$full);
+}
+
+$total = max(1, $data['report']->registered_count);
+$male = $data['report']->male_count ?? 0;
+$female = $data['report']->female_count ?? 0;
+
+$malePct = round(($male / $total) * 100);
+$femalePct = round(($female / $total) * 100);
+
+$avg = $data['report']->avgRatings ?? [];
+@endphp
+
+<div class="container">
+
+    <!-- LOGO -->
+    <img src="{{ public_path('images/rtc_logo.png') }}" style="width:100%; margin-bottom:10px;">
+
+    <!-- HEADER -->
     <div class="header">
-        <img src="{{ public_path('/images/rtc_logo.png') }}" alt="College Logo">
-        <div class="report-title">EVENT REPORT</div>
-        <div class="report-meta">Report ID: {{ $report->id }}</div>
+        <table class="header-table">
+            <tr>
+                <td>
+                    <div class="event-title">
+                        {{ $data['report']->get_event->title ?? 'Event Title' }}
+                    </div>
+                </td>
+                <td class="event-meta">
+                   <b> Date: {{ $data['report']->get_event->event_date }}  &
+                    Session:
+                    @if ($data['report']->get_event->session == 1)
+                        FN
+                    @elseif ($data['report']->get_event->session == 2)
+                        AN
+                    @endif
+                   </b>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <!-- BASIC DETAILS -->
-    <div class="section-title">Event Details</div>
-    <table>
+    <!-- SUMMARY -->
+    <table class="summary-table">
         <tr>
-            <th>Event Name</th>
-            <td>{{ $report->get_event->get_task->title ?? $report->get_event->title ?? 'N/A' }}</td>
-        </tr>
-        <tr>
-            <th>Event Date & Time</th>
-            <td>
-                {{ optional($report->get_event->event_date) ? \Carbon\Carbon::parse($report->get_event->event_date)->format('F d, Y') : 'N/A' }}
-                @if($report->get_event->start_time)
-                    ({{ \Carbon\Carbon::parse($report->get_event->start_time)->format('h:i A') }})
-                @endif
+            <td class="summary-box">
+                <h2>{{ $data['report']->registered_count }}</h2>
+                Registered
             </td>
-        </tr>
-        <tr>
-            <th>Report Submitted By</th>
-            <td>{{ $report->creator->name ?? 'N/A' }} — <em>{{ \Carbon\Carbon::parse($report->created_at)->format('F d, Y (h:i A)') }}</em></td>
+            <td width="20"></td>
+            <td class="summary-box">
+                <h2>{{ $data['report']->attended_count }}</h2>
+                Attended
+            </td>
         </tr>
     </table>
 
-    <!-- PARTICIPANTS -->
-    <div class="section-title">Participants</div>
-    <table>
-        <tr>
-            <th>Total Attendance</th>
-            <td>Male: {{ $report->male_count ?? 0 }} &nbsp; | &nbsp; Female: {{ $report->female_count ?? 0 }}</td>
-        </tr>
-    </table>
-    <!-- OUTCOMES -->
-    <div class="section-title">Event Outcomes</div>
-    <table>
-        <tr>
-            <td>{!! nl2br(e($report->outcomes ?? $report->outcomes_results ?? 'N/A')) !!}</td>
-        </tr>
-    </table>
-    <!-- FEEDBACK -->
-    <div class="section-title">Feedback Summary</div>
-    <table>
-        <tr>
-            <td>{!! nl2br(e($report->feedback_summary ?? 'N/A')) !!}</td>
-        </tr>
-    </table>
-    <!-- CERTIFICATES -->
-    <div class="section-title">Certificate / Documentation</div>
-    <table>
-        <tr>
-            <td>
-                @php $cert = $report->certificates; @endphp
-                @if($cert)
-                    @if(preg_match('/\.(jpg|jpeg|png)$/i', $cert))
-                        <img src="{{ public_path('storage/' . $cert) }}" style="max-width:270px; max-height:170px; border:1px solid #bbb; padding:4px;">
-                    @else
-                        <span class="file-badge">{{ basename($cert) }}</span>
-                    @endif
-                @else
-                    N/A
-                @endif
-            </td>
-        </tr>
-    </table>
-    <!-- SUPPORTING IMAGES -->
-    @if($report->get_event_image && $report->get_event_image->count())
-        <div class="section-title">Supporting Files / Photographs</div>
+    <!-- GENDER -->
+<div class="section-title">Gender Participation</div>
+
+@php
+$total = max(1, $male + $female);
+$maleAngle = ($male / $total) * 360;
+$femaleAngle = 360 - $maleAngle;
+@endphp
+
+<!-- SVG CHART (NO CSS LAYOUT) -->
+<svg width="420" height="200" viewBox="0 0 420 200">
+
+    <!-- PIE -->
+    <g transform="translate(100,100)">
+        <!-- Male -->
+        <path d="
+            M 0 0
+            L 0 -70
+            A 70 70 0 {{ $maleAngle > 180 ? 1 : 0 }} 1
+              {{ 70 * sin(deg2rad($maleAngle)) }}
+              {{ -70 * cos(deg2rad($maleAngle)) }}
+            Z"
+            fill="#7A1C73"/>
+
+        <!-- Female -->
+        <path d="
+            M 0 0
+            L {{ 70 * sin(deg2rad($maleAngle)) }}
+              {{ -70 * cos(deg2rad($maleAngle)) }}
+            A 70 70 0 {{ $femaleAngle > 180 ? 1 : 0 }} 1
+              0 -70
+            Z"
+            fill="#C36BCB"/>
+
+        <!-- Center hole -->
+        <circle cx="0" cy="0" r="35" fill="#ffffff"/>
+    </g>
+
+    <!-- LABELS -->
+    <text x="220" y="70" font-size="12" fill="#000">
+        ■ Male: {{ $male }}
+    </text>
+    <rect x="200" y="60" width="10" height="10" fill="#7A1C73"/>
+
+    <text x="220" y="95" font-size="12" fill="#000">
+        ■ Female: {{ $female }}
+    </text>
+    <rect x="200" y="85" width="10" height="10" fill="#C36BCB"/>
+
+    <!-- BARS -->
+    <text x="20" y="180" font-size="11">Male</text>
+    <rect x="60" y="170" width="{{ ($male/$total)*300 }}" height="10" fill="#7A1C73"/>
+
+    <text x="20" y="195" font-size="11">Female</text>
+    <rect x="60" y="185" width="{{ ($female/$total)*300 }}" height="10" fill="#C36BCB"/>
+
+</svg>
+
+
+
+
+    <!-- AVERAGE FEEDBACK -->
+    <div class="section-title">Average Feedback</div>
+
+    @foreach([
+        'overall_experience'=>'Overall Experience',
+        'engagement'=>'Engagement',
+        'organization'=>'Organization',
+        'coordination'=>'Coordination',
+        'recommendation'=>'Recommendation'
+    ] as $k=>$label)
+
+        @php $val = round(($avg[$k] ?? 0) * 20); @endphp
+
+        <div class="bar-item">
+            <div class="bar-label">
+                {{ $label }} ({{ number_format($avg[$k] ?? 0,1) }}/5)
+            </div>
+            <div class="bar-bg">
+                <div class="bar-fill" style="width:{{ $val }}%; background:#7A1C73;"></div>
+            </div>
+        </div>
+
+    @endforeach
+
+    <!-- STUDENT FEEDBACK -->
+    <div class="section-title">Student Feedback</div>
+
+    @foreach($data['report']->feedbacks as $f)
+        @php $r = json_decode($f->ratings,true); @endphp
+        <div class="feedback-item">
+            <strong>{{ $f->student->name ?? 'Student' }}</strong>
+            <div class="stars">
+                Overall: {{ stars($r['overall_experience'] ?? 0) }}
+            </div>
+            <div>{{ $f->comments }}</div>
+        </div>
+    @endforeach
+
+    <!-- GEO IMAGES -->
+    @if($data['report']->geo_images->count())
+        <div class="section-title">Geo Tagged Photos</div>
         <div class="image-grid">
-            @foreach($report->get_event_image as $img)
-                <div class="image-block">
-                    <img src="{{ public_path('storage/' . ltrim($img->file_path, '/')) }}" alt="{{ $img->file_name }}">
-                    <div style="font-size: 11px; margin-top: 3px;">{{ $img->file_name }}</div>
-                </div>
+            @foreach($data['report']->geo_images as $img)
+                <img src="{{ public_path('storage/'.$img->file_path) }}">
             @endforeach
         </div>
     @endif
-    <hr>
-    <!-- FOOTER -->
+
+    <!-- STUDENT UPLOADS -->
+    {{-- @if($data['report']->student_uploads->count())
+        <div class="section-title">Student Uploads</div>
+        <div class="image-grid">
+            @foreach($data['report']->student_uploads as $img)
+                <img src="{{ public_path('storage/'.$img->file_path) }}">
+            @endforeach
+        </div>
+    @endif --}}
+
     <div class="footer">
-        Generated on {{ \Carbon\Carbon::now()->format('F d, Y (h:i A)') }}
+        Generated on {{ now()->format('d M Y h:i A') }}
     </div>
+
+</div>
 </body>
 </html>
+

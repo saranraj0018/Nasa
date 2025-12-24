@@ -29,17 +29,17 @@ class RegisterEventController extends Controller
             ->whereDate('event_date', $now->toDateString())
             // ->whereTime('start_time', '<=', $now->toTimeString())
             // ->whereTime('end_time', '>=', $now->toTimeString())
-            ->where('end_registration', '<=', $now) // not after registration deadline
+            ->orderBy('start_time', 'asc')
             ->get();
+        // Upcoming Events
         $this->data['upcomingEvents'] = Event::with('registrations')
             ->where(function ($query) use ($now) {
                 $query->whereDate('event_date', '>', $now->toDateString())
                     ->orWhere(function ($q) use ($now) {
-                        $q->whereDate('event_date', '=', $now->toDateString());
-                        //    ->whereTime('start_time', '>', $now->toTimeString());
+                        $q->whereDate('event_date', '=', $now->toDateString())
+                            ->whereTime('start_time', '>', $now->toTimeString());
                     });
             })
-            ->where('end_registration', '<=', $now)
             ->orderBy('event_date', 'asc')
             ->orderBy('start_time', 'asc')
             ->get();
@@ -50,8 +50,11 @@ class RegisterEventController extends Controller
         $activecount = StudentEventRegistration::where('student_id', $student->id)->count();
         $this->data['pending_uploads'] =  $activecount - count($myuploads);
         $this->data['attendedCount'] = StudentEventRegistration::where('student_id', $student->id)
-            ->where('status',2)
+            ->where('status', 2)
             ->count();
+        $this->data['studentRegistrations'] = \App\Models\StudentEventRegistration::where('student_id', $student->id)
+            ->with('event') // eager load event for date and type
+            ->get();
         return view('student.register_event_index')->with($this->data);
     }
 
@@ -60,11 +63,13 @@ class RegisterEventController extends Controller
         $request->validate([
             'student_id' => 'required|string|max:255',
             'event'  => 'required',
-         ]);
+        ]);
 
-         try {
+        try {
             $register_event = StudentEventRegistration::where(['student_id' => $request->stu_id, 'event_id' => $request->event_id])->first();
+
             if (!$register_event) {
+
                 $register = new StudentEventRegistration();
                 $register->student_id    = $request->stu_id;
                 $register->event_id      = $request->event_id ?? null;
@@ -74,14 +79,14 @@ class RegisterEventController extends Controller
                 if (!empty($request['report_id'])) {
                     $user = auth('student')->user();
                     $event = Event::where('id', $request->event_id)->first();
-                    ActivityLog::add($user->name .' - '. $event->title ." - Event Registered", $user);
+                    ActivityLog::add($user->name . ' - ' . $event->title . " - Event Registered", $user);
                 }
             }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Event Registered Successfully!',
-             ]);
+            ]);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -93,14 +98,14 @@ class RegisterEventController extends Controller
 
     public function getStudent(Request $request)
     {
-        if($request->ajax() && $request->get_student){
+        if ($request->ajax() && $request->get_student) {
             $student = session()->get('student');
-            $event = Event::where('id',$request->event_id)->first();
-              return response()->json([
+            $event = Event::where('id', $request->event_id)->first();
+            return response()->json([
                 'success' => true,
                 'student' => $student,
                 'event' => $event
-             ]);
+            ]);
         }
     }
 }

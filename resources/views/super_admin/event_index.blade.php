@@ -202,10 +202,11 @@
                         <div class="relative">
                             <img src="{{ asset('storage/' . $event->event->banner_image) }}" alt="Event"
                                 class="rounded-t-2xl w-full h-48 object-cover">
-                            <span
-                                class="absolute top-3 right-3 bg-gradient-to-r from-primary to-pink-600 text-white px-3 text-sm py-1 rounded-full">
-                                <span class="text-2xl">{{ $available }}</span> Seats Available
+                            @if ($event->event->event_type == 'paid')
+                            <span class= "absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
+                                    Premium
                             </span>
+                            @endif
                             <span
                                 class="absolute bottom-3 left-3 bg-[rgba(128,128,128,0.4)] text-white text-xs px-3 py-1 rounded-full">
                                 {{ $event->event->title }}

@@ -40,7 +40,7 @@ class StudentAuthController extends Controller
         $student = Auth::guard('student')->id();
         $studentdetail = Student::where('id', $student)->first();
         session()->put('student', $studentdetail);
-        ActivityLog::add($studentdetail->name . " - Login", auth('student')->user());
+        ActivityLog::add($studentdetail->name . " - Student Login", auth('student')->user());
         return redirect()->route('student_dashboard');
     }
 

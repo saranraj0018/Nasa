@@ -3,11 +3,7 @@
         <h3 class="font-semibold text-primary">Events</h3>
     </div>
     <div class="flex justify-end">
-        @if (!empty(session()->get('super_admin')))
-            <a href="{{ route('create_event') }}"
-                class="px-2 w-40 mt-3 bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full"><i
-                    class="fa fa-plus" aria-hidden="true"></i>Create Event</a>
-        @endif
+            <a href="{{ route('create_event') }}" class="px-2 w-40 mt-3 bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full"><i class="fa fa-plus" aria-hidden="true"></i>Create Event</a>
     </div>
     <!-- Dashboard Header -->
     @if (!empty(session()->get('admin')))

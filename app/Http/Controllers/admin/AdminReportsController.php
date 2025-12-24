@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Helpers\ActivityLog;
-use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\Student;
 use App\Models\EventReport;
-use App\Models\EventReportImage;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Helpers\ActivityLog;
 use Illuminate\Http\Request;
+use App\Models\StudentFeedback;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\EventReportImage;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -32,7 +34,7 @@ class AdminReportsController extends Controller
             }
         }
         $adminId = Auth::guard('admin')->id();
-        $this->data['event'] = Event::where('created_by' , $adminId)->get();
+        $this->data['event'] = Event::where('created_by', $adminId)->get();
 
         return view('admin.create_admin_report')->with($this->data);
     }
@@ -85,15 +87,15 @@ class AdminReportsController extends Controller
                     'public'
                 )
                 : $report->attendance_out;
-           $user = auth('admin')->user();
-           $exist_report = EventReport::where(['event_id' => $request->event_id , 'created_by'=> $user->id ])->exists();
+            $user = auth('admin')->user();
+            $exist_report = EventReport::where(['event_id' => $request->event_id, 'created_by' => $user->id])->exists();
 
-           if($exist_report){
+            if ($exist_report) {
                 return response()->json([
                     'success' => false,
                     'message' => 'This event report already exists!'
                 ], 500);
-           }
+            }
             // SAVE MAIN REPORT
             $report->event_id = $request->event_id;
             $report->created_by = $user->id;
@@ -147,7 +149,6 @@ class AdminReportsController extends Controller
                 'success' => true,
                 'message' => $message
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -156,23 +157,171 @@ class AdminReportsController extends Controller
         }
     }
 
+    // public function viewPdf($id)
+    // {
+    //     $report = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
+    //     $pdf = Pdf::loadView('report.pdf.report_template', compact('report'))
+    //         ->setPaper('a4', 'portrait');
+    //     $user = auth('admin')->user();
+    //     ActivityLog::add($user->name  .' - '. $report->get_event->title .' - Report Viewed', $user);
+
+    //     return $pdf->stream("event_report_{$report->id}.pdf");
+    // }
+
     public function viewPdf($id)
     {
-        $report = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
-        $pdf = Pdf::loadView('report.pdf.report_template', compact('report'))
+
+        $event = EventReport::with(['get_event.get_task', 'get_event_image', 'creator', 'student_uploads'])->findOrFail($id);
+        // Get feedbacks
+
+        $feedbacks = StudentFeedback::with('student')
+            ->where('event_id', $event->event_id)
+            ->get();
+
+        // Calculate average ratings
+        $avgRatings = [
+            'overall_experience' => 0,
+            'engagement' => 0,
+            'organization' => 0,
+            'coordination' => 0,
+            'recommendation' => 0,
+        ];
+
+        $totalFeedbacks = $feedbacks->count();
+
+        if ($totalFeedbacks > 0) {
+            foreach ($feedbacks as $feedback) {
+                $ratings = json_decode($feedback->ratings, true);
+                foreach ($avgRatings as $key => $val) {
+                    $avgRatings[$key] += isset($ratings[$key]) ? (int)$ratings[$key] : 0;
+                }
+            }
+
+            // Calculate average
+            foreach ($avgRatings as $key => $val) {
+                $avgRatings[$key] = $val / $totalFeedbacks;
+            }
+        }
+
+        // Gender counts
+        $studentIds = $feedbacks->pluck('student_id')->toArray();
+
+        // Prepare gender chart via QuickChart.io
+        $genderChartUrl = 'https://quickchart.io/chart?c=' . urlencode(json_encode([
+            'type' => 'pie',
+            'data' => [
+                'labels' => ['Male', 'Female'],
+                'datasets' => [[
+                    'data' => [$event->male_count, $event->female_count],
+                    'backgroundColor' => ['#7A1C73', '#C36BCB']
+                ]]
+            ],
+            'options' => ['plugins' => ['legend' => ['position' => 'bottom']]]
+        ]));
+        // Counts
+        $registeredCount = $event->get_event->registrations()->count();
+        $attendedCount = $event->male_count + $event->female_count;
+
+        // Prepare PDF data
+        $data = [
+            'report' => (object)[
+                'get_event' => $event->get_event,
+                'feedbacks' => $feedbacks,
+                'avgRatings' => $avgRatings,
+                'male_count' => $event->male_count,
+                'female_count' => $event->female_count,
+                'registered_count' => $registeredCount,
+                'attended_count' => $attendedCount,
+                'geo_images' => $event->get_event_image,
+                'student_uploads' => $event->student_uploads,
+                'event_image' => $event->image, // optional main event image
+            ],
+            'genderChartUrl' => $genderChartUrl
+        ];
+
+        // Generate PDF
+        $pdf = Pdf::loadView('report.pdf.report_template', compact('data'))
             ->setPaper('a4', 'portrait');
         $user = auth('admin')->user();
-        ActivityLog::add($user->name  .' - '. $report->get_event->title .' - Report Viewed', $user);
-        return $pdf->stream("event_report_{$report->id}.pdf");
+        ActivityLog::add($user->name  . ' - ' . $event->title . ' - Report Viewed', $user);
+        return $pdf->stream("event_report_{$event->id}.pdf");
     }
 
     public function downloadPdf($id)
     {
-        $report = EventReport::with(['get_event.get_task', 'get_event_image', 'creator'])->findOrFail($id);
-        $pdf = Pdf::loadView('report.pdf.report_template', compact('report'))
-                ->setPaper('a4', 'portrait');
+        $event = EventReport::with(['get_event.get_task', 'get_event_image', 'creator', 'student_uploads'])->findOrFail($id);
+        // Get feedbacks
+
+        $feedbacks = StudentFeedback::with('student')
+            ->where('event_id', $event->event_id)
+            ->get();
+
+        // Calculate average ratings
+        $avgRatings = [
+            'overall_experience' => 0,
+            'engagement' => 0,
+            'organization' => 0,
+            'coordination' => 0,
+            'recommendation' => 0,
+        ];
+
+        $totalFeedbacks = $feedbacks->count();
+
+        if ($totalFeedbacks > 0) {
+            foreach ($feedbacks as $feedback) {
+                $ratings = json_decode($feedback->ratings, true);
+                foreach ($avgRatings as $key => $val) {
+                    $avgRatings[$key] += isset($ratings[$key]) ? (int)$ratings[$key] : 0;
+                }
+            }
+
+            // Calculate average
+            foreach ($avgRatings as $key => $val) {
+                $avgRatings[$key] = $val / $totalFeedbacks;
+            }
+        }
+
+        // Gender counts
+        $studentIds = $feedbacks->pluck('student_id')->toArray();
+
+
+        // Prepare gender chart via QuickChart.io
+        $genderChartUrl = 'https://quickchart.io/chart?c=' . urlencode(json_encode([
+            'type' => 'pie',
+            'data' => [
+                'labels' => ['Male', 'Female'],
+                'datasets' => [[
+                    'data' => [$event->male_count, $event->female_count],
+                    'backgroundColor' => ['#7A1C73', '#C36BCB']
+                ]]
+            ],
+            'options' => ['plugins' => ['legend' => ['position' => 'bottom']]]
+        ]));
+        // Counts
+        $registeredCount = $event->get_event->registrations()->count();
+        $attendedCount = $event->male_count + $event->female_count;
+
+        // Prepare PDF data
+        $data = [
+            'report' => (object)[
+                'get_event' => $event->get_event,
+                'feedbacks' => $feedbacks,
+                'avgRatings' => $avgRatings,
+                'male_count' => $event->male_count,
+                'female_count' => $event->female_count,
+                'registered_count' => $registeredCount,
+                'attended_count' => $attendedCount,
+                'geo_images' => $event->get_event_image,
+                'student_uploads' => $event->student_uploads,
+                'event_image' => $event->image, // optional main event image
+            ],
+            'genderChartUrl' => $genderChartUrl
+        ];
+
         $user = auth('admin')->user();
-        ActivityLog::add($user->name .' - '. $report->get_event->title .'Report Downloaded', $user);
-        return $pdf->download("event_report_{$report->id}.pdf");
+        ActivityLog::add($user->name . ' - ' .  $event->title . 'Report Downloaded', $user);
+        $pdf = Pdf::loadView('report.pdf.report_template', compact('data'))
+            ->setPaper('a4', 'portrait');
+        return $pdf->download("event_report_{$event->id}.pdf");
     }
 }

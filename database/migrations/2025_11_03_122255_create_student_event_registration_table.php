@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('event_id');
             $table->enum('status', ['1', '2','3','4'])->comment('1 - Registered, 2 - Approved, 3 - Completed, 4 - Cancelled');
+            $table->enum('grade', ['a', 'b', 'c', 'd'])->comment('A - Winner, B - Runner Up, C - Completed, D - Disqualified')->nullable();
             $table->timestamps();
 
             $table->foreign('event_id')->references('id')->on('events')->onDelete('no action');
