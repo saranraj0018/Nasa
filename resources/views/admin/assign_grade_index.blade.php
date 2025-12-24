@@ -27,7 +27,7 @@
                         <tr class="border-t">
                             <td class="px-4 py-3">{{ $loop->iteration }}</td>
                             <td class="px-4 py-3 font-medium">{{ $event->title ?? '' }}</td>
-                            <td class="px-4 py-3">{{ $event->date ?? '' }}</td>
+                            <td class="px-4 py-3">{{ $event->event_date ?? '' }}</td>
                             <td class="px-4 py-3">{{ $event->contact_person ?? '' }}</td>
                             <td class="px-4 py-3">{{ $event->contact_email ?? '' }}</td>
                             <td class="px-4 py-3">{{ $event->get_club?->name ?? '' }}</td>

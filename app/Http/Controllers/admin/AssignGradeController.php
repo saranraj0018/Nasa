@@ -22,7 +22,7 @@ class AssignGradeController extends Controller
         $this->data['registrations'] = StudentAttendance::with('student', 'get_grade')
             ->whereNotNull('entry_time')
             ->whereNotNull('exit_time')
-            ->where('event_id', 3)
+            ->where('event_id', $request->event_id)
             ->orderBy('id')
             ->get();
         $this->data['event'] = Event::find($request->event_id);

@@ -39,7 +39,7 @@ class AdminHomeController extends Controller
         $this->data['submitted_reports'] = EventReport::where('created_by', $adminId)->get();
         $this->data['total_tasks'] = Tasks::where('admin_id', $adminId)->count();
         $this->data['pending_tasks'] = Tasks::where('admin_id', $adminId)->where('status','pending')->count();
-        $this->data['completed_tasks'] = Tasks::where('admin_id', $adminId)->where('status', 'completed')->count();
+        $this->data['completed_tasks'] = Tasks::where('admin_id', $adminId)->whereNot('status', 'pending')->count();
         $this->data['approved_tasks'] = Tasks::where('admin_id', $adminId)->where('status', 'accepted')->count();
         return view('admin.admin_home_index')->with($this->data);
     }
