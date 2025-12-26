@@ -138,7 +138,6 @@ $(document).on("submit", "#studentregisterForm", function (e) {
         formData,
         "POST",
         function (res) {
-            console.log(res);
             if (res.success) {
                 showToast(res.message, "success", 2000);
                 setTimeout(function () {

@@ -26,7 +26,6 @@ $(document).on("click", ".btnAction", function () {
       const eventSelect = document.querySelector('select[name="event"]');
       const tasks = document.querySelectorAll(".task-card");
       const refreshBtn = document.getElementById("refreshBtn");
-console.log(statusSelect);
       function filterTasks() {
           const studentVal = studentSelect.value;
           const statusVal = statusSelect.value;
@@ -38,8 +37,6 @@ console.log(statusSelect);
               const studentMatch = !studentVal || studentVal === taskStudent;
               const statusMatch = !statusVal || statusVal === taskStatus;
               const eventMatch = !eventVal || eventVal === taskEvent;
-              console.log(statusMatch);
-
               task.style.display =
                   studentMatch && statusMatch && eventMatch ? "block" : "none";
           });

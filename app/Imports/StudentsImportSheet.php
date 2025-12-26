@@ -27,8 +27,8 @@ class StudentsImportSheet implements ToModel, WithHeadingRow, WithValidation, Sk
 
     public function model(array $row)
     {
-        $department = Department::where('name', trim($row['department_id']))->first();
-        $programme  = Programme::where('name', trim($row['programme_id']))->first();
+        $department = Department::where('name', trim($row['department']))->first();
+        $programme  = Programme::where('name', trim($row['programme']))->first();
 
         return new Student([
             'department_id' => $department?->id,
@@ -61,8 +61,8 @@ class StudentsImportSheet implements ToModel, WithHeadingRow, WithValidation, Sk
     {
 
         return [
-            'department_id' => trim($data['department_id']),
-            'programme_id'  => trim($data['programme_id']),
+            'department_id' => trim($data['department']),
+            'programme_id'  => trim($data['programme']),
             'name'          => trim($data['name']),
             'email'         => trim($data['email']),
             'mobile_number' => trim($data['mobile_number']),
@@ -92,12 +92,12 @@ class StudentsImportSheet implements ToModel, WithHeadingRow, WithValidation, Sk
                 Rule::unique('students', 'mobile_number'), // REQUIRED
             ],
             '*.gender' => ['bail', 'required', 'in:m,f,o'],
-            '*.department_id' => [
+            '*.department' => [
                 'bail',
                 'required',
                 Rule::exists('departments', 'name'),
             ],
-            '*.programme_id' => [
+            '*.programme' => [
                 'bail',
                 'required',
                 Rule::exists('programmes', 'name'),

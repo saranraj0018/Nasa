@@ -26,12 +26,6 @@ class RazorpayController extends Controller
         // Amount in paise, as integer
         $amountPaise = (int) round($event->price * 100);
 
-        Log::info('Razorpay Order Amount Debug', [
-            'event_price' => $event->price,
-            'amount_paise' => $amountPaise,
-            'type' => gettype($amountPaise),
-        ]);
-
         try {
             $order = $api->order->create([
                 'amount' => $amountPaise, // MUST be integer in paise
@@ -48,12 +42,8 @@ class RazorpayController extends Controller
             $event_payment->amount = $event->price;
             $event_payment->status = 'created';
             $event_payment->save();
-
-            Log::info('Razorpay Order Created', ['order' => $order->toArray()]);
-
             return response()->json($order->toArray());
         } catch (\Exception $e) {
-            Log::error('Razorpay Order Creation Failed: ' . $e->getMessage());
             return response()->json(['error' => 'Unable to create order. Try again later.'], 500);
         }
     }

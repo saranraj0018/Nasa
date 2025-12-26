@@ -27,7 +27,6 @@ $(document).on("submit", "#eventReportForm", function (e) {
        const totalImages = document.querySelectorAll(
            "#previewArea .img-wrapper"
        ).length;
-       console.log(totalImages);
     e.preventDefault();
     // Fields to validate
     let fields = [
