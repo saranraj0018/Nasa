@@ -92,7 +92,7 @@
             @endif
         </x-menu.list>
           <x-menu.item name="Privacy Policy" icon="fa-book-open" route="privacy_policy"/>
-          <x-menu.item name="Terms and Conditions" icon="fa-book-open" route="terms_and_conditions"/>
+          <x-menu.item name="Terms and Conditions" icon="fa-file-contract " route="terms_and_conditions"/>
         @if (!empty(session()->get('student')))
             {{-- <x-menu.item name="Non-Curriculum" icon="fa-graduation-cap" /> --}}
         @endif
