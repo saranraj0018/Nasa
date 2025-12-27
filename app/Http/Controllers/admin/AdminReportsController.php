@@ -235,6 +235,8 @@ class AdminReportsController extends Controller
                 'geo_images' => $event->get_event_image,
                 'student_uploads' => $event->student_uploads,
                 'event_image' => $event->image, // optional main event image
+                'outcomes' => $event->outcomes,
+                'feedback_summary' => $event->feedback_summary
             ],
             'genderChartUrl' => $genderChartUrl
         ];
@@ -313,7 +315,9 @@ class AdminReportsController extends Controller
                 'attended_count' => $attendedCount,
                 'geo_images' => $event->get_event_image,
                 'student_uploads' => $event->student_uploads,
-                'event_image' => $event->image, // optional main event image
+                'event_image' => $event->image,
+                'outcomes' => $event->outcomes,
+                'feedback_summary' => $event->feedback_summary
             ],
             'genderChartUrl' => $genderChartUrl
         ];
