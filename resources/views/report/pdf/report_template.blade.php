@@ -110,6 +110,8 @@
 
         .stars {
             color: #F1C40F;
+            font-size: 16px;
+            letter-spacing: 2px;
         }
 
         /* IMAGES */
@@ -135,7 +137,12 @@
         function stars($rating)
         {
             $full = floor($rating);
-            return str_repeat('★', $full) . str_repeat('☆', 5 - $full);
+            $half = ($rating - $full) >= 0.5 ? 1 : 0;
+            $empty = 5 - ($full + $half);
+
+            return str_repeat('★', $full)
+                 . str_repeat('⯪', $half)
+                 . str_repeat('☆', $empty);
         }
 
         $data['report'] = $data['report'];
@@ -196,18 +203,6 @@
                 <td class="label">Event Date</td>
                 <td>{{ optional($data['report']->get_event->event_date)->format('d M Y') }}</td>
             </tr>
-            {{-- <tr>
-                <td class="label">Attendance In</td>
-                <td>{{ $data['report']->attendance_in }}</td>
-            </tr>
-            <tr>
-                <td class="label">Attendance Out</td>
-                <td>{{ $data['report']->attendance_out }}</td>
-            </tr>
-            <tr>
-                <td class="label">Certificates Issued</td>
-                <td>{{ $data['report']->certificates ?? 'N/A' }}</td>
-            </tr> --}}
             <tr>
                 <td class="label">Report Created By</td>
                 <td>{{ $data['report']->creator->name ?? 'Admin' }}</td>
@@ -266,21 +261,25 @@
 
         <!-- AVERAGE FEEDBACK -->
         <div class="section-title">Average Feedback</div>
-        @foreach ([
-        'overall_experience' => 'Overall Experience',
-        'engagement' => 'Engagement',
-        'organization' => 'Organization',
-        'coordination' => 'Coordination',
-        'recommendation' => 'Recommendation',
-    ] as $k => $label)
-            @php $val = round(($avg[$k] ?? 0) * 20); @endphp
-            <div class="bar-item">
-                <div class="bar-label">{{ $label }} ({{ number_format($avg[$k] ?? 0, 1) }}/5)</div>
-                <div class="bar-bg">
-                    <div class="bar-fill" style="width:{{ $val }}%; background:#7A1C73;"></div>
-                </div>
-            </div>
-        @endforeach
+
+        <table class="info-table">
+            @foreach ([
+                'overall_experience' => 'Overall Experience',
+                'engagement' => 'Engagement',
+                'organization' => 'Organization',
+                'coordination' => 'Coordination',
+                'recommendation' => 'Recommendation',
+            ] as $k => $label)
+                @php $rating = round($avg[$k] ?? 0, 1); @endphp
+                <tr>
+                    <td class="label">{{ $label }}</td>
+                    <td>
+                        <span class="stars">{{ stars($rating) }}</span>
+                        &nbsp; <b>{{ $rating }}/5</b>
+                    </td>
+                </tr>
+            @endforeach
+        </table>
 
         <!-- STUDENT FEEDBACK -->
         <div class="section-title">Student Feedback</div>
