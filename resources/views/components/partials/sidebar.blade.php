@@ -56,7 +56,6 @@
                     <x-menu.item name="Register for Events" icon="fa-calendar" route="register_events" />
                     <x-menu.item name="My Registration" icon="fa-check-circle" route="my_register_events" />
                     <x-menu.item name="Certificates" icon="fa-trophy" route="certificates" />
-                    {{-- <x-menu.item name="Upload Proofs" icon="fa-file-text" /> --}}
                 </x-slot:menus>
             @endif
             @if (!empty(session()->get('admin')))
@@ -92,6 +91,8 @@
                 </x-slot:menus>
             @endif
         </x-menu.list>
+          <x-menu.item name="Privacy Policy" icon="fa-book-open" route="privacy_policy"/>
+          <x-menu.item name="Terms and Conditions" icon="fa-book-open" route="terms_and_conditions"/>
         @if (!empty(session()->get('student')))
             {{-- <x-menu.item name="Non-Curriculum" icon="fa-graduation-cap" /> --}}
         @endif
