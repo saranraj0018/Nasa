@@ -41,7 +41,8 @@ class StudentController extends Controller
                 'mobile_number' => 'required|digits:10',
                 'department_id' => 'required',
                 'programme_id'  => 'required',
-                'gender' => 'required'
+                'gender' => 'required',
+                'section' => 'required'
             ];
 
             if (!empty($request['student_id'])) {
@@ -61,7 +62,6 @@ class StudentController extends Controller
                         'error' => 'Mobile Number is already exists!',
                     ], 500);
                 }
-
             } else {
                 $exists = Student::where('email', $request['email'])->exists();
                 $mobile_exists = Student::where('mobile_number', $request['mobile_number'])->exists();
@@ -79,7 +79,6 @@ class StudentController extends Controller
                         'error' => 'Mobile Number is already exists!',
                     ], 500);
                 }
-
             }
 
             if (empty($request['student_id']) && !$request->has('old_banner')) {
@@ -114,6 +113,7 @@ class StudentController extends Controller
             $student->department_id = $request['department_id'] ?? '';
             $student->programme_id = $request['programme_id'] ?? '';
             $student->gender = $request['gender'] ?? '';
+            $student->section = $request['section'] ?? '';
             $student->save();
 
             if (!empty($request['student_id'])) {
@@ -145,7 +145,7 @@ class StudentController extends Controller
         }
         return view('student/register_student')->with($this->data);
     }
-    
+
     public function registerSave(Request $request)
     {
         try {
@@ -156,35 +156,36 @@ class StudentController extends Controller
                 'mobile_number' => 'required|digits:10',
                 'department_id' => 'required',
                 'programme_id'  => 'required',
-                'gender' => 'required'
+                'gender' => 'required',
+                'section' => 'required'
             ];
 
-                $exists = Student::where('email', $request['email'])->exists();
-                $mobile_exists = Student::where('mobile_number', $request['mobile_number'])->exists();
-                if ($exists) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Email ID is already exists!',
-                        'error' => 'Email ID is already exists!',
-                    ], 500);
-                }
-                if ($mobile_exists) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Mobile Number is already exists!',
-                        'error' => 'Mobile Number is already exists!',
-                    ], 500);
-                }
+            $exists = Student::where('email', $request['email'])->exists();
+            $mobile_exists = Student::where('mobile_number', $request['mobile_number'])->exists();
+            if ($exists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email ID is already exists!',
+                    'error' => 'Email ID is already exists!',
+                ], 500);
+            }
+            if ($mobile_exists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mobile Number is already exists!',
+                    'error' => 'Mobile Number is already exists!',
+                ], 500);
+            }
 
 
-           if ($request->hasFile('banner_image')) {
+            if ($request->hasFile('banner_image')) {
                 $rules['banner_image'] = 'image|mimes:jpeg,png,jpg';
             }
 
             $request->validate($rules);
 
-                $student = new Student();
-                $message = 'Student Registered Successfully';
+            $student = new Student();
+            $message = 'Student Registered Successfully';
 
             if ($request->hasFile('banner_image')) {
                 $file = $request->file('banner_image');
@@ -202,6 +203,7 @@ class StudentController extends Controller
             $student->department_id = $request['department_id'] ?? '';
             $student->programme_id = $request['programme_id'] ?? '';
             $student->gender = $request['gender'] ?? '';
+            $student->section = $request['section'] ?? '';
             $student->save();
 
             session()->put('register_student', $student);
@@ -212,7 +214,6 @@ class StudentController extends Controller
                 'success' => true,
                 'message' => $message
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -221,5 +222,4 @@ class StudentController extends Controller
             ], 500);
         }
     }
-
 }

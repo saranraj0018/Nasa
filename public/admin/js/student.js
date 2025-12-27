@@ -1,37 +1,42 @@
 $(document).on("submit", "#studentForm", function (e) {
     e.preventDefault();
-     let fields = [
-         {
-             id: "#student_name",
-             condition: (val) => val === "",
-             message: "Student Name is required",
-         },
-         {
-             id: "#email",
-             condition: (val) => val === "",
-             message: "Email is required",
-         },
-         {
-             id: "#mobile_number",
-             condition: (val) => val === "",
-             message: "Mobile Number is required",
-         },
-         {
-             id: "#department_id",
-             condition: (val) => val === "",
-             message: "Please Select Department",
-         },
-         {
-             id: "#programme_id",
-             condition: (val) => val === "",
-             message: "Please Select Programme",
-         },
-         {
-             id: "#gender",
-             condition: (val) => val === "",
-             message: "Please Select Gender",
-         },
-     ];
+    let fields = [
+        {
+            id: "#student_name",
+            condition: (val) => val === "",
+            message: "Student Name is required",
+        },
+        {
+            id: "#email",
+            condition: (val) => val === "",
+            message: "Email is required",
+        },
+        {
+            id: "#mobile_number",
+            condition: (val) => val === "",
+            message: "Mobile Number is required",
+        },
+        {
+            id: "#department_id",
+            condition: (val) => val === "",
+            message: "Please Select Department",
+        },
+        {
+            id: "#programme_id",
+            condition: (val) => val === "",
+            message: "Please Select Programme",
+        },
+        {
+            id: "#gender",
+            condition: (val) => val === "",
+            message: "Please Select Gender",
+        },
+        {
+            id: "#section",
+            condition: (val) => val === "",
+            message: "Please Select Section",
+        },
+    ];
     let isValid = true;
     for (const field of fields) {
         const result = validateField(field); // synchronous, so no async/await needed
@@ -67,7 +72,9 @@ $(document).on("submit", "#studentForm", function (e) {
     );
 });
 
-document.getElementById("fileInput").addEventListener("change", function (event) {
+document
+    .getElementById("fileInput")
+    .addEventListener("change", function (event) {
         const file = event.target.files[0];
         const previewArea = document.getElementById("previewArea");
         const uploadText = document.getElementById("uploadText");
@@ -92,7 +99,6 @@ document.getElementById("dropArea").addEventListener("click", function () {
 });
 
 $(document).on("submit", "#studentregisterForm", function (e) {
-    alert(1);
     e.preventDefault();
     let fields = [
         {
@@ -124,6 +130,11 @@ $(document).on("submit", "#studentregisterForm", function (e) {
             id: "#gender",
             condition: (val) => val === "",
             message: "Please Select Gender",
+        },
+        {
+            id: "#section",
+            condition: (val) => val === "",
+            message: "Please Select Section",
         },
     ];
     let isValid = true;
@@ -160,11 +171,3 @@ $(document).on("submit", "#studentregisterForm", function (e) {
         }
     );
 });
-
-
-
-
-
-
-
-

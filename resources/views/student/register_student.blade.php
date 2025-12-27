@@ -13,7 +13,7 @@
                 @csrf
                 <!-- Email + Mobile -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                     <div>
+                    <div>
                         <label class="block text-sm font-medium">Student Name <span class="text-red-500">*</span></label>
                         <input type="text" name="student_name" id="student_name"
                             value="{{ old('student_name', $edit_student->name ?? '') }}"
@@ -52,17 +52,18 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium"> Gender <span class="text-red-500">*</span></label>
-                        <select name="gender" id="gender" class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 focus:outline-none focus:ring focus:ring-primary/40">
+                        <select name="gender" id="gender"
+                            class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 focus:outline-none focus:ring focus:ring-primary/40">
                             <option value="" selected disabled>Select Gender</option>
                             <option value="m">Male</option>
                             <option value="f">FeMale</option>
                             <option value="o">Others</option>
-                         </select>
+                        </select>
                         @error('gender')
                             <small class="text-red-500">{{ $message }}</small>
                         @enderror
                     </div>
-                        <div>
+                    <div>
                         <label class="block text-sm font-medium">Department <span class="text-red-500">*</span></label>
                         <select name="department_id" id="department_id"
                             class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40">
@@ -94,40 +95,61 @@
                             <small class="text-red-500">{{ $message }}</small>
                         @enderror
                     </div>
-                        <div>
-                    <label class="block text-sm font-medium mb-1">Profile Image</label>
-                    <div class="bg-[#F0F0F0] rounded-3xl p-10 text-center">
-                        <div id="dropArea"
-                            class="border-2 border-dashed border-primary rounded-2xl p-8 cursor-pointer">
-                            <div id="previewArea" class="flex justify-center mb-3">
-                                @if (!empty($edit_student) && $edit_student->profile_pic)
-                                    <img src="{{ asset('storage/' . $edit_student->profile_pic) }}"
-                                        class="mx-auto rounded-2xl w-40 h-40 object-cover">
-                                    <input type="hidden" name="old_banner" value="{{ $edit_student->profile_pic }}">
-                                @endif
-                            </div>
-
-                            <div id="uploadText" @if (!empty($edit_student) && $edit_student->profile_pic) style="display:none;" @endif>
-                                <img src="{{ asset('/images/upload.png') }}" class="mx-auto w-14 mb-3" />
-                                <p class="text-primary font-semibold">Upload your profile image</p>
-                                <p class="text-primary text-sm mt-2">PNG, JPG up to 5MB</p>
-                            </div>
-
-                            <input type="file" id="fileInput" name="banner_image" accept="image/*" class="hidden">
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium"> Section <span class="text-red-500">*</span></label>
+                        <select name="section" id="section"
+                            class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 mt-1 focus:outline-none focus:ring focus:ring-primary/40">
+                            <option value="" selected disabled>Select Section</option>
+                            <option value="a">A</option>
+                            <option value="b">B</option>
+                            <option value="c">C</option>
+                        </select>
                     </div>
-                    @error('banner_image')
-                        <small class="text-red-500">{{ $message }}</small>
-                    @enderror
-                </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Profile Image</label>
+                        <div class="bg-[#F0F0F0] rounded-3xl p-10 text-center">
+                            <div id="dropArea"
+                                class="border-2 border-dashed border-primary rounded-2xl p-8 cursor-pointer">
+                                <div id="previewArea" class="flex justify-center mb-3">
+                                    @if (!empty($edit_student) && $edit_student->profile_pic)
+                                        <img src="{{ asset('storage/' . $edit_student->profile_pic) }}"
+                                            class="mx-auto rounded-2xl w-40 h-40 object-cover">
+                                        <input type="hidden" name="old_banner"
+                                            value="{{ $edit_student->profile_pic }}">
+                                    @endif
+                                </div>
+
+                                <div id="uploadText" @if (!empty($edit_student) && $edit_student->profile_pic) style="display:none;" @endif>
+                                    <img src="{{ asset('/images/upload.png') }}" class="mx-auto w-14 mb-3" />
+                                    <p class="text-primary font-semibold">Upload your profile image</p>
+                                    <p class="text-primary text-sm mt-2">PNG, JPG up to 5MB</p>
+                                </div>
+
+                                <input type="file" id="fileInput" name="banner_image" accept="image/*"
+                                    class="hidden">
+                            </div>
+                        </div>
+                        @error('banner_image')
+                            <small class="text-red-500">{{ $message }}</small>
+                        @enderror
+                    </div>
                 </div>
                 <!-- Profile Image Upload -->
                 <!-- Submit -->
-                <div class="flex justify-center p-6">
-                    <button type="submit" class="w-full sm:w-auto px-10 md:px-14 bg-gradient-to-r from-primary to-pink-600 text-white font-semibold py-3 rounded-full hover:opacity-90 transition flex items-center justify-center gap-2">
+                <div class="flex flex-col sm:flex-row justify-center gap-4 p-6">
+                    <!-- Register Button -->
+                    <button type="submit"
+                        class="w-full sm:w-auto px-10 md:px-14 bg-gradient-to-r from-primary to-pink-600 text-white font-semibold py-3 rounded-full hover:opacity-90 transition flex items-center justify-center gap-2">
                         <i class="fas fa-save"></i>
                         Register Student
                     </button>
+
+                    <!-- Go to Login Button -->
+                    <a href="{{ route('student.login') }}"
+                        class="w-full sm:w-auto px-10 md:px-14 border-2 bg-primary border-primary text-white font-semibold py-3 rounded-full hover:bg-primary  transition flex items-center justify-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Go to Login
+                    </a>
                 </div>
             </form>
             <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>

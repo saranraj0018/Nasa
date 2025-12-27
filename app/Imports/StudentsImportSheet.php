@@ -61,15 +61,14 @@ class StudentsImportSheet implements ToModel, WithHeadingRow, WithValidation, Sk
     {
 
         return [
-            'department_id' => trim($data['department']),
-            'programme_id'  => trim($data['programme']),
+            'department' => trim($data['department']),
+            'programme'  => trim($data['programme']),
             'name'          => trim($data['name']),
             'email'         => trim($data['email']),
             'mobile_number' => trim($data['mobile_number']),
             'date_of_birth' => trim($data['date_of_birth']),
             'gender'        => trim($data['gender']),
         ];
-
     }
 
 
@@ -104,5 +103,4 @@ class StudentsImportSheet implements ToModel, WithHeadingRow, WithValidation, Sk
             ],
         ];
     }
-
 }

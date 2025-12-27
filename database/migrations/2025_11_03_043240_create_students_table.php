@@ -21,7 +21,8 @@ return new class extends Migration
             $table->string('password');
             $table->string('profile_pic')->nullable();
             $table->date('date_of_birth')->nullable();
-            $table->enum('gender', ['m','f','o'])->comment('m -> Male, f -> Female , o -> others ');
+            $table->enum('gender', ['m', 'f', 'o'])->comment('m -> Male, f -> Female , o -> others ');
+            $table->enum('section', ['a', 'b', 'c'])->nullable();
             $table->timestamps();
 
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('no action');
@@ -32,8 +33,5 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-
-    }
+    public function down(): void {}
 };
