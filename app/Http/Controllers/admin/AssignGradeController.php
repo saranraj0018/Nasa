@@ -47,28 +47,43 @@ class AssignGradeController extends Controller
     public function gradeEntry(Request $request)
     {
         $eventId = $request->event_id;
-        $this->data['event'] = Event::findOrFail($eventId);
+        $event = Event::findOrFail($eventId);
+        $this->data['event'] = $event;
         $this->data['registrations'] = collect();
-        $this->data['schedule_department'] = EventSchedule::with('programme')
-            ->where('event_id', $eventId)
-            ->get()
-            ->groupBy('programme_id');
-        if ($request->filled('programme_id') && $request->filled('event_date')) {
-            $schedule = $this->resolveSchedule(
-                $eventId,
-                $request->programme_id,
-                $request->event_date,
-                $request->section,
-                $request->batch,
-                $request->semester
-            );
-            if ($schedule) {
-                $this->data['registrations'] = StudentAttendance::with('student.get_department','student.get_programme')
-                    ->where('event_id', $eventId)
-                    ->where('event_schedule_id', $schedule->id)
-                    ->whereNotNull('entry_time')
-                    ->whereNotNull('exit_time')
-                    ->get();
+
+        if ($event->is_first_year === 'y') {
+            // First-year events have no programme/section/batch/semester to filter
+            // by — show everyone in the event who has completed attendance
+            // (entry + exit marked) directly, no search step needed.
+            $this->data['registrations'] = StudentAttendance::with('student.get_department', 'student.get_programme')
+                ->where('event_id', $eventId)
+                ->whereNotNull('entry_time')
+                ->whereNotNull('exit_time')
+                ->get();
+        } else {
+            $this->data['schedule_department'] = EventSchedule::with('programme')
+                ->where('event_id', $eventId)
+                ->get()
+                ->groupBy('programme_id');
+
+            if ($request->filled('programme_id') && $request->filled('event_date')) {
+                $schedule = $this->resolveSchedule(
+                    $eventId,
+                    $request->programme_id,
+                    $request->event_date,
+                    $request->section,
+                    $request->batch,
+                    $request->semester
+                );
+
+                if ($schedule) {
+                    $this->data['registrations'] = StudentAttendance::with('student.get_department', 'student.get_programme')
+                        ->where('event_id', $eventId)
+                        ->where('event_schedule_id', $schedule->id)
+                        ->whereNotNull('entry_time')
+                        ->whereNotNull('exit_time')
+                        ->get();
+                }
             }
         }
         return view('admin.assign_grade_entry')->with($this->data);

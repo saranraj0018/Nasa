@@ -67,7 +67,7 @@
                             @if ($event->event->event_type == 'paid')
                                 <span
                                     class="absolute top-3 right-3 bg-[#FFC31F] text-white px-3 text-sm py-1 rounded-full">
-                                    Premium
+                                    Premium <br> ₹{{ number_format($event['price'], 2) }}
                                 </span>
                             @endif
 

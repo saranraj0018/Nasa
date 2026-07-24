@@ -31,9 +31,9 @@ class OngoingEventController extends Controller
             ->where('status', 1)
             ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
             ->count();
-         $attendedCount = StudentEventRegistration::where('student_id', $student->id)
+        $attendedCount = StudentEventRegistration::where('student_id', $student->id)
             ->where('status', 3)
-            ->whereHas('get_event_attendance', fn($q) => $q->whereNotNull('entry_time')->whereNotNull('exit_time'))
+            ->whereHas('get_event_attendance', fn($q) => $q->whereNotNull('entry_time')->whereNotNull('exit_time')->where('student_id', $student->id))
             ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
             ->count();
         $totalRegistered = StudentEventRegistration::where('student_id', $student->id)
@@ -61,19 +61,12 @@ class OngoingEventController extends Controller
             ->values()
             ->toArray();
         $ongoingEvents = Event::whereHas('get_dep_events', function ($q) use ($student) {
-            $q->where('programme_id', $student->programme_id)
-                ->where('section', $student->section)
-                ->where('batch', $student->batch)
-                ->where('semester', $student->semester)
-                ->where('event_date', '=', Carbon::now()->toDateString()); // Only future dates
+            $q->matchesStudent($student)
+                ->where('event_date', Carbon::now()->toDateString());
         })
             ->with(['get_dep_events' => function ($q) use ($student) {
-                $q->where('programme_id', $student->programme_id)
-                    ->where('section', $student->section)
-                    ->where('batch', $student->batch)
-                    ->where('semester', $student->semester)
-                    ->where('event_date', '=', Carbon::now()->toDateString())
-                    ->orderBy('event_date', 'asc');
+                $q->matchesStudent($student)
+                    ->where('event_date', Carbon::now()->toDateString());
             }, 'get_dep_events.registrations'])
             ->where([
                 'publish' => 1,
@@ -245,7 +238,7 @@ class OngoingEventController extends Controller
         // Attended Count
         $attendedCount = StudentEventRegistration::where('student_id', $student->id)
             ->where('status', 3)
-            ->whereHas('get_event_attendance', fn($q) => $q->whereNotNull('entry_time')->whereNotNull('exit_time'))
+            ->whereHas('get_event_attendance', fn($q) => $q->whereNotNull('entry_time')->whereNotNull('exit_time')->where('student_id', $student->id))
             ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
             ->count();
 
@@ -264,7 +257,7 @@ class OngoingEventController extends Controller
         $pendingUploads = $totalRegistered - count($myUploads);
 
         // Ongoing Events Only
-        $registered_event = StudentEventRegistration::with('event.get_dep_events.registrations','schedule.programme')->where('student_id', $student->id)
+        $registered_event = StudentEventRegistration::with('event.get_dep_events.registrations', 'schedule.programme')->where('student_id', $student->id)
             ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
             ->get();
 
@@ -292,44 +285,37 @@ class OngoingEventController extends Controller
                 }
             }
 
-            $registeredCountQuery = StudentEventRegistration::where('event_schedule_id', $registration->event_schedule_id);
-
-            $registeredCountQuery->whereHas('student', function ($q) use ($student) {
-                $q->where('programme_id', $student->programme_id)
-                    ->where('section', $student->section)
-                    ->where('batch', $student->batch)
-                    ->where('semester', $student->semester);
-            });
-
-                $registeredCount = $registeredCountQuery->count();
-                $availableSeats = max(0, $registration->get_event_schedule?->seat_count - $registeredCount);
+            $schedule = $registration->get_event_schedule;
+            $registeredCount = $schedule ? $schedule->registeredSeatsFor($student) : 0;
+            $availableSeats = max(0, ($schedule->seat_count ?? 0) - $registeredCount);
 
 
-                $eventData[] = [
-                    'event_id'          => $event->id,
-                    'event_image'       => $event->banner_image
-                        ? asset('storage/' . $event->banner_image)
-                        : null,
-                    'event_name'        => $event->title,
-                    'event_description' => $event->description,
-                    'event_start_time'  => $start_time
-                        ? Carbon::parse($start_time)->format('g:i A')
-                        : null,
-                    'event_end_time'    => $end_time
-                        ? Carbon::parse($end_time)->format('g:i A')
-                        : null,
-                    'event_seats'       => $availableSeats,
-                    'event_location'    => $event->location,
-                    'event_date'        => $registration->get_event_schedule?->event_date ? Carbon::parse($registration->get_event_schedule?->event_date)
-                        ->format('F j, Y') : null,
-                    'event_premium'     => $event->event_type === 'paid'
-                        ? 'paid'
-                        : 'free',
-                    'student_name'      => $student->name,
-                    'student_id'        => $student->id,
-                    'student_email'     => $student->email,
-                    'student_number'    => $student->mobile_number,
-                ];
+            $eventData[] = [
+                'event_id'          => $event->id,
+                'event_image'       => $event->banner_image
+                    ? asset('storage/' . $event->banner_image)
+                    : null,
+                'event_name'        => $event->title,
+                'event_description' => $event->description,
+                'event_start_time'  => $start_time
+                    ? Carbon::parse($start_time)->format('g:i A')
+                    : null,
+                'event_end_time'    => $end_time
+                    ? Carbon::parse($end_time)->format('g:i A')
+                    : null,
+                'event_seats'       => $availableSeats,
+                'event_location'    => $event->location,
+                'event_date'        => $registration->get_event_schedule?->event_date ? Carbon::parse($registration->get_event_schedule?->event_date)
+                    ->format('F j, Y') : null,
+                'event_premium'     => $event->event_type === 'paid'
+                    ? 'paid'
+                    : 'free',
+                'event_amount'      => $event->price,
+                'student_name'      => $student->name,
+                'student_id'        => $student->id,
+                'student_email'     => $student->email,
+                'student_number'    => $student->mobile_number,
+            ];
         }
         return response()->json([
             'status'                    => 200,
@@ -339,7 +325,6 @@ class OngoingEventController extends Controller
             'pending_events'            => $pendingUploads,
             'data'                      => $eventData,
         ]);
-
     }
 
     public function completedEvent()
@@ -362,7 +347,7 @@ class OngoingEventController extends Controller
 
         // Attended Count
         $attendedCount = StudentEventRegistration::where('student_id', $student->id)
-            ->whereHas('get_event_attendance', fn($q) => $q->whereNotNull('entry_time')->whereNotNull('exit_time'))
+            ->whereHas('get_event_attendance', fn($q) => $q->whereNotNull('entry_time')->whereNotNull('exit_time')->where('student_id', $student->id))
             ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
             ->count();
 
@@ -380,9 +365,10 @@ class OngoingEventController extends Controller
 
         $pendingUploads = $totalRegistered - count($myUploads);
         $completed_event = StudentEventRegistration::with('get_event_attendance', 'event')->where('student_id', $student->id)
-            ->whereHas('get_event_attendance', function ($query){
+            ->whereHas('get_event_attendance', function ($query) use ($student) {
                 $query->whereNotNull('entry_time')
-                    ->whereNotNull('exit_time');
+                    ->whereNotNull('exit_time')
+                    ->where('student_id', $student->id);
             })
             ->whereHas('event', function ($query) {
                 $query->where('publish', 1)
@@ -409,17 +395,9 @@ class OngoingEventController extends Controller
                 }
             }
 
-            $registeredCountQuery = StudentEventRegistration::where('event_schedule_id', $registration->event_schedule_id);
-
-            $registeredCountQuery->whereHas('student', function ($q) use ($student) {
-                $q->where('programme_id', $student->programme_id)
-                    ->where('section', $student->section)
-                    ->where('batch', $student->batch)
-                    ->where('semester', $student->semester);
-            });
-
-            $registeredCount = $registeredCountQuery->count();
-            $availableSeats = max(0, $registration->get_event_schedule?->seat_count - $registeredCount);
+            $schedule = $registration->get_event_schedule;
+            $registeredCount = $schedule ? $schedule->registeredSeatsFor($student) : 0;
+            $availableSeats = max(0, ($schedule->seat_count ?? 0) - $registeredCount);
 
             $questions = getQuestions($event->is_technical_event == 'y' ? 'technical' : 'nonTechnical');
             $feedback = StudentFeedback::where('event_id', $event->id)
@@ -455,16 +433,17 @@ class OngoingEventController extends Controller
                 'event_premium'     => $event->event_type === 'paid'
                     ? 'paid'
                     : 'free',
+                'event_amount'      => $event->price,
                 'student_name'      => $student->name,
                 'student_id'        => $student->id,
                 'student_email'     => $student->email,
                 'student_number'    => $student->mobile_number,
                 'event_type'        => $event->is_technical_event,
                 'question'         =>  $questions,
-                'upload_image_url'  => StudentUploadProof::where('event_id',$event->id)
+                'upload_image_url'  => StudentUploadProof::where('event_id', $event->id)
                     ->where('event_schedule_id', $registration->get_event_schedule?->id)
-                    ->where('student_id',$student->id)->get()->map(function($item){
-                        return url('storage/'.$item->file_path);
+                    ->where('student_id', $student->id)->get()->map(function ($item) {
+                        return url('storage/' . $item->file_path);
                     }),
                 'feed_back' => !empty($feedback->comments) ? $feedback->comments : null,
             ];
@@ -477,8 +456,5 @@ class OngoingEventController extends Controller
             'pending_events'            => $pendingUploads,
             'data'                      => $eventData,
         ]);
-
     }
-
-
 }

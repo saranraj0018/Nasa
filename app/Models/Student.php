@@ -39,6 +39,19 @@ class Student extends Authenticatable implements JWTSubject
         return $this->hasMany(StudentEventRegistration::class, 'student_id');
     }
 
+    public function getEarnedCreditsAttribute(): float
+    {
+        return $this->registrations
+            ->whereNotNull('grade')
+            ->where('grade', '!=', 'd')
+            ->sum(fn ($registration) => $registration->get_event_schedule->credit_points ?? 0);
+    }
+
+    public function getCappedEarnedCreditsAttribute(): float
+    {
+        return min($this->earned_credits, 4);
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();

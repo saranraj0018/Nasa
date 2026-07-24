@@ -1,27 +1,32 @@
-// $(document).on("change", "#event_id", function () {
-//     var eventId = $(this).val();
-//     if (eventId) {
-//         $.ajax({
-//             url: "/admin/create_report", // Route to get officers
-//             type: "GET",
-//             dataType: "json",
-//             data: {
-//                 eventId: eventId,
-//                 get_event_date: true,
-//             },
-//             success: function (response) {
-//                 $("#event_date").empty();
-//                 $("#event_date").val(response.event.event_date);
-//             },
-//             error: function () {
-//                 showToast("Unable to fetch event date!", "error", 2000);
-//             },
-//         });
-//     } else {
-//         $("#event_date").empty();
-
-//     }
-// });
+// A first-year event has no programme/section/batch/semester to report
+// against (its schedule is common to all first-years, resolved automatically
+// on save) — hide those fields once such an event is selected.
+$(document).on("change", "#event_id", function () {
+    var $eventSelect = $(this);
+    var eventId = $eventSelect.val();
+    if (!eventId) {
+        $eventSelect.data("isFirstYear", false);
+        $("#specificFields").show();
+        return;
+    }
+    $.ajax({
+        url: "/admin/create_report",
+        type: "GET",
+        dataType: "json",
+        data: {
+            eventId: eventId,
+            get_event_date: true,
+        },
+        success: function (response) {
+            var isFirstYear = response.is_first_year === "y";
+            $eventSelect.data("isFirstYear", isFirstYear);
+            $("#specificFields").toggle(!isFirstYear);
+        },
+        error: function () {
+            showToast("Unable to fetch event details!", "error", 2000);
+        },
+    });
+});
 
 $(document).on("submit", "#eventReportForm", function (e) {
     const totalImages = document.querySelectorAll(
@@ -47,32 +52,37 @@ $(document).on("submit", "#eventReportForm", function (e) {
             condition: (val) => val === "",
             message: "Please Enter Feedback Summary",
         },
-        {
-            id: "#programme_id",
-            condition: (val) => val === "",
-            message: "please select programme",
-        },
-        {
-            id: "#section",
-            condition: (val) => val === "",
-            message: "Section field is required",
-        },
-        {
-            id: "#batch",
-            condition: (val) => val === "",
-            message: "Batch field is required",
-        },
-        {
-            id: "#semester",
-            condition: (val) => val === "",
-            message: "Semester field is required",
-        },
-        {
-            id: "#event_date",
-            condition: (val) => val === "",
-            message: "Event Date field is required",
-        },
     ];
+
+    if (!$("#event_id").data("isFirstYear")) {
+        fields.push(
+            {
+                id: "#programme_id",
+                condition: (val) => val === "",
+                message: "please select programme",
+            },
+            {
+                id: "#section",
+                condition: (val) => val === "",
+                message: "Section field is required",
+            },
+            {
+                id: "#batch",
+                condition: (val) => val === "",
+                message: "Batch field is required",
+            },
+            {
+                id: "#semester",
+                condition: (val) => val === "",
+                message: "Semester field is required",
+            },
+            {
+                id: "#event_date",
+                condition: (val) => val === "",
+                message: "Event Date field is required",
+            },
+        );
+    }
 
     let isValid = true;
 

@@ -17,7 +17,6 @@ class StudentHomeController extends Controller
     {
         $now = Carbon::now();
         $student = auth('student-api')->user();
-        $isFirstYearStudent = in_array((int)$student->semester, [1, 2]);
         $totalEvents = Event::where([
             'publish' => 1,
             'is_active' => 'y'
@@ -48,24 +47,14 @@ class StudentHomeController extends Controller
             ->values()
             ->toArray();
         $upcomingEvents = Event::whereHas('get_dep_events', function ($q) use ($student) {
-
-            $q->where('programme_id', $student->programme_id)
-                ->where('section', $student->section)
-                ->where('batch', $student->batch)
-                ->where('semester', $student->semester)
-                ->whereDate('event_date', '>=', Carbon::today());
+            $q->matchesStudent($student)
+                ->where('event_date', '>=', Carbon::now()->toDateString());
         })
-            ->with([
-                'get_dep_events' => function ($q) use ($student) {
-                    $q->where('programme_id', $student->programme_id)
-                        ->where('section', $student->section)
-                        ->where('batch', $student->batch)
-                        ->where('semester', $student->semester)
-                        ->whereDate('event_date', '>=', Carbon::today())
-                        ->orderBy('event_date', 'asc');
-                },
-                'get_dep_events.registrations'
-            ])
+            ->with(['get_dep_events' => function ($q) use ($student) {
+                $q->matchesStudent($student)
+                    ->where('event_date', '>=', Carbon::now()->toDateString())
+                    ->orderBy('event_date', 'asc');
+            }, 'get_dep_events.registrations'])
             ->where([
                 'publish'   => 1,
                 'is_active' => 'y',
@@ -80,36 +69,7 @@ class StudentHomeController extends Controller
 
                 $eventDate = Carbon::parse($dept->event_date)->toDateString();
 
-                $isCommonFirstYearEvent =
-                    is_null($dept->programme_id) &&
-                    is_null($dept->section) &&
-                    is_null($dept->semester) &&
-                    (is_null($dept->batch) || $dept->batch == $student->batch);
-
-                $registeredCountQuery = StudentEventRegistration::where('event_schedule_id', $dept->id);
-
-                if ($isCommonFirstYearEvent) {
-
-                    $registeredCountQuery->whereHas('student', function ($q) use ($student) {
-
-                        $q->whereIn('semester', [1, 2]);
-
-                        if (!empty($student->batch)) {
-                            $q->where('batch', $student->batch);
-                        }
-                    });
-                } else {
-
-                    $registeredCountQuery->whereHas('student', function ($q) use ($student) {
-
-                        $q->where('programme_id', $student->programme_id)
-                            ->where('section', $student->section)
-                            ->where('batch', $student->batch)
-                            ->where('semester', $student->semester);
-                    });
-                }
-
-                $registeredCount = $registeredCountQuery->count();
+                $registeredCount = $dept->registeredSeatsFor($student);
                 $availableSeats = max(0, $dept->seat_count - $registeredCount);
 
                 if ($dept->is_reserve_date == 'y') {
@@ -201,19 +161,12 @@ class StudentHomeController extends Controller
 
 
         $ongoingEvents = Event::whereHas('get_dep_events', function ($q) use ($student) {
-            $q->where('programme_id', $student->programme_id)
-                ->where('section', $student->section)
-                ->where('batch', $student->batch)
-                ->where('semester', $student->semester)
-                ->where('event_date', '=', Carbon::now()->toDateString()); // Only future dates
+            $q->matchesStudent($student)
+                ->where('event_date', Carbon::now()->toDateString());
         })
             ->with(['get_dep_events' => function ($q) use ($student) {
-                $q->where('programme_id', $student->programme_id)
-                    ->where('section', $student->section)
-                    ->where('batch', $student->batch)
-                    ->where('semester', $student->semester)
-                    ->where('event_date', '=', Carbon::now()->toDateString())
-                    ->orderBy('event_date', 'asc');
+                $q->matchesStudent($student)
+                    ->where('event_date', Carbon::now()->toDateString());
             }, 'get_dep_events.registrations'])
             ->where([
                 'publish' => 1,
@@ -229,34 +182,7 @@ class StudentHomeController extends Controller
 
                 $eventDate = Carbon::parse($dept->event_date)->toDateString();
 
-                // Check common first year event
-                $isCommonFirstYearEvent =
-                    is_null($dept->programme_id) &&
-                    is_null($dept->section) &&
-                    is_null($dept->semester) &&
-                    (is_null($dept->batch) || $dept->batch == $student->batch);
-
-                // Seat count query
-                $registeredCountQuery = StudentEventRegistration::where('event_schedule_id', $dept->id);
-
-                if ($isCommonFirstYearEvent) {
-                    $registeredCountQuery->whereHas('student', function ($q) use ($student) {
-                        $q->whereIn('semester', [1, 2]);
-                        if (!empty($student->batch)) {
-                            $q->where('batch', $student->batch);
-                        }
-                    });
-                } else {
-                    $registeredCountQuery->whereHas('student', function ($q) use ($student) {
-                        $q->where('programme_id', $student->programme_id)
-                            ->where('section', $student->section)
-                            ->where('batch', $student->batch)
-                            ->where('semester', $student->semester);
-                    });
-                }
-
-                $registeredCount = $registeredCountQuery->count();
-                // Log::info(print_r($registeredCountQuery, true));
+                $registeredCount = $dept->registeredSeatsFor($student);
                 $availableSeats  = max(0, $dept->seat_count - $registeredCount);
 
                 // Time
@@ -378,6 +304,7 @@ class StudentHomeController extends Controller
                     'available_seats' => $availableSeats,
 
                     'event_premium' => $event->event_type == 'paid' ? 'paid' : 'free',
+                    'event_amount' => $event->price,
                     'event_register' => false,
                     'registration_status' => $registration->status,
                     'grade' => $registration->grade,

@@ -160,16 +160,6 @@ $(document).on("submit", "#eventForm", function (e) {
             condition: (val) => val === "",
             message: "Please Enter Duration Month",
         },
-        // {
-        //     id: ".department",
-        //     condition: (val) => val === "",
-        //     message: "Please Select Programme",
-        // },
-        // {
-        //     id: ".section",
-        //     condition: (val) => val === "",
-        //     message: "Please Select Section",
-        // },
         {
             id: ".event_date",
             condition: (val) => val === "",
@@ -188,11 +178,6 @@ $(document).on("submit", "#eventForm", function (e) {
         //     message:
         //         "Batch must be in YYYY-YYYY format and end year must be greater than start year",
         // },
-        // {
-        //     id: ".semester",
-        //     condition: (val) => val === "",
-        //     message: "Semester is required",
-        // },
         {
             id: ".credit_points",
             condition: (val) => val === "",
@@ -208,6 +193,30 @@ $(document).on("submit", "#eventForm", function (e) {
     }
 
     $(".dept-card").each(function () {
+        const scope = $(this).find(".dept-scope:checked").val() || "all";
+
+        if (scope === "specific") {
+            const programme = $(this).find(".department").val();
+            const section = $(this).find(".section").val();
+            const semester = $(this).find(".semester").val();
+
+            if (!programme) {
+                showToast("Please select Programme for a specific-department schedule", "error", 2000);
+                isValid = false;
+                return false;
+            }
+            if (!section) {
+                showToast("Please select Section for a specific-department schedule", "error", 2000);
+                isValid = false;
+                return false;
+            }
+            if (!semester) {
+                showToast("Please select Semester for a specific-department schedule", "error", 2000);
+                isValid = false;
+                return false;
+            }
+        }
+
         let batch = $(this).find(".batch").val();
 
         if (batch) {
@@ -354,6 +363,100 @@ $("#confirmDelete").on("click", function () {
     });
 });
 
+// Toggle event status (Active / In Active)
+$(document).on("click", ".toggleStatus", function () {
+    const btn = $(this);
+    const eventId = btn.data("id");
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to change the status of this event?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, change it!",
+        cancelButtonText: "Cancel",
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        $.ajax({
+            url: "/admin/events/" + eventId + "/toggle-status",
+            type: "POST",
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                if (response.success) {
+                    const isActive = response.is_active === "y";
+                    btn.data("status", response.is_active);
+                    btn.text(isActive ? "Active" : "In Active");
+                    btn.removeClass(
+                        "bg-green-100 text-green-700 bg-red-100 text-red-700",
+                    ).addClass(
+                        isActive
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700",
+                    );
+                    showToast(response.message, "success", 2000);
+                } else {
+                    showToast(response.message || "Unable to update status", "error", 2000);
+                }
+            },
+            error: function () {
+                showToast("Unable to update status", "error", 2000);
+            },
+        });
+    });
+});
+
+// Toggle event publish state
+$(document).on("click", ".togglePublish", function () {
+    const btn = $(this);
+    const eventId = btn.data("id");
+    const isPublished = Number(btn.data("publish")) === 1;
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: isPublished
+            ? "Students will no longer be able to view this event."
+            : "Once published, students can view this event.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: isPublished ? "Yes, unpublish it!" : "Yes, publish it!",
+        cancelButtonText: "Cancel",
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        $.ajax({
+            url: "/admin/events/" + eventId + "/toggle-publish",
+            type: "POST",
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                if (response.success) {
+                    const nowPublished = Number(response.publish) === 1;
+                    btn.data("publish", response.publish);
+                    btn.attr(
+                        "title",
+                        nowPublished ? "Unpublish Event" : "Publish Event",
+                    );
+                    btn.find("i")
+                        .toggleClass("fa-eye", nowPublished)
+                        .toggleClass("fa-eye-slash", !nowPublished);
+                    btn.toggleClass("text-yellow-600 hover:text-yellow-800", nowPublished);
+                    btn.toggleClass("text-gray-500 hover:text-gray-700", !nowPublished);
+                    showToast(response.message, "success", 2000);
+                } else {
+                    showToast(response.message || "Unable to update publish status", "error", 2000);
+                }
+            },
+            error: function () {
+                showToast("Unable to update publish status", "error", 2000);
+            },
+        });
+    });
+});
+
 let programmeOfficerChoice = new Choices("#programme_officer", {
     searchEnabled: true,
 });
@@ -435,11 +538,69 @@ document.getElementById("event_type").addEventListener("change", function () {
     }
 });
 
+// Lazily initialize (and cache) a Choices instance for a dynamically-added select,
+// mirroring what common.js does for selects present at initial page load.
+function initChoiceSelect(el) {
+    if (el.choicesInstance) return el.choicesInstance;
+    el.choicesInstance = new Choices(el, {
+        searchEnabled: true,
+        itemSelectText: "",
+        shouldSort: false,
+        allowHTML: true,
+    });
+    return el.choicesInstance;
+}
+
+// Programme/Section/Semester only apply to a "Specific Department" row; for an
+// "All Departments" row they must stay null, so disable + clear them (matches
+// EventSchedule::isCommonFirstYearSchedule() on the backend).
+function applyDeptScope(card) {
+    if (!card) return;
+    const checked = card.querySelector(".dept-scope:checked");
+    const isSpecific = checked ? checked.value === "specific" : false;
+
+    card.querySelectorAll(".dept-specific-field select").forEach(function (select) {
+        if (isSpecific) {
+            if (select.choicesInstance) {
+                select.choicesInstance.enable();
+            } else {
+                select.disabled = false;
+            }
+        } else {
+            if (select.choicesInstance) {
+                select.choicesInstance.setChoiceByValue("");
+                select.choicesInstance.disable();
+            } else {
+                select.value = "";
+                select.disabled = true;
+            }
+        }
+    });
+
+    card.querySelectorAll(".dept-specific-field input").forEach(function (input) {
+        if (isSpecific) {
+            input.disabled = false;
+        } else {
+            input.value = "";
+            input.disabled = true;
+        }
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const addDeptBtn = document.getElementById("addDeptBtn");
     const deptContainer = document.getElementById("departmentContainer");
 
     if (!addDeptBtn || !deptContainer) return;
+
+    // Apply correct enabled/disabled + Choices state for rows already rendered server-side
+    deptContainer.querySelectorAll(".dept-card").forEach(applyDeptScope);
+
+    deptContainer.addEventListener("change", function (e) {
+        if (e.target.classList.contains("dept-scope")) {
+            applyDeptScope(e.target.closest(".dept-card"));
+        }
+    });
 
     // IMPORTANT FIX
     let deptIndex = deptContainer.querySelectorAll(".dept-card").length;
@@ -463,8 +624,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
         card.innerHTML = `
             <button type="button" class="rounded-2xl py-1 px-2 absolute top-2 right-5 text-red-500 font-bold removeDept bg-white">Remove</button>
+            <div class="mt-5">
+                <label class="block text-sm font-medium">Apply To <span class="text-red-600">*</span></label>
+                <div class="flex items-center gap-6 mt-2">
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="departments[${deptIndex}][scope]" value="all"
+                            class="text-primary focus:ring-primary dept-scope" checked>
+                        <span class="ml-2 text-sm">All Departments</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="departments[${deptIndex}][scope]" value="specific"
+                            class="text-primary focus:ring-primary dept-scope">
+                        <span class="ml-2 text-sm">Specific Department</span>
+                    </label>
+                </div>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
-                <div>
+                <div class="dept-specific-field">
                     <label class="block text-sm font-medium">Programme <span class="text-red-600">*</span></label>
                     <select name="departments[${deptIndex}][programme_id]"
                         class="w-full bg-[#D9D9D9] rounded-full px-4 py-3 department choice-select">
@@ -472,10 +648,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         ${deptOptionsHtml}
                     </select>
                 </div>
-                <div>
+                <div class="dept-specific-field">
                     <label class="block text-sm font-medium">Section <span class="text-red-600">*</span></label>
                     <select  name="departments[${deptIndex}][section]" id="section" class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 section">
-                                <option value="" selected disabled>Select Section</option>
+                                <option value="" selected>Select Section</option>
                                 <option value="a">A</option>
                                 <option value="b">B</option>
                                 <option value="c">C</option>
@@ -512,18 +688,18 @@ document.addEventListener("DOMContentLoaded", function () {
                         name="departments[${deptIndex}][seat_count]"
                         class="w-full bg-[#D9D9D9] rounded-full px-4 py-2 seat_count">
                 </div>
-                     <div>
+                     <div class="dept-specific-field">
                             <label class="block text-sm font-medium">Batch<span class="text-red-500">*</span></label>
                             <input type="text" name="departments[${deptIndex}][batch]" id="batch"
                                 placeholder="e.g, 2025-2029"
                                 class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 batch">
                         </div>
-                        <div>
+                        <div class="dept-specific-field">
                             <label class="block text-sm font-medium"> Semester <span
                                     class="text-red-500">*</span></label>
                             <select name="departments[${deptIndex}][semester]" id="semester"
                                 class="semester bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 choice-select">
-                                <option selected disabled>Select Semester</option>
+                                <option value="" selected>Select Semester</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -544,6 +720,8 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
 
         deptContainer.appendChild(card);
+        card.querySelectorAll(".choice-select").forEach(initChoiceSelect);
+        applyDeptScope(card);
         flatpickr(card.querySelectorAll(".date_field"), {
             dateFormat: "d/m/Y",
         });
@@ -621,32 +799,35 @@ $("#publishBtn").on("click", function () {
 
     // Loop through each department card
     $(".dept-card").each(function () {
+        let scope = $(this).find(".dept-scope:checked").val() || "all";
         let batch = $(this).find(".batch").val();
         let semester = $(this).find(".semester").val();
         let creditPoints = $(this).find(".credit_points").val();
         const regex = /^\d{4}-\d{4}$/;
 
-        // Batch validation
-        if (!batch || !regex.test(batch)) {
-            showToast("Batch must be in YYYY-YYYY format", "error", 2000);
-            isValid = false;
-            return false; // break loop
+        // Batch validation (optional — only checked when a value is provided)
+        if (batch) {
+            if (!regex.test(batch)) {
+                showToast("Batch must be in YYYY-YYYY format", "error", 2000);
+                isValid = false;
+                return false; // break loop
+            }
+
+            const [start, end] = batch.split("-").map(Number);
+
+            if (end <= start) {
+                showToast(
+                    "Batch end year must be greater than start year",
+                    "error",
+                    2000,
+                );
+                isValid = false;
+                return false;
+            }
         }
 
-        const [start, end] = batch.split("-").map(Number);
-
-        if (end <= start) {
-            showToast(
-                "Batch end year must be greater than start year",
-                "error",
-                2000,
-            );
-            isValid = false;
-            return false;
-        }
-
-        // Semester validation
-        if (!semester) {
+        // Semester validation (only required for a Specific Department row)
+        if (scope === "specific" && !semester) {
             showToast("Please Select Semester", "error", 2000);
             isValid = false;
             return false;
