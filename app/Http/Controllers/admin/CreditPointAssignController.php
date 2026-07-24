@@ -48,7 +48,6 @@ class CreditPointAssignController extends Controller
             $creditpoint = new CreditPoint();
             $creditpoint->semester = $request->semester;
             $creditpoint->credit_points = $request->credit_points;
-            $creditpoint->college_id = 1;
             $creditpoint->save();
 
             return response()->json([

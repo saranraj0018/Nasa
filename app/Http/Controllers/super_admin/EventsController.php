@@ -288,7 +288,6 @@ class EventsController extends Controller
                 ->contains(fn($schedule) => ($schedule['scope'] ?? null) === 'all');
             $event->is_first_year = $isFirstYearEvent ? 'y' : 'n';
             $event->is_active = $request['is_active'] ?? 'y';
-            $event->college_id = 1;
             $event->save();
 
             $submittedScheduleIds = collect($request->departments)
