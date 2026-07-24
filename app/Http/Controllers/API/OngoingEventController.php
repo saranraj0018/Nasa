@@ -404,8 +404,16 @@ class OngoingEventController extends Controller
                 ->where('event_schedule_id', $registration->get_event_schedule?->id)
                 ->where('student_id', $student->id)
                 ->first();
+
             if (!empty($feedback)) {
-                $ratings = json_decode($feedback->ratings, true);
+                $ratings = $feedback->ratings;
+
+                if (is_string($ratings)) {
+                    $ratings = json_decode($ratings, true) ?? [];
+                } elseif (!is_array($ratings)) {
+                    $ratings = [];
+                }
+
                 foreach ($questions as &$question) {
                     if (isset($ratings[$question['key']])) {
                         $question['rating'] = (int) $ratings[$question['key']];
