@@ -339,6 +339,7 @@ class EventsController extends Controller
                 ActivityLog::add($event->title . ' - Event Updated', auth('admin')->user());
             } else {
                 ActivityLog::add($event->title . ' - New Event Created', auth('admin')->user());
+
             }
 
             return response()->json([

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Student;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PolicyController extends Controller
 {
@@ -22,5 +26,33 @@ class PolicyController extends Controller
             'status'  => 200,
             'message' => 'Terms & Conditions Fetched Successfully',
         ]);
+    }
+
+    public function saveToken(Request $request)
+    {
+        try {
+
+            $request->validate([
+                'device_token' => 'required',
+            ]);
+
+            $student = Auth::guard('student-api')->id();
+            $list = Student::find($student);
+            $list->update([
+                'device_token' => $request->device_token
+            ]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Device token saved successfully',
+            ]);
+
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'status' => $th->getCode() ?: 500,
+                'message' => $th->getMessage(),
+            ], $th->getCode() ?: 500);
+        }
     }
 }

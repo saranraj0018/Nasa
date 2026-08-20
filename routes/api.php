@@ -20,7 +20,9 @@ Route::group(['prefix' => 'student'], function () {
         ->name('student.certificate.download');
     Route::get('privacy-policy', [PolicyController::class, 'privacyPolicy']);
     Route::get('terms-and-condition', [PolicyController::class, 'termsConditions']);
+
     Route::middleware('verify.jwt')->group(function () {
+        Route::post('/save-token', [PolicyController::class, 'saveToken']);
         Route::post('home', [StudentHomeController::class, 'index']);
         Route::get('upcoming-events', [UpcomingEventController::class, 'index']);
         Route::get('ongoing-events', [OngoingEventController::class, 'index']);
