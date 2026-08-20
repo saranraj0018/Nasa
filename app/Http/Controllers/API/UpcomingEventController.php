@@ -22,40 +22,24 @@ class UpcomingEventController extends Controller
                 'mgs'    => 'Unauthenticated',
             ], 401);
         }
-
         $myUploads = StudentUploadProof::select('student_id', 'event_id')
             ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
             ->where('student_id', $student->id)
             ->groupBy('student_id', 'event_id')
             ->get();
-
         $activeRegistrationCount = StudentEventRegistration::where('student_id', $student->id)
             ->where('status', 1)
             ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
             ->count();
-
         $registeredCount = StudentEventRegistration::where('student_id', $student->id)
             ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
             ->count();
-
         $attendedEvents = StudentEventRegistration::where('student_id', $student->id)
             ->where('status', 3)
-            ->whereHas('get_event_attendance', fn($q) => $q->whereNotNull('entry_time')->whereNotNull('exit_time'))
+            ->whereHas('get_event_attendance', fn($q) => $q->whereNotNull('entry_time')->whereNotNull('exit_time')->where('student_id', $student->id))
             ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
             ->count();
-
         $pendingUploads = max(0, $registeredCount - $myUploads->count());
-
-        $studentRegistrations = StudentEventRegistration::where('student_id', $student->id)
-            ->with(['event', 'get_event_schedule'])
-            ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
-            ->get();
-
-        $studentRegistrations = StudentEventRegistration::where('student_id', $student->id)
-            ->with('event')
-            ->whereHas('event', fn($q) => $q->where('publish', 1)->where('is_active', 'y'))
-            ->get();
-
         $paidRegisteredDates = \App\Models\StudentEventRegistration::where('student_id', $student->id)
             ->whereHas('event', function ($q) {
                 $q->where('event_type', 'paid');
@@ -69,24 +53,14 @@ class UpcomingEventController extends Controller
             ->toArray();
 
         $upcomingEvents = Event::whereHas('get_dep_events', function ($q) use ($student) {
-
-            $q->where('programme_id', $student->programme_id)
-                ->where('section', $student->section)
-                ->where('batch', $student->batch)
-                ->where('semester', $student->semester)
-                ->whereDate('event_date', '>=', Carbon::today());
+            $q->matchesStudent($student)
+                ->where('event_date', '>=', Carbon::now()->toDateString()); // Only future dates
         })
-            ->with([
-                'get_dep_events' => function ($q) use ($student) {
-                    $q->where('programme_id', $student->programme_id)
-                        ->where('section', $student->section)
-                        ->where('batch', $student->batch)
-                        ->where('semester', $student->semester)
-                        ->whereDate('event_date', '>=', Carbon::today())
-                        ->orderBy('event_date', 'asc');
-                },
-                'get_dep_events.registrations'
-            ])
+            ->with(['get_dep_events' => function ($q) use ($student) {
+                $q->matchesStudent($student)
+                    ->where('event_date', '>=', Carbon::now()->toDateString())
+                    ->orderBy('event_date', 'asc');
+            }, 'get_dep_events.registrations'])
             ->where([
                 'publish'   => 1,
                 'is_active' => 'y',

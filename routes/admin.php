@@ -59,6 +59,7 @@ Route::prefix('admin')->group(function () {
 
         Route::get('/student-approval', [StudentApprovalController::class, 'index'])->name('student_approval');
         Route::get('/student-attendance', [StudentAttendanceController::class, 'index'])->name('student_attendance');
+        Route::get('/student-attendance', [StudentAttendanceController::class, 'index'])->name('student_attendance');
         Route::get('/student-attendance-entry', [StudentAttendanceController::class, 'attendanceEntry'])->name('student_attendance_entry');
         Route::get('/attendance/download', [StudentAttendanceController::class, 'download'])->name('attendance.download');
         Route::any('/attendance/mark', [StudentAttendanceController::class, 'markAttendance'])->name('attendance.mark');
@@ -129,6 +130,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/download-otherfiles/{event}/{student}/{schedule_id}', [AssignGradeController::class, 'downloadAll'])->name('download_all');
         Route::post('/events/{id}', [EventsController::class, 'destroy'])
             ->name('events.destroy');
+        Route::post('/events/{id}/toggle-publish', [EventsController::class, 'togglePublish'])
+            ->name('events.toggle_publish');
+        Route::post('/events/{id}/toggle-status', [EventsController::class, 'toggleStatus'])
+            ->name('events.toggle_status');
 
         //promote student
         Route::post('/promote-student', [StudentController::class, 'promoteStudent'])->name('promote_student');

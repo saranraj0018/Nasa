@@ -331,7 +331,7 @@
                                 @if ($ongoing_event['event_type'] == 'paid')
                                     <span
                                         class= "absolute top-3 left-3 bg-[#FFC31F] text-white px-3 text-sm rounded-full">
-                                        Premium <br> ₹{{ number_format($event['price'], 2) }}
+                                        Premium <br> ₹{{ number_format($ongoing_event['price'], 2) }}
                                     </span>
                                 @endif
                                 <span

@@ -51,9 +51,11 @@ class AdminReportsController extends Controller
         if ($request->ajax()) {
             if ($request->get_event_date) {
                 $get_event = Event::where('id', $request->eventId)->first();
+
                 return response()->json([
                     'success' => true,
-                    'event' => $get_event
+                    'event' => $get_event,
+                    'is_first_year' => $get_event->is_first_year ?? 'n',
                 ]);
             }
         }
@@ -70,27 +72,46 @@ class AdminReportsController extends Controller
 
     public function saveReport(Request $request)
     {
-        $request->validate([
-            'event_id'      => 'required|exists:events,id',
-            'programme_id' => 'required',
-            'section'   => 'required',
-            'event_date'  => 'required|date',
-            'outcome_results' => 'required',
+        $event = Event::findOrFail($request->event_id);
+
+        $rules = [
+            'event_id'         => 'required|exists:events,id',
+            'outcome_results'  => 'required',
             'feedback_summary' => 'required',
-            'batch'      => 'required',
-            'semester' => 'required',
-        ]);
+        ];
+
+        if ($event->is_first_year !== 'y') {
+            $rules['programme_id'] = 'required';
+            $rules['section']      = 'required';
+            $rules['event_date']   = 'required|date';
+            $rules['batch']        = 'required';
+            $rules['semester']     = 'required';
+        }
+
+        $request->validate($rules);
 
         DB::beginTransaction();
         try {
-            $schedule = $this->resolveSchedule(
-                $request->event_id,
-                $request->programme_id,
-                $request->event_date,
-                $request->section,
-                $request->batch,
-                $request->semester
-            );
+            if ($event->is_first_year === 'y') {
+                // First-year events have no programme/section/batch/semester to
+                // report against — resolve their one common schedule directly,
+                // no admin input needed.
+                $schedule = EventSchedule::where('event_id', $request->event_id)
+                    ->whereNull('programme_id')
+                    ->whereNull('section')
+                    ->whereNull('semester')
+                    ->orderBy('event_date')
+                    ->first();
+            } else {
+                $schedule = $this->resolveSchedule(
+                    $request->event_id,
+                    $request->programme_id,
+                    $request->event_date,
+                    $request->section,
+                    $request->batch,
+                    $request->semester
+                );
+            }
             if (!$schedule) {
                 throw new \Exception('Schedule not found');
             }
@@ -100,8 +121,8 @@ class AdminReportsController extends Controller
                     'event_schedule_id' => $schedule->id
                 ],
                 [
-                    'programme_id' => $request->programme_id,
-                    'event_date' => $request->event_date,
+                    'programme_id' => $schedule->programme_id,
+                    'event_date' => $schedule->event_date,
                     'outcomes' => $request->outcome_results,
                     'feedback_summary' => $request->feedback_summary,
                     'created_by' => auth('admin')->id()
@@ -288,7 +309,7 @@ class AdminReportsController extends Controller
             auth('admin')->user()
         );
 
-        return $pdf->stream((($report->schedule?->department?->name) ?? '') . ' - ' . $report->get_event->title . ".pdf");
+        return $pdf->stream((($report->schedule?->programme?->name) ?? '') . ' - ' . $report->get_event->title . ".pdf");
     }
 
     public function downloadPdf($id)
@@ -422,7 +443,7 @@ class AdminReportsController extends Controller
         ActivityLog::add($user->name . ' - ' .  $report->get_event->title . 'Report Downloaded', $user);
         $pdf = Pdf::loadView('report.pdf.report_template', compact('data'))
             ->setPaper('a4', 'portrait');
-        return $pdf->download((($report->schedule?->department?->name) ?? '') . ' - ' . $report->get_event->title . ".pdf");
+        return $pdf->download((($report->schedule?->programme?->name) ?? '') . ' - ' . $report->get_event->title . ".pdf");
     }
 
     private function normalizeRatings($value)

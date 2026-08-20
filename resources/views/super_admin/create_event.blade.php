@@ -128,29 +128,6 @@
                     <option value="free" @if (!empty($edit_event) && $edit_event->event_type == 'free') selected @endif>Free</option>
                 </select>
             </div>
-            @if (!empty($edit_event))
-                <div>
-                    <label class="block text-sm font-medium"> Is First Year <span class="text-red-500">*</span></label>
-                    <div class="flex items-center gap-6 mt-2">
-                        {{-- YES --}}
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="is_first_year" value="y"
-                                class="text-primary focus:ring-primary is_first_year"
-                                {{ old('is_first_year', optional($edit_event)->is_first_year) === 'y' ? 'checked' : '' }}>
-                            <span class="ml-2 text-sm">Yes</span>
-                        </label>
-
-                        {{-- NO --}}
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="is_first_year" value="n"
-                                class="text-primary focus:ring-primary is_first_year"
-                                {{ old('is_first_year', optional($edit_event)->is_first_year) === 'n' ? 'checked' : '' }}>
-                            <span class="ml-2 text-sm">No</span>
-                        </label>
-                    </div>
-                </div>
-            @endif
-
             <div id="priceFieldContainer">
                 @if (!empty($edit_event) && $edit_event->event_type == 'paid')
                     <label class="block mt-3 font-medium">Price</label>
@@ -174,6 +151,11 @@
             @endphp
 
             @foreach ($deptData as $index => $dept)
+                @php
+                    $isSpecificDept =
+                        $dept && (!is_null($dept->programme_id) || !is_null($dept->section) || !is_null($dept->semester));
+                    $scopeValue = old("departments.$index.scope", $isSpecificDept ? 'specific' : 'all');
+                @endphp
                 <div class="bg-[#F0F0F0] p-5 rounded-2xl relative dept-card">
                     <input type="hidden" name="departments[{{ $index }}][schedule_id]"
                         value="{{ $dept->id ?? '' }}">
@@ -183,14 +165,34 @@
                             Remove
                         </button>
                     @endif
+                    {{-- Apply To --}}
+                    <div class="mt-5">
+                        <label class="block text-sm font-medium">
+                            Apply To <span class="text-red-600">*</span>
+                        </label>
+                        <div class="flex items-center gap-6 mt-2">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="departments[{{ $index }}][scope]" value="all"
+                                    class="text-primary focus:ring-primary dept-scope"
+                                    {{ $scopeValue === 'all' ? 'checked' : '' }}>
+                                <span class="ml-2 text-sm">All Departments</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="departments[{{ $index }}][scope]" value="specific"
+                                    class="text-primary focus:ring-primary dept-scope"
+                                    {{ $scopeValue === 'specific' ? 'checked' : '' }}>
+                                <span class="ml-2 text-sm">Specific Department</span>
+                            </label>
+                        </div>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
-                        <div>
+                        <div class="dept-specific-field">
                             <label class="block text-sm font-medium">
                                 Programme <span class="text-red-500">*</span>
                             </label>
                             <select name="departments[{{ $index }}][programme_id]"
                                 class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 department choice-select">
-                                <option value="">All Programmes</option>
+                                <option value="">Select Programme</option>
                                 @foreach ($programmes as $d)
                                     <option value="{{ $d->id }}"
                                         @if (!empty($dept) && $dept->programme_id == $d->id) selected @endif>
@@ -200,12 +202,12 @@
                             </select>
                         </div>
                         {{-- Section --}}
-                        <div>
+                        <div class="dept-specific-field">
                             <label class="block text-sm font-medium"> Section <span
                                     class="text-red-500">*</span></label>
                             <select name="departments[{{ $index }}][section]" id="section"
                                 class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 section">
-                                <option value="">All Sections</option>
+                                <option value="">Select Section</option>
                                 <option value="a" {{ $dept?->section == 'a' ? 'selected' : '' }}>A</option>
                                 <option value="b" {{ $dept?->section == 'b' ? 'selected' : '' }}>B</option>
                                 <option value="c" {{ $dept?->section == 'c' ? 'selected' : '' }}>C</option>
@@ -254,18 +256,18 @@
                                 value="{{ $dept->seat_count ?? '' }}"
                                 class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 seat_count">
                         </div>
-                        <div>
+                        <div class="dept-specific-field">
                             <label class="block text-sm font-medium">Batch<span class="text-red-500">*</span></label>
                             <input type="text" name="departments[{{ $index }}][batch]" id="batch"
                                 value="{{ $dept->batch ?? '' }}" placeholder="e.g, 2025-2029"
                                 class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 batch">
                         </div>
-                        <div>
+                        <div class="dept-specific-field">
                             <label class="block text-sm font-medium"> Semester <span
                                     class="text-red-500">*</span></label>
                             <select name="departments[{{ $index }}][semester]" id="semester"
                                 class="semester bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 choice-select">
-                                <option value="">All Semesters</option>
+                                <option value="">Select Semester</option>
                                 <option value="1" {{ $dept?->semester == '1' ? 'selected' : '' }}>1</option>
                                 <option value="2" {{ $dept?->semester == '2' ? 'selected' : '' }}>2</option>
                                 <option value="3" {{ $dept?->semester == '3' ? 'selected' : '' }}>3</option>

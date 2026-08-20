@@ -147,6 +147,13 @@
             text-align: right;
             font-size: 11px;
         }
+
+        .text-block {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
     </style>
 </head>
 
@@ -216,11 +223,11 @@
 
         <!-- OUTCOMES -->
         <div class="section-title">Event Outcomes</div>
-        <p>{{ $data['report']->outcomes }}</p>
+        <p class="text-block">{{ $data['report']->outcomes }}</p>
 
         <!-- FEEDBACK SUMMARY -->
         <div class="section-title">Feedback Summary</div>
-        <p>{{ $data['report']->feedback_summary }}</p>
+        <p class="text-block">{{ $data['report']->feedback_summary }}</p>
 
         <!-- GENDER PARTICIPATION -->
         <div class="section-title">Attended Students Lists</div>
@@ -334,7 +341,7 @@
         @endif
         <tr>
             <td class="label">Key Take Away</td>
-            <td>{{ optional($data['report']->feedback)->comments ?? '-' }}</td>
+            <td class="text-block">{{ optional($data['report']->feedback)->comments ?? '-' }}</td>
         </tr>
     </table>
 @else

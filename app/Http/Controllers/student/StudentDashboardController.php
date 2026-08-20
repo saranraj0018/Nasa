@@ -33,9 +33,10 @@ class StudentDashboardController extends Controller
             ->get();
         $this->data['studentRegistrations'] = $studentRegistrations;
         $this->data['completed_events'] = StudentEventRegistration::with('get_event_attendance', 'event')->where('student_id', $student->id)
-            ->whereHas('get_event_attendance', function ($query) use ($now) {
+            ->whereHas('get_event_attendance', function ($query) use ($now, $student) {
                 $query->whereNotNull('entry_time')
-                    ->whereNotNull('exit_time');
+                    ->whereNotNull('exit_time')
+                    ->where('student_id', $student->id);
             })
             ->whereHas('event', function ($query) {
                 $query->where('publish', 1)
@@ -46,20 +47,17 @@ class StudentDashboardController extends Controller
             ->whereNotNull('grade');
         // Upcoming and ongoing department-wise events
         $this->data['ongoingEvents'] = Event::whereHas('get_dep_events', function ($q) use ($student) {
-            $q->where('programme_id', $student->programme_id)
-                ->where('section', $student->section)
-                ->where('batch', $student->batch)
-                ->where('semester', $student->semester)
+            $q->matchesStudent($student)
                 ->where('event_date', Carbon::now()->toDateString());
         })
             ->with(['get_dep_events' => function ($q) use ($student) {
-                $q->where('programme_id', $student->programme_id)
-                    ->where('section', $student->section)
-                    ->where('batch', $student->batch)
-                    ->where('semester', $student->semester)
+                $q->matchesStudent($student)
                     ->where('event_date', Carbon::now()->toDateString());
             }, 'get_dep_events.registrations'])
-            ->where('publish', 1)
+            ->where([
+                'publish' => 1,
+                'is_active' => 'y'
+            ])
             ->get();
 
         $this->data['registeredEvents'] = StudentEventRegistration::with('event', 'get_event_schedule', 'student')
@@ -70,17 +68,11 @@ class StudentDashboardController extends Controller
             ->where('student_id', $student->id)
             ->get();
         $this->data['upcomingEvents'] = Event::whereHas('get_dep_events', function ($q) use ($student) {
-            $q->where('programme_id', $student->programme_id)
-                ->where('section', $student->section)
-                ->where('batch', $student->batch)
-                ->where('semester', $student->semester)
+            $q->matchesStudent($student)
                 ->where('event_date', '>=', Carbon::now()->toDateString()); // Only future dates
         })
             ->with(['get_dep_events' => function ($q) use ($student) {
-                $q->where('programme_id', $student->programme_id)
-                    ->where('section', $student->section)
-                    ->where('batch', $student->batch)
-                    ->where('semester', $student->semester)
+                $q->matchesStudent($student)
                     ->where('event_date', '>=', Carbon::now()->toDateString())
                     ->orderBy('event_date', 'asc');
             }, 'get_dep_events.registrations'])
@@ -91,17 +83,11 @@ class StudentDashboardController extends Controller
             ->get();
 
         $this->data['studentRegistrations'] = StudentEventRegistration::whereHas('schedule', function ($q) use ($student) {
-            $q->where('programme_id', $student->programme_id)
-                ->where('section', $student->section)
-                ->where('batch', $student->batch)
-                ->where('semester', $student->semester)
+            $q->matchesStudent($student)
                 ->where('event_date', '>', Carbon::now()->toDateString()); // Only future dates
         })
             ->with(['schedule' => function ($q) use ($student) {
-                $q->where('programme_id', $student->programme_id)
-                    ->where('section', $student->section)
-                    ->where('batch', $student->batch)
-                    ->where('semester', $student->semester)
+                $q->matchesStudent($student)
                     ->where('event_date', '>', Carbon::now()->toDateString())
                     ->orderBy('event_date', 'asc');
                 // ->orderBy('start_time', 'asc');
@@ -127,9 +113,7 @@ class StudentDashboardController extends Controller
             })
             ->where('grade', '!=', 'd')
             ->whereHas('get_event_schedule', function ($q) use ($student) {
-                $q->where('semester', $student->semester)
-                    ->where('batch', $student->batch)
-                    ->where('programme_id', $student->programme_id);
+                $q->matchesStudent($student);
             })
             ->with('get_event_schedule:id,credit_points')
             ->get()

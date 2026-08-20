@@ -1,10 +1,12 @@
 <x-layouts.app>
-    <div class="bg-[#F5E8F5] w-full h-[70px] rounded-full shadow-sm px-8 py-3">
+    <div class="bg-[#F5E8F5] w-full h-[70px] rounded-full shadow-sm px-8 py-3 flex justify-between items-center">
         <h3 class="font-semibold text-primary">Event Report Submission</h3>
         <p>Submit comprehensive reports for completed events</p>
+        <a href="{{ route('reports') }}" class="flex items-center text-gray-700 hover:text-primary transition-colors">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Back
+        </a>
     </div>
-    <form id="eventReportForm" action="{{ route('student_register_event') }}" method="POST" enctype="multipart/form-data"
-        class="mt-8 px-4">
+    <form id="eventReportForm" action="{{ route('student_register_event') }}" method="POST" enctype="multipart/form-data" class="mt-8 px-4">
         @csrf
         <h2 class="text-primary font-semibold mt-10 px-4">Event Information</h2>
         <p class="px-4 text-gray-600 text-sm">Select the completed events and confirm details</p>
@@ -19,56 +21,62 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="block text-sm font-medium">
-                    Programme <span class="text-red-500">*</span>
-                </label>
-                <select name="programme_id" id="programme_id"
-                    class="choice-select bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 department">
-                    <option value="">Select Programme</option>
-                    @foreach ($programmes as $d)
-                        <option value="{{ $d->id }}" @if (!empty($eve) && $eve->id == $d->id) selected @endif>
-                            {{ $d->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium"> Section <span class="text-red-500">*</span></label>
-                <select name="section" id="section"
-                    class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 section">
-                    <option value="" selected disabled>Select Section</option>
-                    <option value="a">A</option>
-                    <option value="b">B</option>
-                    <option value="c">C</option>
-                    <option value="d">D</option>
-                    <option value="r">R</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium">Batch<span class="text-red-500">*</span></label>
-                <input type="text" name="batch" id="batch" placeholder="e.g, 2025-2029"
-                    class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40">
-            </div>
-            <div>
-                <label class="block text-sm font-medium"> Semester <span class="text-red-500">*</span></label>
-                <select name="semester" id="semester"
-                    class="choice-select bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40">
-                    <option value="" selected disabled>Select Semester</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium">Event Date <span class="text-red-600">*</span></label>
-                <input type="date" name="event_date" id="event_date"
-                    class="bg-[#D9D9D9] w-full rounded-full py-3 px-4 mt-1 focus:outline-none focus:ring-2 focus:ring-primary/40">
+
+            {{-- First-year events have no programme/section/batch/semester (and no
+                 schedule to pick) — their single common schedule is resolved
+                 automatically on save, so these fields are simply hidden. --}}
+            <div id="specificFields" style="display:contents">
+                <div>
+                    <label class="block text-sm font-medium">
+                        Programme <span class="text-red-500">*</span>
+                    </label>
+                    <select name="programme_id" id="programme_id"
+                        class="choice-select bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 department">
+                        <option value="">Select Programme</option>
+                        @foreach ($programmes as $d)
+                            <option value="{{ $d->id }}" @if (!empty($eve) && $eve->id == $d->id) selected @endif>
+                                {{ $d->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium"> Section <span class="text-red-500">*</span></label>
+                    <select name="section" id="section"
+                        class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 section">
+                        <option value="" selected disabled>Select Section</option>
+                        <option value="a">A</option>
+                        <option value="b">B</option>
+                        <option value="c">C</option>
+                        <option value="d">D</option>
+                        <option value="r">R</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Batch<span class="text-red-500">*</span></label>
+                    <input type="text" name="batch" id="batch" placeholder="e.g, 2025-2029"
+                        class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium"> Semester <span class="text-red-500">*</span></label>
+                    <select name="semester" id="semester"
+                        class="choice-select bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40">
+                        <option value="" selected disabled>Select Semester</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Event Date <span class="text-red-600">*</span></label>
+                    <input type="date" name="event_date" id="event_date"
+                        class="bg-[#D9D9D9] w-full rounded-full py-3 px-4 mt-1 focus:outline-none focus:ring-2 focus:ring-primary/40">
+                </div>
             </div>
         </div>
         <!-- EVENT OUTCOMES -->

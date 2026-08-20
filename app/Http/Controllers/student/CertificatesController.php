@@ -29,6 +29,7 @@ class CertificatesController extends Controller
                 fn($query) =>
                 $query->whereNotNull('entry_time')
                     ->whereNotNull('exit_time')
+                    ->where('student_id', $student->id)
             )
             ->whereHas('event', function ($query) {
                 $query->where('publish', 1)

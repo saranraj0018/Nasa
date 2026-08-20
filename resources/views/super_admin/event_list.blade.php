@@ -171,7 +171,7 @@
                                             <div
                                                 class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 hover:shadow-md transition">
                                                 <div class="text-xs font-bold text-gray-800 mb-1">
-                                                    {{ $schedule?->programme?->name  ?? 'All Programmes' }}
+                                                    {{ $schedule?->programme?->name  ?? 'All First Year Programmes' }}
                                                 </div>
                                                 <div class="text-xs text-gray-600 mb-1">
                                                     <span class="font-medium">Event Date:</span>
@@ -186,7 +186,7 @@
                                                 </div>
                                                 <div class="text-xs text-gray-600">
                                                     <span class="font-medium">Section:</span>
-                                                   {{ $schedule->section ? strtoupper($schedule->section) : 'All Sections' }}
+                                                   {{ $schedule->section ? strtoupper($schedule->section) : 'All First Year' }}
                                                     <span class="mx-2">|</span>
                                                     <span class="font-medium">Seats:</span>
                                                     {{ $schedule->seat_count }}
@@ -196,11 +196,11 @@
                                     </div>
                                 </td>
                                 <td class="px-3 py-2">
-                                 @if ($event->is_active == 'y')
-                                  <span class="bg-green-100 text-green-700 p-2 rounded-full"> Active </span>
-                                 @else
-                                    <span class="bg-red-100 text-red-700 p-2 rounded-full"> InActive </span>
-                                 @endif
+                                    <button type="button"
+                                        class="toggleStatus {{ $event->is_active == 'y' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} p-2 rounded-full cursor-pointer border-0"
+                                        data-id="{{ $event->id }}" data-status="{{ $event->is_active }}">
+                                        {{ $event->is_active == 'y' ? 'Active' : 'In Active' }}
+                                    </button>
                                 </td>
                                 <!-- Action -->
                                 <td class="px-3 py-2 text-center">
@@ -208,18 +208,22 @@
                                         class="text-blue-600 hover:text-blue-800">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
+                                    {{-- <button type="button"
+                                        class="togglePublish {{ $event->publish ? 'text-yellow-600 hover:text-yellow-800' : 'text-gray-500 hover:text-gray-700' }} mx-2"
+                                        data-id="{{ $event->id }}" data-publish="{{ $event->publish }}"
+                                        title="{{ $event->publish ? 'Unpublish Event' : 'Publish Event' }}">
+                                        <i class="fa-solid {{ $event->publish ? 'fa-eye' : 'fa-eye-slash' }}"></i>
+                                    </button> --}}
                                     @php
                                         $canDelete = $event->schedules->every(function ($schedule) {
                                             return $schedule->registrations->isEmpty();
                                         });
                                     @endphp
-
                                     @if ($canDelete)
                                         <button type="button" class="text-red-600 hover:text-red-800 deleteEvent" id="deleteEvent" data-id="{{ $event->id }}">
                                             <i class="fa-solid fa-delete-left"></i>
                                         </button>
                                     @endif
-
                                 </td>
                             </tr>
                         @endforeach

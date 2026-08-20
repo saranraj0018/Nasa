@@ -45,9 +45,10 @@ class StudentController extends Controller
             ->where('student_id', $student->id)
             ->whereNotNull('grade')
             ->where('grade', '!=', 'd')
-            ->whereHas('get_event_attendance', function ($query) {
+            ->whereHas('get_event_attendance', function ($query) use ($student) {
                 $query->whereNotNull('entry_time')
-                    ->whereNotNull('exit_time');
+                    ->whereNotNull('exit_time')
+                    ->where('student_id', $student->id);
             })
             ->whereHas('event', function ($query) {
                 $query->where('publish', 1)

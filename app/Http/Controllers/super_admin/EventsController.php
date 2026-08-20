@@ -15,6 +15,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class EventsController extends Controller
 {
@@ -149,14 +150,14 @@ class EventsController extends Controller
             $query = Event::with('get_faculty', 'schedules', 'get_task', 'schedules.registrations');
         } else {
             $query = Event::with('get_faculty', 'schedules', 'get_task', 'schedules.registrations')
-                      ->where('created_by', $adminId);
+                ->where('created_by', $adminId);
         }
 
-         if ($request->filled('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'LIKE', "%{$search}%")
-                  ->orWhere('description', 'LIKE', "%{$search}%");
+                    ->orWhere('description', 'LIKE', "%{$search}%");
             });
         }
 
@@ -195,8 +196,20 @@ class EventsController extends Controller
                 'event_type'   => 'required',
                 'duration_months' => 'required',
                 'departments' => 'required|array|min:1',
-                'departments.*.programme_id' => 'nullable|exists:programmes,id',
-                'departments.*.section' => 'nullable|in:a,b,c,d,e,f,r',
+                'departments.*.scope' => 'required|in:all,specific',
+                // Programme/Section/Semester are only mandatory for a "Specific Department"
+                // row. Left blank together, a row means "All Departments" (a common/first-year
+                // schedule) — see EventSchedule::isCommonFirstYearSchedule().
+                'departments.*.programme_id' => Rule::forEach(function ($value, $attribute) use ($request) {
+                    $index = explode('.', $attribute)[1];
+                    $isSpecific = $request->input("departments.$index.scope") === 'specific';
+                    return [$isSpecific ? 'required' : 'nullable', 'exists:programmes,id'];
+                }),
+                'departments.*.section' => Rule::forEach(function ($value, $attribute) use ($request) {
+                    $index = explode('.', $attribute)[1];
+                    $isSpecific = $request->input("departments.$index.scope") === 'specific';
+                    return [$isSpecific ? 'required' : 'nullable', 'in:a,b,c,d,e,f,r'];
+                }),
                 'departments.*.event_date' => 'required|date_format:d/m/Y',
                 'departments.*.is_reserve_date' => 'nullable|in:y,n',
                 'departments.*.seat_count' => 'required|integer|min:1',
@@ -204,7 +217,11 @@ class EventsController extends Controller
                     'nullable',
                     'regex:/^\d{4}-\d{4}$/'
                 ],
-                'departments.*.semester' => 'nullable|in:1,2,3,4,5,6,7,8',
+                'departments.*.semester' => Rule::forEach(function ($value, $attribute) use ($request) {
+                    $index = explode('.', $attribute)[1];
+                    $isSpecific = $request->input("departments.$index.scope") === 'specific';
+                    return [$isSpecific ? 'required' : 'nullable', 'in:1,2,3,4,5,6,7,8'];
+                }),
                 'departments.*.credit_points' => 'required|numeric|min:0|max:4',
             ];
 
@@ -219,7 +236,6 @@ class EventsController extends Controller
             }
 
             $request->validate($rules);
-
             if (!empty($request['event_id'])) {
                 $message = 'Event Updated successfully';
                 $event = Event::find($request['event_id']);
@@ -265,6 +281,12 @@ class EventsController extends Controller
             $event->contact_email = $request['contact_email']  ?? '';
             $event->duration_months = $request['duration_months'];
             $event->is_technical_event = $request['is_technical_event'] ?? '';
+            // "First year" is derived, not admin-set: any "All Departments" row
+            // means a common first-year schedule (see EventSchedule::isCommonFirstYearSchedule()),
+            // so the event as a whole is treated as a first-year event.
+            $isFirstYearEvent = collect($request->departments)
+                ->contains(fn($schedule) => ($schedule['scope'] ?? null) === 'all');
+            $event->is_first_year = $isFirstYearEvent ? 'y' : 'n';
             $event->is_active = $request['is_active'] ?? 'y';
             $event->save();
 
@@ -278,15 +300,19 @@ class EventsController extends Controller
                 ->delete();
 
             foreach ($request->departments as $schedule) {
+                $isSpecific = ($schedule['scope'] ?? null) === 'specific';
                 $data = [
                     'event_id'        => $event->id,
-                    'programme_id'    => !empty($schedule['programme_id']) ? $schedule['programme_id'] : null,
-                    'section'         => !empty($schedule['section']) ? $schedule['section'] : null,
+                    // Force null for "All Departments" rows even if a stray value was
+                    // submitted, so the common/first-year schedule matching in
+                    // EventSchedule::isCommonFirstYearSchedule() stays reliable.
+                    'programme_id'    => $isSpecific ? $schedule['programme_id'] : null,
+                    'section'         => $isSpecific ? $schedule['section'] : null,
                     'event_date'      => Carbon::createFromFormat('d/m/Y', $schedule['event_date'])->format('Y-m-d'),
                     'is_reserve_date' => $schedule['is_reserve_date'] ?? 'n',
                     'seat_count'      => $schedule['seat_count'],
-                    'batch'           => !empty($schedule['batch']) ? $schedule['batch'] : null,
-                    'semester'        => !empty($schedule['semester']) ? $schedule['semester'] : null,
+                    'batch'           => ($isSpecific && !empty($schedule['batch'])) ? $schedule['batch'] : null,
+                    'semester'        => $isSpecific ? $schedule['semester'] : null,
                     'credit_points'   => $schedule['credit_points'],
                 ];
 
@@ -323,8 +349,8 @@ class EventsController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to save event',
-                'error' => 'Failed to save event',
+                'message' => $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -362,6 +388,32 @@ class EventsController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Event published successfully'
+        ]);
+    }
+
+    public function togglePublish($id)
+    {
+        $event = Event::findOrFail($id);
+        $event->publish = $event->publish ? 0 : 1;
+        $event->save();
+
+        return response()->json([
+            'success' => true,
+            'publish' => $event->publish,
+            'message' => $event->publish ? 'Event published successfully' : 'Event unpublished successfully'
+        ]);
+    }
+
+    public function toggleStatus($id)
+    {
+        $event = Event::findOrFail($id);
+        $event->is_active = $event->is_active === 'y' ? 'n' : 'y';
+        $event->save();
+
+        return response()->json([
+            'success'   => true,
+            'is_active' => $event->is_active,
+            'message'   => $event->is_active === 'y' ? 'Event activated successfully' : 'Event deactivated successfully'
         ]);
     }
 }

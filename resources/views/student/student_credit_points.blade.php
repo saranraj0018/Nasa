@@ -124,12 +124,8 @@
                         <tbody class="divide-y divide-gray-100 bg-white">
                             @forelse($student_credits as $index => $student)
                                 @php
-                                    if ($student->earned_credits > 4) {
-                                        $earned = 4;
-                                    } else {
-                                        $earned = $student->earned_credits;
-                                    }
-                                    $pending = $credit_points->credit_points - $earned;
+                                    $earned = $student->capped_earned_credits;
+                                    $pending = ($credit_points->credit_points ?? 0) - $earned;
                                 @endphp
                                 <tr class="hover:bg-gray-50 transition">
                                     <td class="px-2 py-3">{{ $index + 1 }}</td>

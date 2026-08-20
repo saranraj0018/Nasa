@@ -1,3 +1,7 @@
+   @php
+     $url = null;
+     $title = 'NASA';
+   @endphp
    @if (!empty(session()->get('super_admin')))
              @php
               $url =  route('super_admin_home') ;
