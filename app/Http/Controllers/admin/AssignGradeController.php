@@ -125,7 +125,7 @@ class AssignGradeController extends Controller
 
                 $student = Student::find($studentId);
                 if ($student) {
-                    app(StudentNotificationService::class)->notifyGradeAssigned($student, $event, $grade);
+                    app(StudentNotificationService::class)->notify('grade_assigned', ['student' => $student, 'event' => $event, 'grade' => $grade]);
                 }
             }
             DB::commit();

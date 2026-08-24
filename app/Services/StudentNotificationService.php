@@ -11,41 +11,42 @@ use Illuminate\Support\Facades\Log;
 class StudentNotificationService
 {
     /**
-     * Notify the audience of a newly published event: every semester-1/2 student
-     * for a common first-year schedule, or only the matching department's
-     * students for a department-specific schedule (see
-     * EventSchedule::isCommonFirstYearSchedule()). Call this only when an event
-     * transitions from unpublished to published — student-facing queries filter
-     * on publish = 1, so notifying earlier would reference an event students
-     * can't see yet.
+     * Dispatch a notification by type. `$params` keys depend on `$type`:
+     *   - 'event_published':   ['event' => Event]
+     *   - 'attendance_marked': ['student' => Student, 'event' => Event]
+     *   - 'grade_assigned':    ['student' => Student, 'event' => Event, 'grade' => string]
+     *
+     * For 'event_published', call this only when an event transitions from
+     * unpublished to published — student-facing queries filter on publish = 1,
+     * so notifying earlier would reference an event students can't see yet.
      */
-    public function notifyEventPublished(Event $event): void
+    public function notify(string $type, array $params): void
     {
-        $students = $this->studentsForEvent($event);
+        switch ($type) {
+            case 'event_published':
+                $event = $params['event'];
+                $students = $this->studentsForEvent($event);
+                $title = 'New Event: ' . $event->title;
+                $description = "A new event \"{$event->title}\" has been scheduled on {$this->eventDate($event)}. Check it out!";
+                break;
 
-        $this->send(
-            $students,
-            'New Event: ' . $event->title,
-            "A new event \"{$event->title}\" has been scheduled on {$this->eventDate($event)}. Check it out!"
-        );
-    }
+            case 'attendance_marked':
+                $students = collect([$params['student']]);
+                $title = 'Attendance Marked';
+                $description = "Your attendance for \"{$params['event']->title}\" has been recorded.";
+                break;
 
-    public function notifyAttendanceMarked(Student $student, Event $event): void
-    {
-        $this->send(
-            collect([$student]),
-            'Attendance Marked',
-            "Your attendance for \"{$event->title}\" has been recorded."
-        );
-    }
+            case 'grade_assigned':
+                $students = collect([$params['student']]);
+                $title = 'Grade Assigned';
+                $description = "Your grade for \"{$params['event']->title}\" has been updated to \"" . strtoupper($params['grade']) . "\".";
+                break;
 
-    public function notifyGradeAssigned(Student $student, Event $event, string $grade): void
-    {
-        $this->send(
-            collect([$student]),
-            'Grade Assigned',
-            "Your grade for \"{$event->title}\" has been updated to \"" . strtoupper($grade) . "\"."
-        );
+            default:
+                return;
+        }
+
+        $this->send($students, $title, $description);
     }
 
     protected function studentsForEvent(Event $event): Collection

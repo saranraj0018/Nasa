@@ -166,7 +166,7 @@ class StudentAttendanceController extends Controller
                 if ($attendanceChanged) {
                     $student = Student::find($studentId);
                     if ($student) {
-                        app(StudentNotificationService::class)->notifyAttendanceMarked($student, $event);
+                        app(StudentNotificationService::class)->notify('attendance_marked', ['student' => $student, 'event' => $event]);
                     }
                 }
 
