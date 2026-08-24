@@ -35,7 +35,7 @@
                 $route = route('admin.logout');
             }
         @endphp
-
+ 
         @if (!empty($profile_pict))
             <img src="{{ asset('storage/' . $profile_pict) }}" alt="Profile Picture"
                 class="mx-auto rounded-full w-2/5 h-25">
@@ -47,18 +47,18 @@
             Welcome Back
         </div>
         <div class="text-center font-medium text-md text-primary">
-            {{ $name }}
+            {{ $name ?? ''}}
         </div>
         <div class="text-center font-sm text-sm text-primary">
-            {{ $dept_name }}
+            {{ $dept_name ?? ''}}
         </div>
         @if (!empty(session()->get('admin')) || !empty(session()->get('super_admin')))
             <div class="text-center font-sm text-sm">
-                {{ $desig_name }}
+                {{ $desig_name ?? '' }}
             </div>
         @endif
         <div class="text-center font-medium text-md text-primary">
-            ID - {{ $id }}
+            ID - {{ $id ?? '' }}
         </div>
     </div>
     <ul class="">
@@ -163,14 +163,14 @@
             <img src="{{ asset('/images/user_dummy.png') }}" alt="Default Picture" class="w-1/5">
         @endif
         <div class="my-auto space-y-1">
-            <form method="POST" action="{{ $route }}">
+            <form method="POST" action="{{ $route ?? ''}}">
                 @csrf
                 <button type="submit" class="text-sm font-medium hover:underline">
                     Logout
                 </button>
             </form>
             <p class="text-sm font-medium text-black">ID -
-                {{ $id }}
+                {{ $id ?? '' }}
             </p>
         </div>
     </div>

@@ -17,6 +17,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ResolvesEventSchedule;
 use App\Models\StudentEventRegistration;
+use App\Services\StudentNotificationService;
 
 class AssignGradeController extends Controller
 {
@@ -100,6 +101,7 @@ class AssignGradeController extends Controller
         try {
             $grades = $request->grades['student'];
             $schedules = $request->grades['schedule'];
+            $event = Event::findOrFail($request->event_id);
 
             foreach ($grades as $studentId => $grade){
                 if (empty($grade)) {
@@ -119,6 +121,11 @@ class AssignGradeController extends Controller
 
                 if (!$updated) {
                     throw new \Exception("Registration not found for student ID: {$studentId}");
+                }
+
+                $student = Student::find($studentId);
+                if ($student) {
+                    app(StudentNotificationService::class)->notifyGradeAssigned($student, $event, $grade);
                 }
             }
             DB::commit();

@@ -8,7 +8,9 @@ use App\Models\StudentAttendance;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventSchedule;
+use App\Models\Student;
 use App\Models\StudentEventRegistration;
+use App\Services\StudentNotificationService;
 use App\Traits\ResolvesEventSchedule;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -158,7 +160,15 @@ class StudentAttendanceController extends Controller
                     $attendance->exit_time = null;
                 }
 
+                $attendanceChanged = $attendance->isDirty(['entry_time', 'exit_time']);
                 $attendance->save();
+
+                if ($attendanceChanged) {
+                    $student = Student::find($studentId);
+                    if ($student) {
+                        app(StudentNotificationService::class)->notifyAttendanceMarked($student, $event);
+                    }
+                }
 
                 StudentEventRegistration::where([
                     'event_id' => $request->event_id,

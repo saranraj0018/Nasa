@@ -236,7 +236,8 @@ class EventsController extends Controller
             }
 
             $request->validate($rules);
-            if (!empty($request['event_id'])) {
+            $isNewEvent = empty($request['event_id']);
+            if (!$isNewEvent) {
                 $message = 'Event Updated successfully';
                 $event = Event::find($request['event_id']);
             } else {
@@ -381,10 +382,16 @@ class EventsController extends Controller
             'event_id' => 'required|exists:events,id'
         ]);
 
-        $event = Event::where('id', $request->event_id)
-            ->update([
-                'publish' => 1
-            ]);
+        $event = Event::findOrFail($request->event_id);
+        $wasPublished = (bool) $event->publish;
+
+        $event->publish = 1;
+        $event->save();
+
+        if (!$wasPublished) {
+            $event->load('schedules');
+            app(\App\Services\StudentNotificationService::class)->notifyEventPublished($event);
+        }
 
         return response()->json([
             'success' => true,
@@ -395,8 +402,14 @@ class EventsController extends Controller
     public function togglePublish($id)
     {
         $event = Event::findOrFail($id);
-        $event->publish = $event->publish ? 0 : 1;
+        $wasPublished = (bool) $event->publish;
+        $event->publish = $wasPublished ? 0 : 1;
         $event->save();
+
+        if (!$wasPublished && $event->publish) {
+            $event->load('schedules');
+            app(\App\Services\StudentNotificationService::class)->notifyEventPublished($event);
+        }
 
         return response()->json([
             'success' => true,
