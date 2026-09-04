@@ -127,10 +127,6 @@ class EventsController extends Controller
         if ($request->event_id) {
             $eventId = decrypt($request->event_id);
             $this->data['edit_event'] = Event::where('id', $eventId)->first();
-            if ($this->data['edit_event'] && $this->data['edit_event']->publish) {
-                return redirect()->route('event_list')
-                    ->with('error', 'A published event cannot be edited. Unpublish it first.');
-            }
             $this->data['edit_faculty'] = Faculty::where('id', $this->data['edit_event']->faculty_id)->first();
         } else {
             $this->data['edit_event'] = null;
@@ -243,12 +239,6 @@ class EventsController extends Controller
             $isNewEvent = empty($request['event_id']);
             if (!$isNewEvent) {
                 $event = Event::find($request['event_id']);
-                if ($event && $event->publish) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'A published event cannot be edited. Unpublish it first.',
-                    ], 422);
-                }
                 $message = 'Event Updated successfully';
             } else {
                 $event = new Event();
