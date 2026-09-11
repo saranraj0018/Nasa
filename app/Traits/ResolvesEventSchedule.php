@@ -13,9 +13,7 @@ trait ResolvesEventSchedule
             ->where('section', $section)
             ->where('batch', $batch)
             ->where('semester', $semester)
-//            ->where(function ($q) use ($date) {
-//                $q->whereDate('event_date', $date);
-//            })
+            ->whereDate('event_date', $date)
             ->first();
     }
 }

@@ -5,6 +5,43 @@
         <h3 class="font-semibold text-primary">Assign Grades</h3>
     </div>
 
+    <!-- Filters Section -->
+    <section class="p-3 mt-4">
+        <div class="bg-white rounded-xl shadow-md p-4">
+            <form method="GET" action="{{ route('assign_grades') }}"
+                class="flex flex-col md:flex-row md:items-center gap-3">
+                <div class="w-full md:flex-1">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Search event name / contact person / email"
+                        class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <div class="w-full md:w-64">
+                    <select name="club_id"
+                        class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary choice-select">
+                        <option value="">All Clubs</option>
+                        @foreach ($clubs as $club)
+                            <option value="{{ $club->id }}" {{ request('club_id') == $club->id ? 'selected' : '' }}>
+                                {{ $club->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit"
+                        class="px-6 py-2 bg-gradient-to-r from-primary to-pink-600 text-white text-sm rounded-full hover:opacity-90 transition">
+                        <i class="fa fa-search mr-1"></i> Search
+                    </button>
+                    @if (request()->hasAny(['search', 'club_id']))
+                        <a href="{{ route('assign_grades') }}"
+                            class="px-5 py-2 bg-gray-400 text-white text-sm rounded-full hover:bg-gray-500 transition">
+                            Reset
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </section>
+
     <!-- Overview Cards -->
     <section class="p-3 mt-4">
         <!-- Attendance Table -->
@@ -50,6 +87,9 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+         <div class="p-4">
+                {{ $events->links() }}
         </div>
     </section>
 

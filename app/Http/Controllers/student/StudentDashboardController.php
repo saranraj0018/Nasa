@@ -46,13 +46,18 @@ class StudentDashboardController extends Controller
         $this->data['certificate_earned'] = $studentRegistrations
             ->whereNotNull('grade');
         // Upcoming and ongoing department-wise events
-        $this->data['ongoingEvents'] = Event::whereHas('get_dep_events', function ($q) use ($student) {
-            $q->matchesStudent($student)
-                ->where('event_date', Carbon::now()->toDateString());
+        $this->data['ongoingEvents'] = Event::where(function ($q) use ($student) {
+            $q->whereHas('get_dep_events', function ($q2) use ($student) {
+                $q2->matchesStudent($student)
+                    ->where('event_date', '<=', Carbon::now()->toDateString());
+            })->whereHas('get_dep_events', function ($q2) use ($student) {
+                $q2->matchesStudent($student)
+                    ->where('event_date', '>=', Carbon::now()->toDateString());
+            });
         })
             ->with(['get_dep_events' => function ($q) use ($student) {
                 $q->matchesStudent($student)
-                    ->where('event_date', Carbon::now()->toDateString());
+                    ->orderBy('event_date', 'asc');
             }, 'get_dep_events.registrations'])
             ->where([
                 'publish' => 1,

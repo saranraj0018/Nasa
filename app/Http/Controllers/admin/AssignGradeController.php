@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use ZipArchive;
+use App\Models\Club;
 use App\Models\Event;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -23,25 +24,34 @@ class AssignGradeController extends Controller
 {
     use ResolvesEventSchedule;
 
-    public function index()
+    public function index(Request $request)
     {
         $adminId = Auth::guard('admin')->id();
-        if (!empty(session()->get('super_admin'))) {
-            $this->data['events'] = Event::with('get_club')
-                ->where([
+        $query = Event::with('get_club')
+            ->where([
                 'publish' => 1,
                 'is_active' => 'y'
-                ])
-                ->paginate(10);
-        } else {
-            $this->data['events'] = Event::with('get_club')
-                ->where('created_by', $adminId)
-                ->where([
-                'publish' => 1 ,
-                'is_active' => 'y'
-                ])
-                ->paginate(10);
+            ]);
+
+        if (empty(session()->get('super_admin'))) {
+            $query->where('created_by', $adminId);
         }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('contact_person', 'like', "%{$search}%")
+                    ->orWhere('contact_email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('club_id')) {
+            $query->where('club_id', $request->club_id);
+        }
+
+        $this->data['events'] = $query->paginate(10)->appends($request->query());
+        $this->data['clubs'] = Club::orderBy('name')->get();
         return view('admin.assign_grade_index')->with($this->data);
     }
 

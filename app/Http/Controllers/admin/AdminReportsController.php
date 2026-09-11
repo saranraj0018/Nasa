@@ -29,20 +29,33 @@ class AdminReportsController extends Controller
     public function index(Request $request)
     {
         $adminId = Auth::guard('admin')->id();
-        if (!empty(session()->get('super_admin'))) {
-            $this->data['reports'] = EventReport::with('get_event_image', 'get_event.get_task', 'get_programme','get_event')
-                ->whereHas('get_event', function ($query) {
-                    $query->where('publish', 1)
-                        ->where('is_active', 'y');
-                })->paginate(10);
-        } else {
-            $this->data['reports'] = EventReport::with('get_event_image', 'get_event.get_task', 'get_programme','get_event')
-                ->whereHas('get_event', function ($query) {
-                    $query->where('publish', 1)
-                        ->where('is_active', 'y');
-                })
-                ->where('created_by', $adminId)->paginate(10);
+        $query = EventReport::with('get_event_image', 'get_event.get_task', 'get_programme', 'get_event')
+            ->whereHas('get_event', function ($eventQuery) {
+                $eventQuery->where('publish', 1)
+                    ->where('is_active', 'y');
+            });
+
+        if (empty(session()->get('super_admin'))) {
+            $query->where('created_by', $adminId);
         }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('get_event', function ($eventQuery) use ($search) {
+                $eventQuery->where('title', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('programme_id')) {
+            $query->where('programme_id', $request->programme_id);
+        }
+
+        if ($request->filled('event_date')) {
+            $query->whereDate('event_date', $request->event_date);
+        }
+
+        $this->data['reports'] = $query->paginate(10)->appends($request->query());
+        $this->data['programmes'] = Programme::orderBy('name')->get();
         return view('admin.admin_reports_index')->with($this->data);
     }
 

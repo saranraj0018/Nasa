@@ -9,6 +9,49 @@
             class="px-2 w-40 mt-5 bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
             <i class="fa fa-plus" aria-hidden="true"></i>Create Report</a>
     </div>
+
+    <!-- Filters Section -->
+    <section class="mt-5">
+        <div class="bg-white rounded-xl shadow-md p-4">
+            <form method="GET" action="{{ route('reports') }}"
+                class="flex flex-col md:flex-row md:items-center gap-3">
+                <div class="w-full md:flex-1">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Search event name"
+                        class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <div class="w-full md:w-64">
+                    <select name="programme_id"
+                        class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary choice-select">
+                        <option value="">All Programmes</option>
+                        @foreach ($programmes as $programme)
+                            <option value="{{ $programme->id }}"
+                                {{ request('programme_id') == $programme->id ? 'selected' : '' }}>
+                                {{ $programme->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="w-full md:w-56">
+                    <input type="date" name="event_date" value="{{ request('event_date') }}"
+                        class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit"
+                        class="px-6 py-2 bg-gradient-to-r from-primary to-pink-600 text-white text-sm rounded-full hover:opacity-90 transition">
+                        <i class="fa fa-search mr-1"></i> Search
+                    </button>
+                    @if (request()->hasAny(['search', 'programme_id', 'event_date']))
+                        <a href="{{ route('reports') }}"
+                            class="px-5 py-2 bg-gray-400 text-white text-sm rounded-full hover:bg-gray-500 transition">
+                            Reset
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </section>
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-5">
         @foreach ($reports as $report)
             @php
