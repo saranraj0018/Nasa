@@ -192,8 +192,15 @@ $(document).on("submit", "#eventForm", function (e) {
         if (!result) isValid = false;
     }
 
+    // Two rows count as the same schedule when they target the same Programme +
+    // Section + Batch + Semester + Is Reserve Date — Event Date and Seat Count are
+    // deliberately excluded, since those are the fields that legitimately differ
+    // between two entries of an otherwise-duplicate schedule.
+    const seenScheduleKeys = new Set();
+
     $(".dept-card").each(function () {
         const scope = $(this).find(".dept-scope:checked").val() || "all";
+        const isReserveDate = $(this).find(".is_reserve_date:checked").val() || "n";
 
         if (scope === "specific") {
             const programme = $(this).find(".department").val();
@@ -238,6 +245,22 @@ $(document).on("submit", "#eventForm", function (e) {
                 return false;
             }
         }
+
+        const scheduleKey =
+            scope === "specific"
+                ? `specific|${$(this).find(".department").val()}|${$(this).find(".section").val()}|${batch}|${$(this).find(".semester").val()}|${isReserveDate}`
+                : `all|${isReserveDate}`;
+
+        if (seenScheduleKeys.has(scheduleKey)) {
+            showToast(
+                "Duplicate schedule: another row already has the same Programme, Section, Batch, Semester and Reserve-Date setting",
+                "error",
+                3000,
+            );
+            isValid = false;
+            return false;
+        }
+        seenScheduleKeys.add(scheduleKey);
     });
 
     let eventType = $("#event_type").val();

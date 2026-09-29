@@ -236,6 +236,32 @@ class EventsController extends Controller
             }
 
             $request->validate($rules);
+
+            // Reject two schedule rows that target the same Programme + Section +
+            // Batch + Semester + Reserve-Date setting. Event Date and Seat Count are
+            // deliberately excluded from this key since they're expected to differ
+            // between otherwise-identical rows (e.g. a main date vs. reserve date row).
+            $seenScheduleKeys = [];
+            foreach ($request->departments as $schedule) {
+                $isSpecific = ($schedule['scope'] ?? null) === 'specific';
+                $isReserveDate = $schedule['is_reserve_date'] ?? 'n';
+                $key = $isSpecific
+                    ? implode('|', [
+                        'specific',
+                        $schedule['programme_id'] ?? '',
+                        $schedule['section'] ?? '',
+                        $schedule['batch'] ?? '',
+                        $schedule['semester'] ?? '',
+                        $isReserveDate,
+                    ])
+                    : implode('|', ['all', $isReserveDate]);
+
+                if (isset($seenScheduleKeys[$key])) {
+                    throw new Exception('Duplicate department schedule: two rows have the same Programme, Section, Batch, Semester and Reserve-Date setting.');
+                }
+                $seenScheduleKeys[$key] = true;
+            }
+
             $isNewEvent = empty($request['event_id']);
             if (!$isNewEvent) {
                 $event = Event::find($request['event_id']);
