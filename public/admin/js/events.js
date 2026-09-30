@@ -192,10 +192,9 @@ $(document).on("submit", "#eventForm", function (e) {
         if (!result) isValid = false;
     }
 
-    // Two rows count as the same schedule when they target the same Programme +
-    // Section + Batch + Semester + Is Reserve Date — Event Date and Seat Count are
-    // deliberately excluded, since those are the fields that legitimately differ
-    // between two entries of an otherwise-duplicate schedule.
+    // Two rows count as the same schedule only when they target the same
+    // Programme + Section + Batch + Semester + Is Reserve Date on the same Event
+    // Date — rows for the same group on different dates are legitimate.
     const seenScheduleKeys = new Set();
 
     $(".dept-card").each(function () {
@@ -246,14 +245,15 @@ $(document).on("submit", "#eventForm", function (e) {
             }
         }
 
+        const eventDate = ($(this).find(".event_date").val() || "").trim();
         const scheduleKey =
             scope === "specific"
-                ? `specific|${$(this).find(".department").val()}|${$(this).find(".section").val()}|${batch}|${$(this).find(".semester").val()}|${isReserveDate}`
-                : `all|${isReserveDate}`;
+                ? `specific|${$(this).find(".department").val()}|${$(this).find(".section").val()}|${batch}|${$(this).find(".semester").val()}|${isReserveDate}|${eventDate}`
+                : `all|${isReserveDate}|${eventDate}`;
 
         if (seenScheduleKeys.has(scheduleKey)) {
             showToast(
-                "Duplicate schedule: another row already has the same Programme, Section, Batch, Semester and Reserve-Date setting",
+                "Duplicate schedule: another row already has the same Programme, Section, Batch, Semester, Reserve-Date setting and Event Date",
                 "error",
                 3000,
             );
