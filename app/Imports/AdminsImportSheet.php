@@ -39,7 +39,8 @@ class AdminsImportSheet implements ToModel, WithHeadingRow, WithValidation, Skip
         }
 
 
-        $role = Role::where('name', strtolower(trim($row['role'])))->first();
+        $roleName = strtolower(trim($row['role'] ?? ''));
+        $role = Role::where('name', $roleName)->orWhere('slug', $roleName)->first();
         $department = Department::whereRaw('LOWER(name) = ?', [$row['department']])->first();
         $designation = Designation::whereRaw('LOWER(name) = ?', [$row['designation']])->first();
         $data = [
@@ -51,9 +52,8 @@ class AdminsImportSheet implements ToModel, WithHeadingRow, WithValidation, Skip
             return null;
         } else {
             $admin = new Admin();
-            if ($role != 2) {
-                $admin->role_id = $role?->id;
-            }
+            // Fall back to Admin (id 2) when the sheet's role is blank or unknown
+            $admin->role_id = $role?->id ?? 2;
             $admin->department_id = $department?->id;
             $admin->designation_id = $designation?->id;
             $admin->name  = $row['name'];
