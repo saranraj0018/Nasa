@@ -258,7 +258,7 @@
                             $registration?->student?->semester == 8)
                         EVEN
                     @endif
-                </span> semester of the Academic Year <span class="underline underline_aca">2025-2026</span>.
+                </span> semester of the Academic Year <span class="underline underline_aca">2026-2027</span>.
             </div>
         </div>
         <div class="club-logos-first">
