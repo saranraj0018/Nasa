@@ -19,6 +19,11 @@ class StudentAuthController extends Controller
             'password' => 'required'
         ]);
 
+        echo '<pre>';
+print_r($request->all());
+echo '</pre>';
+exit;
+
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',

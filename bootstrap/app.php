@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.guest' => \App\Http\Middleware\AdminGuest::class,
             'student.guest' => \App\Http\Middleware\StudentGuest::class,
             'verify.jwt' => \App\Http\Middleware\VerifyJwt::class,
+            'student.session' => \App\Http\Middleware\EnsureStudentSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

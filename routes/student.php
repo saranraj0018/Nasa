@@ -24,7 +24,7 @@ Route::prefix('student')->group(function () {
         Route::post('/register-save', [StudentController::class, 'registerSave'])->name('register_save');
     });
 
-    Route::middleware('auth:student')->group(function () {
+    Route::middleware(['auth:student', 'student.session'])->group(function () {
         Route::get('/student-dashboard', [StudentDashboardController::class, 'index'])->name('student_dashboard');
         Route::get('/register-events', [RegisterEventController::class, 'index'])->name('register_events');
 
