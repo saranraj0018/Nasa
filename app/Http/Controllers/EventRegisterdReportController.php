@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\EventRegistrationExport;
+use App\Jobs\GenerateRegistrationReport;
 use App\Models\Event;
-use Illuminate\Http\Request;
+use App\Models\ReportExport;
 use App\Models\StudentEventRegistration;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\Reports\EventRegistrationReport;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 class EventRegisterdReportController extends Controller
 {
+    private const EXPORT_TYPES = ['pdf', 'excel', 'csv', 'word'];
+
     public function index(Request $request)
     {
         $adminId = Auth::guard('admin')->id();
@@ -34,12 +37,7 @@ class EventRegisterdReportController extends Controller
                 ->get();
         }
 
-        $this->data['statusLabels'] = [
-            1 => 'Registered',
-            2 => 'Approved',
-            3 => 'Completed',
-            4 => 'Cancelled',
-        ];
+        $this->data['statusLabels'] = EventRegistrationReport::STATUS_LABELS;
 
         $this->data['statusClasses'] = [
             1 => 'bg-yellow-100 text-yellow-700',
@@ -56,7 +54,7 @@ class EventRegisterdReportController extends Controller
                 'get_event_schedule'
             ]);
 
-            $this->data['registrations'] = $this->applyRegistrationReportFilters($query, $request)
+            $this->data['registrations'] = EventRegistrationReport::applyFilters($query, $request->all())
                 ->latest()
                 ->paginate(10)
                 ->appends($request->all());
@@ -70,144 +68,103 @@ class EventRegisterdReportController extends Controller
             );
         }
 
+        $this->data['recentExports'] = $this->recentExports($adminId);
+
         return view('admin.registered_event_report_index')->with($this->data);
     }
 
+    /**
+     * Queue the report instead of building it during the request, so large
+     * reports no longer hit the gateway timeout (504). The page shows its
+     * progress and a download link once the job has finished.
+     */
     public function export(Request $request)
     {
-        $this->data['statusLabels'] = [
-            1 => 'Registered',
-            2 => 'Approved',
-            3 => 'Completed',
-            4 => 'Cancelled',
-        ];
+        $filters = EventRegistrationReport::cleanFilters($request->all());
+        $back = route('registered_report_index', $request->except('type'));
 
-        $query = StudentEventRegistration::with([
-            'event',
-            'student',
-            'student.get_department',
-            'get_event_schedule'
-        ])
-            ->whereHas('event', function ($query) {
-                $query->where('publish', 1)
-                    ->where('is_active', 'y');
-            });
+        // At least one filter is required before downloading. Enforced here as
+        // well as in the page's JS, so a direct URL can't export everything.
+        if (empty($filters)) {
+            return redirect($back)
+                ->with('export_error', 'Please apply at least one filter before downloading the report.');
+        }
 
-        $this->data['registrations'] = $this->applyRegistrationReportFilters($query, $request)
-            ->latest()
-            ->get();
+        if (!in_array($request->type, self::EXPORT_TYPES, true)) {
+            return redirect($back)->with('export_error', 'Unknown export format.');
+        }
 
-        $filters = $request->only([
-            'event_id',
-            'status',
-            'from_date',
-            'to_date',
-            'search',
-            'batch',
-            'semester'
+        $adminId = Auth::guard('admin')->id();
+
+        // Don't queue the same report twice while one is still being built.
+        $alreadyQueued = ReportExport::where('admin_id', $adminId)
+            ->where('report', 'event_registrations')
+            ->where('type', $request->type)
+            ->whereIn('status', [ReportExport::STATUS_PENDING, ReportExport::STATUS_PROCESSING])
+            ->get()
+            ->contains(fn($export) => $export->filters == $filters);
+
+        if ($alreadyQueued) {
+            return redirect($back)
+                ->with('export_success', 'This report is already being prepared. It will appear under "Recent Downloads" when ready.');
+        }
+
+        $export = ReportExport::create([
+            'admin_id' => $adminId,
+            'report'   => 'event_registrations',
+            'type'     => $request->type,
+            'filters'  => $filters,
+            'status'   => ReportExport::STATUS_PENDING,
         ]);
 
-        if ($request->type === 'word') {
-            return response()
-                ->view('admin.event_registrations.export_word', $this->data)
-                ->header('Content-Type', 'application/msword')
-                ->header('Content-Disposition', 'attachment; filename="event-registrations.doc"');
-        }
+        GenerateRegistrationReport::dispatch($export);
 
-        if ($request->type === 'excel') {
-            return Excel::download(
-                new EventRegistrationExport([
-                    'registrations' => collect($this->data['registrations'] ?? []),
-                    'statusLabels'  => $this->data['statusLabels'] ?? [],
-                ]),
-                'event-registrations.xlsx'
-            );
-        }
-
-        if ($request->type === 'csv') {
-            return Excel::download(
-                new EventRegistrationExport([
-                    'registrations' => collect($this->data['registrations'] ?? []),
-                    'statusLabels'  => $this->data['statusLabels'] ?? [],
-                ]),
-                'event-registrations.csv'
-            );
-        }
-
-        if ($request->type === 'pdf') {
-            $pdf = Pdf::loadView(
-                'admin.event_registrations.export_pdf',
-                $this->data
-            );
-
-            return $pdf->download('event-registrations.pdf');
-        }
+        return redirect($back)
+            ->with('export_success', 'Your ' . strtoupper($request->type) . ' report is being prepared. '
+                . 'It will appear under "Recent Downloads" when ready.');
     }
 
-    private function applyRegistrationReportFilters($query, Request $request)
+    /** Status of this admin's recent exports, polled by the report page. */
+    public function exportStatus()
     {
-        $query->when($request->event_id, fn($q) => $q->where('event_id', $request->event_id))
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
-            ->when($request->from_date, function ($q) use ($request) {
-                $q->whereHas('get_event_schedule', function ($schedule) use ($request) {
-                    $schedule->whereDate('event_date', 'like', '%' . $request->from_date . '%');
-                });
-            })
-            ->when($request->to_date, function ($q) use ($request) {
-                $q->whereHas('get_event_schedule', function ($schedule) use ($request) {
-                    $schedule->whereDate('event_date', 'like', '%' . $request->to_date . '%');
-                });
-            })
-            ->when($request->search, function ($q) use ($request) {
-                $q->whereHas('student', function ($student) use ($request) {
-                    $student->where('name', 'like', '%' . $request->search . '%')
-                        ->orWhere('email', 'like', '%' . $request->search . '%');
-                });
-            });
+        return response()->json([
+            'exports' => $this->recentExports(Auth::guard('admin')->id()),
+        ]);
+    }
 
-        $query->when($request->filled('semester') || $request->filled('batch'), function ($q) use ($request) {
-            $semester = $request->semester;
-            $batch = $request->batch;
-            $isFirstYearFilter = in_array((int) $semester, [1, 2]);
+    public function downloadExport(ReportExport $export)
+    {
+        abort_unless((int) $export->admin_id === (int) Auth::guard('admin')->id(), 403);
+        abort_unless($export->status === ReportExport::STATUS_COMPLETED, 404);
+        abort_unless($export->file_path && Storage::disk('local')->exists($export->file_path), 404, 'This file has expired. Please export it again.');
 
-            $q->whereHas('student', function ($studentQ) use ($semester, $batch) {
-                if (!empty($semester)) {
-                    $studentQ->where('semester', $semester);
-                }
+        return Storage::disk('local')->download($export->file_path, $export->file_name);
+    }
 
-                if (!empty($batch)) {
-                    $studentQ->where('batch', $batch);
-                }
-            });
+    private function recentExports(?int $adminId): array
+    {
+        if (!$adminId) {
+            return [];
+        }
 
-            $q->whereHas('get_event_schedule', function ($scheduleQ) use ($semester, $batch, $isFirstYearFilter) {
-                $scheduleQ->where(function ($mainQ) use ($semester, $batch, $isFirstYearFilter) {
-                    $mainQ->where(function ($normalQ) use ($semester, $batch) {
-                        if (!empty($semester)) {
-                            $normalQ->where('semester', $semester);
-                        }
-                        if (!empty($batch)) {
-                            $normalQ->where('batch', $batch);
-                        }
-                    });
-
-                    if ($isFirstYearFilter) {
-                        $mainQ->orWhere(function ($commonQ) use ($batch) {
-                            $commonQ->whereNull('programme_id')
-                                ->whereNull('section')
-                                ->whereNull('semester')
-                                ->where(function ($batchQ) use ($batch) {
-                                    $batchQ->whereNull('batch');
-                                    if (!empty($batch)) {
-                                        $batchQ->orWhere('batch', $batch);
-                                    }
-                                });
-                        });
-                    }
-                });
-            });
-        });
-
-        return $query;
+        return ReportExport::where('admin_id', $adminId)
+            ->where('report', 'event_registrations')
+            ->where('created_at', '>=', now()->subDay())
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(fn(ReportExport $export) => [
+                'id'           => $export->id,
+                'type'         => strtoupper($export->type),
+                'status'       => $export->status,
+                'total_rows'   => $export->total_rows,
+                'file_name'    => $export->file_name,
+                'error'        => $export->error,
+                'requested_at' => $export->created_at->format('d-m-Y h:i A'),
+                'download_url' => $export->status === ReportExport::STATUS_COMPLETED
+                    ? route('admin.event-registrations.exports.download', $export)
+                    : null,
+            ])
+            ->all();
     }
 }

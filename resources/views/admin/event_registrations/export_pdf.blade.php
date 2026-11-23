@@ -68,7 +68,7 @@
 
 <img src="{{ public_path('images/rtc_logo.png') }}" class="logo">
 
-<h2>Event Registration Report</h2>
+<h2>Event Registration Report @if (!empty($partLabel)) <span style="font-size: 10px; font-weight: normal;">({{ $partLabel }})</span> @endif</h2>
 
 <table>
     <thead>
@@ -86,7 +86,7 @@
     <tbody>
         @foreach ($registrations as $i => $row)
             <tr>
-                <td class="text-center">{{ $i + 1 }}</td>
+                <td class="text-center">{{ ($offset ?? 0) + $i + 1 }}</td>
                 <td>{{ $row->student->name ?? '' }}</td>
                 <td class="text-center">{{ $row->student->batch ?? '-' }}</td>
                 <td class="text-center">{{ $row->student->semester ?? '-' }}</td>
