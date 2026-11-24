@@ -98,3 +98,23 @@
     padding: 0 20px;
     white-space: nowrap;
 }
+
+/* ---------- Credit Reports page ---------- */
+.cr-filter-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.cr-filter-actions > * {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 42px; padding: 0 24px; font-size: 14px; white-space: nowrap;
+}
+.cr-head {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;
+    gap: 16px; margin-bottom: 16px;
+}
+.cr-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.cr-actions > a {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 40px; padding: 0 16px; white-space: nowrap;
+}
+.cr-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px; margin-bottom: 20px; text-align: center;
+}

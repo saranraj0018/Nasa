@@ -81,7 +81,6 @@
                 </x-slot:trigger>
                 <x-slot:menus>
                     <x-menu.item name="Home" icon="fa-home" route="home" />
-                    <x-menu.item name="Credit Summary" icon="fa-chart-bar" route="credit_summary" />
                 </x-slot:menus>
             </x-menu.list>
             <x-menu.list>
@@ -108,6 +107,7 @@
                     <x-menu.item name="Student Attendance" icon="fa-graduation-cap" route="student_attendance" />
                     <x-menu.item name="Assign Grades" icon="fa-star" route="assign_grades" />
                     <x-menu.item name="Reports" icon="fa-book" route="reports" />
+                    <x-menu.item name="Credit Reports" icon="fa-trophy" route="credit_summary" />
                 </x-slot:menus>
             </x-menu.list>
         @endif
@@ -117,7 +117,6 @@
                 </x-slot:trigger>
                 <x-slot:menus>
                     <x-menu.item name="Home" icon="fa-home" route="super_admin_home" />
-                    <x-menu.item name="Credit Summary" icon="fa-chart-bar" route="credit_summary" />
                 </x-slot:menus>
             </x-menu.list>
             <x-menu.list>
@@ -148,7 +147,7 @@
                     <x-menu.item name="Assign Grades" icon="fa-star" route="assign_grades" />
                     <x-menu.item name="Reports" icon="fa-book" route="reports" />
                     <x-menu.item name="Review Reports" icon="fa-check-circle" route="review_reports" />
-                    <x-menu.item name="Student Credits" icon="fa-trophy" route="student_credits" />
+                    <x-menu.item name="Credit Reports" icon="fa-trophy" route="credit_summary" />
                 </x-slot:menus>
             </x-menu.list>
         @endif

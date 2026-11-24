@@ -130,7 +130,7 @@ class CreditSummaryReportController extends Controller
     private function fileName(array $report, string $extension): string
     {
         $parts = [
-            'credit_summary',
+            'credit_report',
             Str::slug($report['progm']->name ?? 'programme', '_'),
             'sem_' . $report['semester'],
         ];

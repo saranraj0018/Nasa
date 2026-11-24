@@ -5,7 +5,7 @@
     {{-- Header --}}
     <div
         class="bg-[#F5E8F5] w-full rounded-full shadow-sm px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <h3 class="font-semibold text-primary text-lg sm:text-xl">Credit Summary Report</h3>
+        <h3 class="font-semibold text-primary text-lg sm:text-xl">Credit Reports</h3>
     </div>
 
     @if (session('success'))
@@ -71,12 +71,12 @@
                 </div>
             </div>
         </div>
-        <div class="text-center mt-4">
-            <button type="submit" class="bg-primary text-white px-6 py-2 rounded-full shadow">
+        <div class="cr-filter-actions">
+            <button type="submit" class="bg-gradient-to-r from-primary to-pink-600 text-white rounded-full shadow">
                 <i class="fa fa-search mr-1"></i> Search
             </button>
             <a href="{{ route('credit_summary') }}"
-                class="px-6 py-2 text-sm border rounded-md bg-gray-600 text-white hover:bg-gray-600 transition">
+                class="bg-gray-400 text-white rounded-full hover:bg-gray-500 transition">
                 Reset
             </a>
         </div>
@@ -91,7 +91,7 @@
             ]);
         @endphp
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8 p-5">
-            <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
+            <div class="cr-head">
                 <div class="text-sm space-y-1">
                     <div><b>Programme:</b> {{ $progm->name ?? '' }}</div>
                     <div><b>Semester:</b> {{ $semester }} &nbsp; | &nbsp; <b>Section:</b> {{ $section ? strtoupper($section) : 'All' }}</div>
@@ -103,7 +103,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="flex gap-2">
+                <div class="cr-actions">
                     <a href="{{ route('credit_summary_excel', $exportParams) }}"
                         class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                         <i class="fas fa-file-excel"></i> Export Excel
@@ -115,7 +115,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-3 mb-5 text-center">
+            <div class="cr-stats">
                 <div class="rounded-lg bg-blue-50 border border-blue-200 p-3">
                     <div class="text-xs text-blue-700 uppercase">Total Students</div>
                     <div class="text-xl font-semibold text-blue-800">{{ $summary['students'] }}</div>

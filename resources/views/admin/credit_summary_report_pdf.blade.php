@@ -31,7 +31,7 @@
 <body>
     <img src="{{ public_path('images/rtc_logo.png') }}" class="logo">
 
-    <h2>Credit Summary Report</h2>
+    <h2>Credit Report</h2>
 
     <table class="meta">
         <tr>

@@ -24,7 +24,6 @@ use App\Http\Controllers\super_admin\AssignTasksController;
 use App\Http\Controllers\super_admin\ReviewReportsController;
 use App\Http\Controllers\super_admin\SuperAdminHomeController;
 use App\Http\Controllers\student\StudentImportExportController;
-use App\Http\Controllers\StudentCreditController;
 use App\Http\Controllers\CreditSummaryReportController;
 use App\Http\Controllers\super_admin\StudentApprovalController;
 
@@ -153,11 +152,13 @@ Route::prefix('admin')->group(function () {
         Route::get('/credit-point-assign', [CreditPointAssignController::class, 'index'])->name('credit_point_assign');
         Route::post('/save-credit-point', [CreditPointAssignController::class, 'saveCreditPoint'])->name('save_credit_point');
         Route::post('/publish-event', [EventsController::class, 'publishEvent'])->name('publish_event');
-        Route::get('/student-credits', [StudentCreditController::class, 'index'])->name('student_credits');
-        Route::get('export-student-credits', [StudentCreditController::class, 'exportCredits'])
+        // old "Student Credits" URLs -> Credit Reports (same report, merged into one menu)
+        Route::get('/student-credits', fn (\Illuminate\Http\Request $request) => redirect()->route('credit_summary', $request->query()))
+            ->name('student_credits');
+        Route::get('export-student-credits', fn (\Illuminate\Http\Request $request) => redirect()->route('credit_summary_excel', $request->query()))
             ->name('export_student_credits');
 
-        //credit summary report (semester + programme wise earned / remaining credits)
+        //credit reports (semester + programme wise earned / remaining credits)
         Route::get('/credit-summary', [CreditSummaryReportController::class, 'index'])->name('credit_summary');
         Route::get('/credit-summary/export-excel', [CreditSummaryReportController::class, 'exportExcel'])->name('credit_summary_excel');
         Route::get('/credit-summary/export-pdf', [CreditSummaryReportController::class, 'exportPdf'])->name('credit_summary_pdf');
