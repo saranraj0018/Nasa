@@ -68,7 +68,7 @@
         </script>
     @endif
 
-    <div class="flex justify-end items-center gap-3 mt-3">
+    <div class="flex flex-wrap justify-end items-center gap-3 mt-3">
         <a href="{{ route('create_student') }}"
             class="flex items-center justify-center gap-1 w-[140px]
               bg-gradient-to-r from-primary to-pink-600
@@ -76,11 +76,11 @@
             <i class="fa fa-plus"></i>
             Add Student
         </a>
-        <a href="{{ route('students.download.template') }}" class="px-4 py-1 bg-primary text-white rounded-full">
+        <a href="{{ route('students.download.template') }}" class="px-4 py-1 bg-primary text-white rounded-full" style="white-space: nowrap;">
             <i class="fa fa-download"></i> Download Template
         </a>
         <form action="{{ route('students.upload') }}" method="POST" enctype="multipart/form-data"
-            class="flex items-center gap-2">
+            class="flex flex-wrap items-center gap-2">
             @csrf
             <input type="file" name="file" required class="border border-gray-300 rounded px-2 py-1 text-sm">
             <button type="submit" class="px-4 py-1 bg-gradient-to-r from-primary to-pink-600 text-white rounded-full">
@@ -93,10 +93,10 @@
     <section class="p-4 bg-white rounded-xl shadow-md mt-3">
         <div class="mt-4">
             <form method="GET" action="{{ route('student_list') }}"
-                class="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3">
+                class="list-filter-form">
 
                 {{-- Search Input --}}
-                <div class="w-full md:flex-1">
+                <div class="lf-search">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Search name / email / mobile"
                         class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm
@@ -155,7 +155,7 @@
                 </div>
 
                 {{-- Buttons --}}
-                <div class="flex gap-2">
+                <div class="lf-actions">
                     <button type="submit"
                         class="px-6 py-2 bg-gradient-to-r from-primary to-pink-600
                                text-white text-sm rounded-full hover:opacity-90 transition">

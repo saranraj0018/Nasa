@@ -8,7 +8,7 @@
                 <i class="fa fa-plus" aria-hidden="true"></i>ADD Club</a>
     </div>
     <x-list-filter :action="route('club_list')" :keys="['search', 'faculty_id']">
-        <div class="w-full md:flex-1 md:min-w-[250px]">
+        <div class="lf-search">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search club name / description"
                 class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
         </div>

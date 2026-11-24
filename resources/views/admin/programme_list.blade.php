@@ -8,7 +8,7 @@
                 <i class="fa fa-plus" aria-hidden="true"></i>ADD Programme</a>
     </div>
     <x-list-filter :action="route('programme_list')" :keys="['search', 'department_id', 'graduate_type']">
-        <div class="w-full md:flex-1 md:min-w-[250px]">
+        <div class="lf-search">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search programme name / code"
                 class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
         </div>

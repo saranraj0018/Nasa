@@ -9,8 +9,8 @@
     </div>
     <section class="bg-white rounded-xl shadow-md p-4 mt-3">
         <div class="w-full">
-            <form method="GET" action="{{ route('faculty_list') }}" class="flex flex-wrap items-center gap-3">
-                <div class="w-full sm:w-auto flex-1 min-w-[250px]">
+            <form method="GET" action="{{ route('faculty_list') }}" class="list-filter-form">
+                <div class="lf-search">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Search name/email/mobile/employee code here"
                         class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
@@ -42,16 +42,18 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit"
-                    class="px-6 py-2 bg-gradient-to-r from-primary to-pink-600 text-white text-sm rounded-full hover:opacity-90 transition">
-                    <i class="fa fa-search mr-1"></i> Search
-                </button>
-                @if (request()->hasAny(['search', 'department_id', 'designation_id']))
-                    <a href="{{ route('faculty_list') }}"
-                        class="px-6 py-2 bg-gray-400 text-white text-sm rounded-full hover:bg-gray-500 transition">
-                        Reset
-                    </a>
-                @endif
+                <div class="lf-actions">
+                    <button type="submit"
+                        class="px-6 py-2 bg-gradient-to-r from-primary to-pink-600 text-white text-sm rounded-full hover:opacity-90 transition">
+                        <i class="fa fa-search mr-1"></i> Search
+                    </button>
+                    @if (request()->anyFilled(['search', 'department_id', 'designation_id']))
+                        <a href="{{ route('faculty_list') }}"
+                            class="px-6 py-2 bg-gray-400 text-white text-sm rounded-full hover:bg-gray-500 transition">
+                            Reset
+                        </a>
+                    @endif
+                </div>
             </form>
         </div>
     </section>

@@ -13,7 +13,7 @@
                 <x-partials.sidebar />
             </aside>
 
-            <div class="flex flex-col flex-1 ml-64">
+            <div class="flex flex-col flex-1 ml-64" style="min-width: 0;">
                 <div class="flex justify-start items-start">
                     <div class="flex flex-col w-full">
                         <div class="content-wrapper p-6">

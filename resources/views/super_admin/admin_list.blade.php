@@ -85,10 +85,10 @@
     <h4 class="font-semibold text-gray-800 mb-4">Admin Filter</h4>
     <section class="bg-white rounded-xl shadow-md p-4 mt-3">
         <div class="w-full">
-            <form method="GET" action="{{ route('admin_list') }}" class="flex flex-wrap items-center gap-3">
+            <form method="GET" action="{{ route('admin_list') }}" class="list-filter-form">
 
                 {{-- Search Input --}}
-                <div class="w-full sm:w-auto flex-1 min-w-[250px]">
+                <div class="lf-search">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Search name / email / mobile"
                         class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
@@ -122,19 +122,21 @@
                     </select>
                 </div>
 
-                {{-- Search Button --}}
-                <button type="submit"
-                    class="px-6 py-2 bg-gradient-to-r from-primary to-pink-600 text-white text-sm rounded-full hover:opacity-90 transition">
-                    <i class="fa fa-search mr-1"></i> Search
-                </button>
+                <div class="lf-actions">
+                    {{-- Search Button --}}
+                    <button type="submit"
+                        class="px-6 py-2 bg-gradient-to-r from-primary to-pink-600 text-white text-sm rounded-full hover:opacity-90 transition">
+                        <i class="fa fa-search mr-1"></i> Search
+                    </button>
 
-                {{-- Reset Button --}}
-                @if (request()->hasAny(['search', 'department_id', 'designation_id']))
-                    <a href="{{ route('admin_list') }}"
-                        class="px-6 py-2 bg-gray-400 text-white text-sm rounded-full hover:bg-gray-500 transition">
-                        Reset
-                    </a>
-                @endif
+                    {{-- Reset Button --}}
+                    @if (request()->anyFilled(['search', 'department_id', 'designation_id']))
+                        <a href="{{ route('admin_list') }}"
+                            class="px-6 py-2 bg-gray-400 text-white text-sm rounded-full hover:bg-gray-500 transition">
+                            Reset
+                        </a>
+                    @endif
+                </div>
 
             </form>
         </div>

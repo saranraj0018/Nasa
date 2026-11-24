@@ -8,7 +8,7 @@
             <i class="fa fa-plus" aria-hidden="true"></i>ADD Department</a>
     </div>
     <x-list-filter :action="route('department_list')" :keys="['search']">
-        <div class="w-full md:flex-1 md:min-w-[250px]">
+        <div class="lf-search">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search department name / code"
                 class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
         </div>

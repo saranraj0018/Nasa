@@ -7,9 +7,9 @@
     @if ($title)
         <h4 class="font-semibold text-gray-800 mb-3">{{ $title }}</h4>
     @endif
-    <form method="GET" action="{{ $action }}" class="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3">
+    <form method="GET" action="{{ $action }}" class="list-filter-form">
         {{ $slot }}
-        <div class="flex gap-2">
+        <div class="lf-actions">
             <button type="submit"
                 class="px-6 py-2 bg-gradient-to-r from-primary to-pink-600 text-white text-sm rounded-full hover:opacity-90 transition">
                 <i class="fa fa-search mr-1"></i> Search
