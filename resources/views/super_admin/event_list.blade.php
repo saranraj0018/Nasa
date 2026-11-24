@@ -267,4 +267,5 @@
 
 </x-layouts.app>
 
+@include('partials.js_routes.events')
 <script src="{{ asset('admin/js/events.js') }}?v={{ time() }}"></script>

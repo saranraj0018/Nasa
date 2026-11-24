@@ -103,9 +103,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Batch</label>
-                    <input type="text" name="batch" id="batch" value="{{ request('batch') }}"
-                        placeholder="e.g, 2025-2029"
-                        class="w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 batch">
+                    <x-batch-select :selected="request('batch')" placeholder="All Batches"
+                        class="w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 batch choice-select" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium"> Semester</label>

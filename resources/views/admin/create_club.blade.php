@@ -65,4 +65,5 @@
 
     </form>
 </x-layouts.app>
+@include('partials.js_routes.club')
 <script src="{{ asset('admin/js/club.js') }}?v={{ time() }}"></script>

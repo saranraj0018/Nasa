@@ -40,14 +40,14 @@ $(document).on("submit", "#taskForm", function (e) {
     let formData = new FormData(this);
 
     sendRequest(
-        "/admin/save-task",
+        appRoutes.save_task,
         formData,
         "POST",
         function (res) {
             if (res.success) {
                 showToast(res.message, "success", 2000);
                 setTimeout(function () {
-                    window.location.href = "/admin/assign-tasks"; // Replace with your actual event list route
+                    window.location.href = appRoutes.assign_tasks; // Replace with your actual event list route
                 }, 2000);
             } else {
                 showToast(res.message, "error", 2000);
@@ -223,7 +223,7 @@ $(document).on("click", ".remove-img", function (e) {
    $(document).on("click", ".accept", function () {
        let id = $(this).data("id");
         $.ajax({
-           url: "/admin/assign-tasks",
+           url: appRoutes.assign_tasks,
            type: "POST",
            data: {
                id: id,

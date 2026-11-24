@@ -10,7 +10,7 @@ $(document).on("change", "#event_id", function () {
         return;
     }
     $.ajax({
-        url: "/admin/create_report",
+        url: appRoutes.create_report,
         type: "GET",
         dataType: "json",
         data: {
@@ -99,14 +99,14 @@ $(document).on("submit", "#eventReportForm", function (e) {
     let formData = new FormData(this);
 
     sendRequest(
-        "/admin/save_report",
+        appRoutes.save_report,
         formData,
         "POST",
         function (res) {
             if (res.success) {
                 showToast(res.message, "success", 2000);
                 setTimeout(function () {
-                    window.location.href = "/admin/reports"; // Replace with your actual event list route
+                    window.location.href = appRoutes.reports; // Replace with your actual event list route
                 }, 2000);
             } else {
                 showToast(res.message, "error", 2000);

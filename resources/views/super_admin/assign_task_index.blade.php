@@ -136,4 +136,5 @@
     </section>
 </x-layouts.app>
 
+@include('partials.js_routes.tasks')
 <script src="{{ asset('admin/js/tasks.js') }}?v={{ time() }}"></script>

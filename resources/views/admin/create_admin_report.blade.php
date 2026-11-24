@@ -54,8 +54,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Batch<span class="text-red-500">*</span></label>
-                    <input type="text" name="batch" id="batch" placeholder="e.g, 2025-2029"
-                        class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40">
+                    <x-batch-select
+                        class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 choice-select" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium"> Semester <span class="text-red-500">*</span></label>
@@ -132,5 +132,6 @@
         </div>
     </form>
 </x-layouts.app>
+@include('partials.js_routes.report')
 <script src="{{ asset('admin/js/report.js') }}?v={{ time() }}"></script>
 

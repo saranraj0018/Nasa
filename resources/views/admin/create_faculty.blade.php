@@ -156,5 +156,6 @@
 
     </form>
 </x-layouts.app>
+@include('partials.js_routes.faculty')
 <script src="{{ asset('admin/js/faculty.js') }}?v={{ time() }}"></script>
 <script src="{{ asset('admin/js/common.js') }}?v={{ time() }}"></script>

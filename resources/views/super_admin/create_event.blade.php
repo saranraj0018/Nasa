@@ -258,9 +258,8 @@
                         </div>
                         <div class="dept-specific-field">
                             <label class="block text-sm font-medium">Batch<span class="text-red-500">*</span></label>
-                            <input type="text" name="departments[{{ $index }}][batch]" id="batch"
-                                value="{{ $dept->batch ?? '' }}" placeholder="e.g, 2025-2029"
-                                class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 batch">
+                            <x-batch-select name="departments[{{ $index }}][batch]" :id="null" :selected="$dept->batch ?? null"
+                                class="bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40 batch choice-select" />
                         </div>
                         <div class="dept-specific-field">
                             <label class="block text-sm font-medium"> Semester <span
@@ -428,9 +427,11 @@
         $programmes->map(function ($d) {
             return ['id' => $d->id, 'name' => $d->name];
         }));
+    const batchOptions = @json(\App\Models\Batch::options());
     flatpickr(".date_field", {
         dateFormat: "d/m/Y",
     });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@include('partials.js_routes.events')
 <script src="{{ asset('admin/js/events.js') }}?v={{ time() }}"></script>

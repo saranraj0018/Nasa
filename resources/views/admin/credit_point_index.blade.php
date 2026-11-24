@@ -94,4 +94,5 @@
         </div>
     </div>
 </x-layouts.app>
+@include('partials.js_routes.credit_point')
 <script src="{{ asset('admin/js/credit_point.js') }}?v={{ time() }}"></script>

@@ -26,14 +26,14 @@ $(document).on("submit", "#clubForm", function (e) {
            .text("Saving...");
     let formData = new FormData(this);
     sendRequest(
-        "/admin/save-club",
+        appRoutes.save_club,
         formData,
         "POST",
         function (res) {
             if (res.success) {
                 showToast(res.message, "success", 2000);
                 setTimeout(function () {
-                    window.location.href = "/admin/club-list"; // Replace with your actual event list route
+                    window.location.href = appRoutes.club_list; // Replace with your actual event list route
                 }, 2000);
             } else {
                 showToast("Something went wrong!", "error", 2000);

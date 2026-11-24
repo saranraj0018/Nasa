@@ -81,6 +81,7 @@
                 </x-slot:trigger>
                 <x-slot:menus>
                     <x-menu.item name="Home" icon="fa-home" route="home" />
+                    <x-menu.item name="Credit Summary" icon="fa-chart-bar" route="credit_summary" />
                 </x-slot:menus>
             </x-menu.list>
             <x-menu.list>
@@ -90,6 +91,7 @@
                 <x-slot:menus>
                     <x-menu.item name="Department" icon="fas fa-building" route="department_list" />
                     <x-menu.item name="Programme" icon="fas fa-book" route="programme_list" />
+                    <x-menu.item name="Batch" icon="fas fa-layer-group" route="batch_list" />
                     <x-menu.item name="Faculty" icon="fas fa-chalkboard-teacher" route="faculty_list" />
                     <x-menu.item name="Student" icon="fas fa-user-graduate" route="student_list" />
                     <x-menu.item name="Club" icon="fas fa-users" route="club_list" />
@@ -115,6 +117,7 @@
                 </x-slot:trigger>
                 <x-slot:menus>
                     <x-menu.item name="Home" icon="fa-home" route="super_admin_home" />
+                    <x-menu.item name="Credit Summary" icon="fa-chart-bar" route="credit_summary" />
                 </x-slot:menus>
             </x-menu.list>
             <x-menu.list>
@@ -124,6 +127,7 @@
                 <x-slot:menus>
                     <x-menu.item name="Department" icon="fas fa-building" route="department_list" />
                     <x-menu.item name="Programme" icon="fas fa-book" route="programme_list" />
+                    <x-menu.item name="Batch" icon="fas fa-layer-group" route="batch_list" />
                     <x-menu.item name="Faculty" icon="fas fa-chalkboard-teacher" route="faculty_list" />
                     <x-menu.item name="Student" icon="fas fa-user-graduate" route="student_list" />
                     <x-menu.item name="Club" icon="fas fa-users" route="club_list" />

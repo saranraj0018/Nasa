@@ -169,7 +169,7 @@ $(function () {
             isTechnical ? technicalQuestions : nonTechnicalQuestions,
         );
         fetch(
-            `/student/uploaded-proof?event_id=${eventId}&student_id=${studentId}&schedule_id=${scheduleId}`,
+            `${appRoutes.uploaded_proof}?event_id=${eventId}&student_id=${studentId}&schedule_id=${scheduleId}`,
         )
             .then((res) => res.json())
             .then((data) => {
@@ -269,7 +269,7 @@ $(function () {
             formData.append($(this).attr("name"), $(this).val());
         });
 
-        fetch("/student/upload-proof", {
+        fetch(appRoutes.upload_proof, {
             method: "POST",
             body: formData,
         })

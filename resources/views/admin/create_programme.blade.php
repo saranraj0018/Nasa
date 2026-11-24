@@ -63,4 +63,5 @@
         </div>
     </form>
 </x-layouts.app>
+@include('partials.js_routes.department')
 <script src="{{ asset('admin/js/department.js') }}?v={{ time() }}"></script>

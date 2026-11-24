@@ -94,4 +94,5 @@
 
 </x-layouts.app>
 
+@include('partials.js_routes.student_attendance')
 <script src="{{ asset('admin/js/student_attendance.js') }}?v={{ time() }}"></script>

@@ -4,7 +4,7 @@ $(function () {
         var event_id = $(this).data("event_id");
         var schedule_id = $(this).data("schedule_id");
         $.ajax({
-            url: "get-student",
+            url: appRoutes.get_student,
             type: "GET",
             data: {
                 event_id: event_id,
@@ -38,7 +38,7 @@ $(function () {
         disabledInputs.forEach((input) => (input.disabled = false));
         let formData = new FormData(this);
         $.ajax({
-            url: "/student/student-register-event",
+            url: appRoutes.student_register_event,
             type: "POST",
             data: formData,
             contentType: false,
@@ -117,7 +117,7 @@ function payWithCashfree(eventId, scheduleId) {
     console.log(eventId);
     console.log(scheduleId);
     $.ajax({
-        url: "/student/cashfree-order",
+        url: appRoutes.cashfree_order,
         method: "POST",
         data: {
             event_id: eventId,

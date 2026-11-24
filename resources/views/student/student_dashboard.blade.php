@@ -592,4 +592,5 @@
     window.username = "{{ Auth::user()->name ?? 'Student' }}";
     window.email = "{{ Auth::user()->email ?? '' }}";
 </script>
+@include('partials.js_routes.registration_form')
 <script src="{{ asset('admin/js/registration_form.js') }}?v={{ time() }}"></script>

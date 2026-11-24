@@ -135,5 +135,6 @@
         </div>
     </form>
 </x-layouts.app>
+@include('partials.js_routes.admin')
 <script src="{{ asset('admin/js/admin.js') }}?v={{ time() }}"></script>
 

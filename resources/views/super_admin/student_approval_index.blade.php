@@ -113,4 +113,5 @@
     </section>
 </x-layouts.app>
 
+@include('partials.js_routes.student_approval')
 <script src="{{ asset('admin/js/student_approval.js') }}?v={{ time() }}"></script>

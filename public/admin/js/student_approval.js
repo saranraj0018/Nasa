@@ -2,7 +2,7 @@ $(document).on("click", ".btnAction", function () {
     let id = $(this).data("id");
     let action = $(this).data("action");
     $.ajax({
-        url: "/admin/student-event-approval",
+        url: appRoutes.student_event_approval,
         type: "POST",
         data: {
             id: id,

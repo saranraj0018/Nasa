@@ -282,4 +282,5 @@
         </div>
     </div>
 </x-layouts.app>
+@include('partials.js_routes.myregistration')
 <script src="{{ asset('admin/js/myregistration.js') }}?v={{ time() }}"></script>

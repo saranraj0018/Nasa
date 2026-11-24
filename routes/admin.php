@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClubsController;
+use App\Http\Controllers\BatchController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ProgrammeController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\super_admin\ReviewReportsController;
 use App\Http\Controllers\super_admin\SuperAdminHomeController;
 use App\Http\Controllers\student\StudentImportExportController;
 use App\Http\Controllers\StudentCreditController;
+use App\Http\Controllers\CreditSummaryReportController;
 use App\Http\Controllers\super_admin\StudentApprovalController;
 
 Route::prefix('admin')->group(function () {
@@ -76,6 +78,11 @@ Route::prefix('admin')->group(function () {
         Route::get('/club-list', [ClubsController::class, 'index'])->name('club_list');
         Route::get('/create-club', [ClubsController::class, 'createClub'])->name('create_club');
         Route::post('/save-club', [ClubsController::class, 'saveClub'])->name('save_club');
+
+        //batch
+        Route::get('/batch-list', [BatchController::class, 'index'])->name('batch_list');
+        Route::get('/create-batch', [BatchController::class, 'createBatch'])->name('create_batch');
+        Route::post('/save-batch', [BatchController::class, 'saveBatch'])->name('save_batch');
 
         //department
         Route::get('/department-list', [DepartmentController::class, 'index'])->name('department_list');
@@ -149,5 +156,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/student-credits', [StudentCreditController::class, 'index'])->name('student_credits');
         Route::get('export-student-credits', [StudentCreditController::class, 'exportCredits'])
             ->name('export_student_credits');
+
+        //credit summary report (semester + programme wise earned / remaining credits)
+        Route::get('/credit-summary', [CreditSummaryReportController::class, 'index'])->name('credit_summary');
+        Route::get('/credit-summary/export-excel', [CreditSummaryReportController::class, 'exportExcel'])->name('credit_summary_excel');
+        Route::get('/credit-summary/export-pdf', [CreditSummaryReportController::class, 'exportPdf'])->name('credit_summary_pdf');
     });
 });
