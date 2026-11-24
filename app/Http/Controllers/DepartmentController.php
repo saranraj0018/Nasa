@@ -9,9 +9,16 @@ use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $this->data['departments'] = Department::paginate(10);
+        $this->data['departments'] = Department::query()
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+                $q->where(fn ($w) => $w->where('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%"));
+            })
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
         return view('admin/department_list')->with($this->data);
     }
 

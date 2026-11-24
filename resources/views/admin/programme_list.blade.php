@@ -7,6 +7,27 @@
                 class="px-2 w-40 mt-3 bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
                 <i class="fa fa-plus" aria-hidden="true"></i>ADD Programme</a>
     </div>
+    <x-list-filter :action="route('programme_list')" :keys="['search', 'department_id', 'graduate_type']">
+        <div class="w-full md:flex-1 md:min-w-[250px]">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search programme name / code"
+                class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+        <div class="w-full md:w-64">
+            <select name="department_id" class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary choice-select">
+                <option value="">All Departments</option>
+                @foreach ($departments as $dept)
+                    <option value="{{ $dept->id }}" @selected(request('department_id') == $dept->id)>{{ $dept->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="w-full md:w-48">
+            <select name="graduate_type" class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="">All Graduate Types</option>
+                <option value="ug" @selected(request('graduate_type') == 'ug')>UG</option>
+                <option value="pg" @selected(request('graduate_type') == 'pg')>PG</option>
+            </select>
+        </div>
+    </x-list-filter>
      <section class="p-2 mt-3">
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Programme List</h4>
@@ -24,9 +45,9 @@
                  </tr>
                 </thead>
                 <tbody id="programmeTableBody" class="divide-y divide-gray-200">
-                @foreach($programmes as $programme)
+                @forelse($programmes as $programme)
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ $programmes->firstItem() + $loop->index }}</td>
                         <td class="px-4 py-3">{{ $programme->name ?? ''}}</td>
                         <td class="px-4 py-3">{{ $programme->code }}</td>
                         <td class="px-4 py-3">{{ $programme->get_department->name ?? ''}}</td>
@@ -41,7 +62,11 @@
                         </a>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="6" class="px-4 py-6 text-center text-gray-500">No records found.</td>
+                    </tr>
+                @endforelse
                 </tbody>
             </table>
         </div>

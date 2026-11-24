@@ -11,7 +11,11 @@ class CreditPointAssignController extends Controller
 {
     public function index(Request $request)
     {
-        $this->data['credit_points'] = CreditPoint::paginate(10);
+        $this->data['credit_points'] = CreditPoint::query()
+            ->when($request->filled('filter_semester'), fn ($q) => $q->where('semester', $request->filter_semester))
+            ->orderBy('semester')
+            ->paginate(10)
+            ->withQueryString();
         $editData = null;
 
         if ($request->edit_id) {

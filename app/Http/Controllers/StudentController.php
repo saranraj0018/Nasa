@@ -31,11 +31,16 @@ class StudentController extends Controller
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
         }
+        $query->when($request->filled('programme_id'), fn ($q) => $q->where('programme_id', $request->programme_id))
+            ->when($request->filled('batch'), fn ($q) => $q->where('batch', $request->batch))
+            ->when($request->filled('semester'), fn ($q) => $q->where('semester', $request->semester))
+            ->when($request->filled('section'), fn ($q) => $q->where('section', $request->section));
         $this->data['student'] = $query
             ->orderBy('id', 'desc')
             ->paginate(25)
             ->withQueryString();
         $this->data['departments'] = Department::orderBy('name')->get();
+        $this->data['programmes'] = Programme::orderBy('name')->get(['id', 'name', 'department_id']);
         $this->data['batch'] = Student::whereNotNull('batch')
             ->distinct()
             ->orderBy('batch')

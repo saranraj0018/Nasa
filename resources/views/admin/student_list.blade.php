@@ -93,7 +93,7 @@
     <section class="p-4 bg-white rounded-xl shadow-md mt-3">
         <div class="mt-4">
             <form method="GET" action="{{ route('student_list') }}"
-                class="flex flex-col md:flex-row md:items-center gap-3">
+                class="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3">
 
                 {{-- Search Input --}}
                 <div class="w-full md:flex-1">
@@ -118,6 +118,42 @@
                     </select>
                 </div>
 
+                {{-- Programme Filter --}}
+                <div class="w-full md:w-64">
+                    <select name="programme_id" class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary choice-select">
+                        <option value="">All Programmes</option>
+                        @foreach ($programmes as $prog)
+                            <option value="{{ $prog->id }}" @selected(request('programme_id') == $prog->id)>{{ $prog->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Batch Filter --}}
+                <div class="w-full md:w-48">
+                    <x-batch-select id="filter_batch" :selected="request('batch')" placeholder="All Batches"
+                        class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary choice-select" />
+                </div>
+
+                {{-- Semester Filter --}}
+                <div class="w-full md:w-40">
+                    <select name="semester" class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="">All Semesters</option>
+                        @for ($i = 1; $i <= 8; $i++)
+                            <option value="{{ $i }}" @selected(request('semester') == (string) $i)>Semester {{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+
+                {{-- Section Filter --}}
+                <div class="w-full md:w-36">
+                    <select name="section" class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="">All Sections</option>
+                        @foreach (['a', 'b', 'c', 'd', 'r'] as $sec)
+                            <option value="{{ $sec }}" @selected(request('section') == $sec)>Section {{ strtoupper($sec) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
                 {{-- Buttons --}}
                 <div class="flex gap-2">
                     <button type="submit"
@@ -126,7 +162,7 @@
                         <i class="fa fa-search mr-1"></i> Search
                     </button>
 
-                    @if (request()->hasAny(['search', 'department_id']))
+                    @if (request()->anyFilled(['search', 'department_id', 'programme_id', 'batch', 'semester', 'section']))
                         <a href="{{ route('student_list') }}"
                             class="px-5 py-2 bg-gray-400 text-white text-sm rounded-full hover:bg-gray-500 transition">
                             Reset
@@ -219,7 +255,7 @@
                     <tbody id="studentTableBody" class="divide-y divide-gray-200">
                         @foreach ($student as $stud)
                             <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-2 py-3 font-medium text-gray-900">{{ $loop->iteration }}</td>
+                                <td class="px-2 py-3 font-medium text-gray-900">{{ $student->firstItem() + $loop->index }}</td>
                                 <td class="px-2 py-3">{{ $stud->name ?? '' }}</td>
                                 <td class="px-2 py-3">{{ $stud->register_number ?? '' }}</td>
                                 <td class="px-2 py-3">{{ $stud->section ?? '' }}</td>

@@ -7,6 +7,12 @@
             class="px-2 w-43 mt-3 bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
             <i class="fa fa-plus" aria-hidden="true"></i>ADD Department</a>
     </div>
+    <x-list-filter :action="route('department_list')" :keys="['search']">
+        <div class="w-full md:flex-1 md:min-w-[250px]">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search department name / code"
+                class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+    </x-list-filter>
     <section class="p-2 mt-3">
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Department List</h4>
@@ -22,9 +28,9 @@
                         </tr>
                     </thead>
                     <tbody id="departmentTableBody" class="divide-y divide-gray-200">
-                        @foreach ($departments as $department)
+                        @forelse ($departments as $department)
                             <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-4 py-3 font-medium text-gray-900">{{ $loop->iteration }}</td>
+                                <td class="px-4 py-3 font-medium text-gray-900">{{ $departments->firstItem() + $loop->index }}</td>
                                 <td class="px-4 py-3">{{ $department->name ?? '' }}</td>
                                 <td class="px-4 py-3">{{ $department->code }}</td>
                                 <td class="px-4 py-3 flex justify-center gap-4">
@@ -34,7 +40,11 @@
                                     </a>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-6 text-center text-gray-500">No records found.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

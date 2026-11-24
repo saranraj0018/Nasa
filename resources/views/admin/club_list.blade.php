@@ -7,6 +7,20 @@
                 class="px-2 w-30 mt-3 bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
                 <i class="fa fa-plus" aria-hidden="true"></i>ADD Club</a>
     </div>
+    <x-list-filter :action="route('club_list')" :keys="['search', 'faculty_id']">
+        <div class="w-full md:flex-1 md:min-w-[250px]">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search club name / description"
+                class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+        <div class="w-full md:w-64">
+            <select name="faculty_id" class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary choice-select">
+                <option value="">All Faculty</option>
+                @foreach ($faculty as $fac)
+                    <option value="{{ $fac->id }}" @selected(request('faculty_id') == $fac->id)>{{ $fac->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </x-list-filter>
      <section class="p-2 mt-3">
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Club List</h4>
@@ -22,9 +36,9 @@
                  </tr>
                 </thead>
                 <tbody id="studentTableBody" class="divide-y divide-gray-200">
-                @foreach($clubs as $club)
+                @forelse($clubs as $club)
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ $clubs->firstItem() + $loop->index }}</td>
                         <td class="px-4 py-3">{{ $club->name ?? ''}}</td>
                         <td class="px-4 py-3">{{ $club->description ??''  }}</td>
                         <td class="px-4 py-3">{{ $club->get_faculty->name ?? ''}}</td>
@@ -34,7 +48,11 @@
                         </a>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-4 py-6 text-center text-gray-500">No records found.</td>
+                    </tr>
+                @endforelse
                 </tbody>
             </table>
         </div>

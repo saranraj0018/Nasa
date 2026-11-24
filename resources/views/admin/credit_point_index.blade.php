@@ -54,6 +54,18 @@
                 </a>
             </div>
         </form>
+        <div class="mb-6 -mt-3">
+    <x-list-filter :action="route('credit_point_assign')" :keys="['filter_semester']">
+        <div class="w-full md:w-64">
+            <select name="filter_semester" id="filter_semester" class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="">All Semesters</option>
+                @for ($i = 1; $i <= 8; $i++)
+                    <option value="{{ $i }}" @selected(request('filter_semester') == (string) $i)>Semester {{ $i }}</option>
+                @endfor
+            </select>
+        </div>
+    </x-list-filter>
+        </div>
         <div class="bg-white rounded-lg shadow overflow-x-auto">
             <table class="min-w-full border-collapse">
                 <thead class="bg-primary text-white uppercase text-sm">
@@ -68,7 +80,7 @@
                 <tbody>
                     @forelse ($credit_points as $index => $row)
                         <tr class="border-t">
-                            <td class="px-2 py-3">{{ $loop->iteration }}</td>
+                            <td class="px-2 py-3">{{ $credit_points->firstItem() + $loop->index }}</td>
                             <td class="px-2 py-3">{{ $row->semester }}</td>
                             <td class="px-2 py-3">{{ $row->credit_points }}</td>
                             <td class="px-2 py-3">

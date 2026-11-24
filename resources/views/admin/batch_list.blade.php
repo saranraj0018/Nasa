@@ -7,6 +7,19 @@
             class="px-2 w-30 mt-3 bg-gradient-to-r from-primary to-pink-600 text-white font-medium py-1 rounded-full">
             <i class="fa fa-plus" aria-hidden="true"></i> ADD Batch</a>
     </div>
+    <x-list-filter :action="route('batch_list')" :keys="['search', 'status']">
+        <div class="w-full md:flex-1 md:min-w-[250px]">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search batch e.g. 2025"
+                class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+        <div class="w-full md:w-48">
+            <select name="status" class="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="">All Status</option>
+                <option value="active" @selected(request('status') == 'active')>Active</option>
+                <option value="inactive" @selected(request('status') == 'inactive')>Inactive</option>
+            </select>
+        </div>
+    </x-list-filter>
     <section class="p-2 mt-3">
         <div class="mt-6">
             <h4 class="font-semibold text-gray-800 mb-4">Batch List</h4>
@@ -40,7 +53,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-6 text-center text-gray-500">No batches added yet.</td>
+                                <td colspan="4" class="px-4 py-6 text-center text-gray-500">No batches found.</td>
                             </tr>
                         @endforelse
                     </tbody>

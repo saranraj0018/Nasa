@@ -10,9 +10,14 @@ use Illuminate\Validation\Rule;
 
 class BatchController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $this->data['batches'] = Batch::orderByDesc('name')->paginate(10);
+        $this->data['batches'] = Batch::query()
+            ->when($request->filled('search'), fn ($q) => $q->where('name', 'LIKE', '%' . $request->search . '%'))
+            ->when($request->filled('status'), fn ($q) => $q->where('is_active', $request->status === 'active'))
+            ->orderByDesc('name')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.batch_list')->with($this->data);
     }
