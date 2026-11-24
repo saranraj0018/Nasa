@@ -118,3 +118,15 @@
     display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: 12px; margin-bottom: 20px; text-align: center;
 }
+
+/* ---------- Event list: action column + publish button ---------- */
+.event-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.publish-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 9999px; border: 0;
+    font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer;
+    transition: opacity .15s, filter .15s;
+}
+.publish-btn:hover { filter: brightness(0.95); }
+.publish-btn.is-draft { background: linear-gradient(to right, var(--color-primary, #9F3895), #db2777); color: #fff; }
+.publish-btn.is-published { background: #dcfce7; color: #15803d; }

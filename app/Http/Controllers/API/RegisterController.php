@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Event;
 use App\Models\EventSchedule;
 use App\Models\Student;
 use App\Models\StudentEventRegistration;
 use App\Models\StudentFeedback;
 use App\Models\StudentUploadProof;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -31,18 +33,51 @@ class RegisterController extends Controller
             ], 409);
         }
 
-       $register = new StudentEventRegistration();
-       $register->event_id = $request['event_id'];
-       $register->student_id = $request['student_id'];
-       $register->event_schedule_id = $request['event_schedule_id'];
-       $register->registered_at = now();
-       $register->status = 1;
-       $register->save();
+        // Same duplicate rule as the web registration: one registration per
+        // schedule, unless the event allows re-registering after duration_months.
+        // The student row is locked so two quick taps can't both pass the check.
+        $error = DB::transaction(function () use ($request) {
+            Student::whereKey($request['student_id'])->lockForUpdate()->first();
+            $event = Event::find($request['event_id']);
 
-       return response()->json([
-           'status'  => 200,
-           'message' => 'Registration successful',
-       ]);
+            $last = StudentEventRegistration::where([
+                'student_id'        => $request['student_id'],
+                'event_id'          => $request['event_id'],
+                'event_schedule_id' => $request['event_schedule_id'],
+            ])->orderByDesc('registered_at')->first();
+
+            if ($last) {
+                if (empty($event->duration_months)) {
+                    return 'You are already registered for this event.';
+                }
+                $nextAllowed = \Carbon\Carbon::parse($last->registered_at)->addMonths($event->duration_months);
+                if (now()->lt($nextAllowed)) {
+                    return 'You can register again after ' . $nextAllowed->format('d M Y');
+                }
+            }
+
+            $register = new StudentEventRegistration();
+            $register->event_id = $request['event_id'];
+            $register->student_id = $request['student_id'];
+            $register->event_schedule_id = $request['event_schedule_id'];
+            $register->registered_at = now();
+            $register->status = 1;
+            $register->save();
+
+            return null;
+        });
+
+        if ($error) {
+            return response()->json([
+                'status'  => 409,
+                'message' => $error,
+            ], 409);
+        }
+
+        return response()->json([
+            'status'  => 200,
+            'message' => 'Registration successful',
+        ]);
 
     }
 

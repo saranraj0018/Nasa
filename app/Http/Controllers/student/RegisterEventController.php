@@ -116,7 +116,8 @@ class RegisterEventController extends Controller
         try {
             $event = Event::findOrFail($request->event_id);
             $schedule = EventSchedule::findOrFail($request->schedule_id);
-            $student = Student::where('id', $request->stu_id)->first();
+            // Lock the student row so two quick clicks can't both pass the duplicate check.
+            $student = Student::where('id', $request->stu_id)->lockForUpdate()->first();
             $lastRegistration = StudentEventRegistration::where([
                 'student_id' => $request->stu_id,
                 'event_id'   => $event->id,

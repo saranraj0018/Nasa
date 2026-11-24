@@ -5,6 +5,7 @@ namespace App\Http\Controllers\super_admin;
 use App\Helpers\ActivityLog;
 use App\Http\Controllers\Controller;
 use App\Models\Club;
+use App\Models\CreditPoint;
 use App\Models\Event;
 use App\Models\EventSchedule;
 use App\Models\Faculty;
@@ -222,7 +223,7 @@ class EventsController extends Controller
                     $isSpecific = $request->input("departments.$index.scope") === 'specific';
                     return [$isSpecific ? 'required' : 'nullable', 'in:1,2,3,4,5,6,7,8'];
                 }),
-                'departments.*.credit_points' => 'required|numeric|min:0|max:4',
+                'departments.*.credit_points' => 'nullable|numeric|min:0|max:4',
             ];
 
             if ($request['event_type'] == 'paid') {
@@ -262,6 +263,10 @@ class EventsController extends Controller
                 }
                 $seenScheduleKeys[$key] = true;
             }
+
+            // A semester's credits are capped (Credit Point Assign). Block rows that
+            // would give a programme/section/batch more credit than the semester needs.
+            $this->assertSemesterCreditLimit($request->departments, $request['event_id'] ?? null);
 
             $isNewEvent = empty($request['event_id']);
             if (!$isNewEvent) {
@@ -341,7 +346,7 @@ class EventsController extends Controller
                     'seat_count'      => $schedule['seat_count'],
                     'batch'           => ($isSpecific && !empty($schedule['batch'])) ? $schedule['batch'] : null,
                     'semester'        => $isSpecific ? $schedule['semester'] : null,
-                    'credit_points'   => $schedule['credit_points'],
+                    'credit_points'   => is_numeric($schedule['credit_points'] ?? null) ? $schedule['credit_points'] : 0,
                 ];
 
                 if (!empty($schedule['schedule_id'])) {
@@ -381,6 +386,95 @@ class EventsController extends Controller
                 'message' => $e->getMessage(),
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * Throws when a "specific" schedule row with credits would push its group
+     * (programme + section + semester + batch) past the semester's required credits.
+     *
+     * - Credits are counted once per event (several date rows of one event for the
+     *   same group are alternatives, a student earns the credit once).
+     * - Other active events are counted; the event being edited is excluded.
+     * - A row without a batch targets every batch of that programme/section, so
+     *   it is checked against the batch that already has the most credits.
+     * - No limit applies when the semester has no Credit Point Assign entry.
+     */
+    private function assertSemesterCreditLimit(array $rows, $eventId = null): void
+    {
+        $groups = [];
+        foreach ($rows as $row) {
+            $credit = is_numeric($row['credit_points'] ?? null) ? (float) $row['credit_points'] : 0;
+            if (($row['scope'] ?? null) !== 'specific' || $credit <= 0) {
+                continue;
+            }
+            $batch = !empty($row['batch']) ? $row['batch'] : null;
+            $key = implode('|', [$row['programme_id'], $row['section'], $row['semester'], $batch]);
+            $groups[$key] = [
+                'programme_id' => $row['programme_id'],
+                'section'      => $row['section'],
+                'semester'     => (string) $row['semester'],
+                'batch'        => $batch,
+                'credit'       => max($groups[$key]['credit'] ?? 0, $credit),
+            ];
+        }
+        if (empty($groups)) {
+            return;
+        }
+
+        $required = CreditPoint::whereIn('semester', array_unique(array_column($groups, 'semester')))
+            ->pluck('credit_points', 'semester');
+        $programmes = Programme::whereIn('id', array_unique(array_column($groups, 'programme_id')))->pluck('name', 'id');
+
+        foreach ($groups as $group) {
+            if (!isset($required[$group['semester']])) {
+                continue;
+            }
+            $limit = (float) $required[$group['semester']];
+
+            // Editing an existing event: only check when it raises the credit it already
+            // gives this group, so old events can still be edited (or lowered).
+            if ($eventId) {
+                $current = (float) EventSchedule::where('event_id', $eventId)
+                    ->where('programme_id', $group['programme_id'])
+                    ->where('section', $group['section'])
+                    ->where('semester', $group['semester'])
+                    ->where(fn ($q) => $group['batch'] ? $q->where('batch', $group['batch']) : $q->whereNull('batch'))
+                    ->max('credit_points');
+                if ($group['credit'] <= $current) {
+                    continue;
+                }
+            }
+
+            // Per-event credit already given to this programme/section/semester by other active events.
+            $existing = EventSchedule::query()
+                ->join('events', 'events.id', '=', 'event_schedules.event_id')
+                ->where('events.is_active', 'y')
+                ->when($eventId, fn ($q) => $q->where('event_schedules.event_id', '!=', $eventId))
+                ->where('event_schedules.programme_id', $group['programme_id'])
+                ->where('event_schedules.section', $group['section'])
+                ->where('event_schedules.semester', $group['semester'])
+                ->where('event_schedules.credit_points', '>', 0)
+                ->when($group['batch'], fn ($q) => $q->where(fn ($w) => $w
+                    ->where('event_schedules.batch', $group['batch'])
+                    ->orWhereNull('event_schedules.batch')))
+                ->selectRaw('event_schedules.event_id, event_schedules.batch, MAX(event_schedules.credit_points) AS credit')
+                ->groupBy('event_schedules.event_id', 'event_schedules.batch')
+                ->get();
+
+            $allBatches = $existing->whereNull('batch')->sum('credit');
+            $perBatch = $existing->whereNotNull('batch')->groupBy('batch')->map->sum('credit');
+            $used = $allBatches + ($perBatch->max() ?? 0);
+            $remaining = max($limit - $used, 0);
+
+            if ($used + $group['credit'] > $limit) {
+                $fmt = fn ($v) => rtrim(rtrim(number_format((float) $v, 2, '.', ''), '0'), '.');
+                $who = ($programmes[$group['programme_id']] ?? 'Programme') . ' - Section ' . strtoupper($group['section'])
+                    . ($group['batch'] ? ' (Batch ' . $group['batch'] . ')' : '');
+                throw new Exception($remaining > 0
+                    ? "Semester {$group['semester']} needs only {$fmt($limit)} credit(s) for {$who}; other events already give {$fmt($used)}, so this event can give at most {$fmt($remaining)}. Lower the credit points or leave them empty."
+                    : "Semester {$group['semester']} credits are already closed for {$who}: required {$fmt($limit)}, other events already give {$fmt($used)}. Leave the credit points empty (or 0) for this event.");
+            }
         }
     }
 

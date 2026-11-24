@@ -61,12 +61,17 @@ class CreditSummaryReportController extends Controller
         $creditPoint = CreditPoint::where('semester', $semester)->first();
         $required = (float) ($creditPoint->credit_points ?? 0);
 
-        // Only events that are published/active and scheduled for this semester
-        // (schedules without a semester are common events and count too).
-        $registrationScope = function ($query) use ($semester) {
-            $query->whereHas('get_event_schedule', function ($schedule) use ($semester) {
-                $schedule->where(function ($q) use ($semester) {
-                    $q->where('semester', $semester)->orWhereNull('semester');
+        // Only published/active events scheduled for THIS semester. Common
+        // "All Departments" schedules have no semester; they are first-year events,
+        // so they count only for semesters 1 and 2.
+        $isFirstYear = in_array($semester, ['1', '2'], true);
+        $registrationScope = function ($query) use ($semester, $isFirstYear) {
+            $query->whereHas('get_event_schedule', function ($schedule) use ($semester, $isFirstYear) {
+                $schedule->where(function ($q) use ($semester, $isFirstYear) {
+                    $q->where('semester', $semester);
+                    if ($isFirstYear) {
+                        $q->orWhere(fn ($common) => $common->whereNull('semester')->whereNull('programme_id'));
+                    }
                 })->whereHas('event', function ($event) {
                     $event->where('publish', 1)->where('is_active', 'y');
                 });
@@ -87,7 +92,16 @@ class CreditSummaryReportController extends Controller
             ->get();
 
         $rows = $students->map(function ($student) use ($required) {
-            $events = $student->registrations->map(function ($registration) {
+            // One entry per event: repeated registrations (e.g. re-submits from the app)
+            // and alternate dates of the same event must not add credit twice.
+            // Keep the registration that counts (graded, not disqualified) when there is one.
+            $registrations = $student->registrations
+                ->sortByDesc(fn ($r) => (!empty($r->grade) && $r->grade !== 'd') ? 1 : 0)
+                ->unique(fn ($r) => $r->get_event_schedule->event_id ?? $r->event_id)
+                ->sortBy(fn ($r) => $r->get_event_schedule->event_date ?? '')
+                ->values();
+
+            $events = $registrations->map(function ($registration) {
                 $grade = $registration->grade;
 
                 return [

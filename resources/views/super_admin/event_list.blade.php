@@ -210,17 +210,19 @@
                                     </button>
                                 </td>
                                 <!-- Action -->
-                                <td class="px-3 py-2 text-center">
+                                <td class="px-3 py-2">
+                                    <div class="event-actions">
                                     <a href="{{ route('create_event', ['event_id' => encrypt($event->id)]) }}"
-                                        class="text-blue-600 hover:text-blue-800">
+                                        class="text-blue-600 hover:text-blue-800" title="Edit Event">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
-                                    {{-- <button type="button"
-                                        class="togglePublish {{ $event->publish ? 'text-yellow-600 hover:text-yellow-800' : 'text-gray-500 hover:text-gray-700' }} mx-2"
-                                        data-id="{{ $event->id }}" data-publish="{{ $event->publish }}"
-                                        title="{{ $event->publish ? 'Unpublish Event' : 'Publish Event' }}">
-                                        <i class="fa-solid {{ $event->publish ? 'fa-eye' : 'fa-eye-slash' }}"></i>
-                                    </button> --}}
+                                    <button type="button"
+                                        class="togglePublish publish-btn {{ $event->publish ? 'is-published' : 'is-draft' }}"
+                                        data-id="{{ $event->id }}" data-publish="{{ $event->publish ? 1 : 0 }}"
+                                        title="{{ $event->publish ? 'Published - click to unpublish' : 'Publish this event' }}">
+                                        <i class="fa-solid {{ $event->publish ? 'fa-circle-check' : 'fa-paper-plane' }}"></i>
+                                        <span>{{ $event->publish ? 'Published' : 'Publish' }}</span>
+                                    </button>
                                     @php
                                         $canDelete = $event->schedules->every(function ($schedule) {
                                             return $schedule->registrations->isEmpty();
@@ -231,6 +233,7 @@
                                             <i class="fa-solid fa-delete-left"></i>
                                         </button>
                                     @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

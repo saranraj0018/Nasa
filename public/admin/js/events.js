@@ -178,11 +178,6 @@ $(document).on("submit", "#eventForm", function (e) {
         //     message:
         //         "Batch must be in YYYY-YYYY format and end year must be greater than start year",
         // },
-        {
-            id: ".credit_points",
-            condition: (val) => val === "",
-            message: "Credit Point is required",
-        },
     ];
 
     let isValid = true;
@@ -339,7 +334,7 @@ $(document).on("submit", "#eventForm", function (e) {
                 });
                 showToast(msg, "error", 2000);
             } else {
-                showToast(err.message || "Unexpected error", "error", 2000);
+                showToast(err.message || "Unexpected error", "error", 7000);
             }
         },
     );
@@ -458,16 +453,17 @@ $(document).on("click", ".togglePublish", function () {
             success: function (response) {
                 if (response.success) {
                     const nowPublished = Number(response.publish) === 1;
-                    btn.data("publish", response.publish);
+                    btn.data("publish", nowPublished ? 1 : 0);
                     btn.attr(
                         "title",
-                        nowPublished ? "Unpublish Event" : "Publish Event",
+                        nowPublished ? "Published - click to unpublish" : "Publish this event",
                     );
                     btn.find("i")
-                        .toggleClass("fa-eye", nowPublished)
-                        .toggleClass("fa-eye-slash", !nowPublished);
-                    btn.toggleClass("text-yellow-600 hover:text-yellow-800", nowPublished);
-                    btn.toggleClass("text-gray-500 hover:text-gray-700", !nowPublished);
+                        .toggleClass("fa-circle-check", nowPublished)
+                        .toggleClass("fa-paper-plane", !nowPublished);
+                    btn.find("span").text(nowPublished ? "Published" : "Publish");
+                    btn.toggleClass("is-published", nowPublished);
+                    btn.toggleClass("is-draft", !nowPublished);
                     showToast(response.message, "success", 2000);
                 } else {
                     showToast(response.message || "Unable to update publish status", "error", 2000);
@@ -739,9 +735,9 @@ document.addEventListener("DOMContentLoaded", function () {
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium">Credit Points <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium">Credit Points <span class="text-gray-400 text-xs">(optional)</span></label>
                             <input type="number" name="departments[${deptIndex}][credit_points]" id="credit_points"
-                             placeholder="Enter Event Credit Points"
+                             placeholder="Leave empty for no credit"
                                 class="credit_points points bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40">
                         </div>
             </div>
@@ -861,8 +857,8 @@ $("#publishBtn").on("click", function () {
             return false;
         }
 
-        // Credit points validation
-        if (!creditPoints || creditPoints < 0) {
+        // Credit points are optional; when given they must be 0-4
+        if (creditPoints !== "" && (isNaN(creditPoints) || creditPoints < 0 || creditPoints > 4)) {
             showToast("Please Enter Valid Credit Points", "error", 2000);
             isValid = false;
             return false;

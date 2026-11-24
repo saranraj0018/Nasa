@@ -279,10 +279,10 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium">Credit Points <span
-                                    class="text-red-500">*</span></label>
+                                    class="text-gray-400 text-xs">(optional)</span></label>
                             <input type="number" name="departments[{{ $index }}][credit_points]"
                                 id="credit_points" value="{{ $dept->credit_points ?? '' }}"
-                                placeholder="Enter Event Credit Points"
+                                placeholder="Leave empty for no credit"
                                 class="credit_points bg-[#D9D9D9] w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-primary/40">
                         </div>
                     </div>
